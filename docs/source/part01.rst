@@ -17,38 +17,32 @@ We are going to implement a front end for a really simple language called
 Tiny Imperative Language (TIL) or just tiny. This language has not been 
 standardized or defined elsewhere but we will not start from scratch. 
 
-..
-    Our tiny implementation will be based on the 
-    @url{http://www.program-transformation.org/Sts/TinyImperativeLanguage, description available}
-    in the wiki of 
-    @url{http://www.program-transformation.org/Sts/WebHome, Software Transformation Systems}.
 
-    Programming languages have three facets that we have to consider:
+Our tiny implementation will be based on the 
+`language description available http://www.program-transformation.org/Sts/TinyImperativeLanguage`_
+in the wiki of Software Transformation Systems.
 
-    @itemize @bullet
-    @item
-    Syntax, that deals with the form
+Programming languages have three facets that we have to consider:
 
-    @item
-    Semantics, that deals with the meaning
+* Syntax, that deals with the form
+* Semantics, that deals with the meaning
+* Pragmatics, that deals with the implementation
 
-    @item
-    Pragmatics, that deals with the implementation
+These three facets are not independent and affect each other. In this series 
+we will deal mostly about the pragmatics but we still need a minimal definition 
+of the syntax and semantics of tiny before we start implementing anything. 
+This is important as the syntax and the semantic obviously have an impact in 
+the implementation. In this post we will define to some detail (although incompletely) 
+the syntax and the semantics of our tiny language. 
+The rest of the series will be all about the pragmatics.
 
-    @end itemize
-
-    These three facets are not independent and affect each other. In this series 
-    we will deal mostly about the pragmatics but we still need a minimal definition 
-    of the syntax and semantics of tiny before we start implementing anything. 
-    This is important as the syntax and the semantic obviously have an impact in 
-    the implementation. In this post we will define to some detail (although incompletely) 
-    the syntax and the semantics of our tiny language. 
-    The rest of the series will be all about the pragmatics.
-
-    @section Syntax
+Syntax
+------
 
     A tiny program is composed by a, possibly empty, sequence of statements. This 
     means that an empty program is a valid tiny program. In this syntax description 
+
+..
     @grammar{name} means a part of the language and @code{*} means the preceding element zero or more times.
 
     @grammar{program} @grammargives{} @grammar{statement}@code{*}
