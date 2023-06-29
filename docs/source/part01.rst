@@ -92,42 +92,50 @@ The following two are not (in fact they are syntactically invalid).
     vara : int;
     var a : i nt;
 
+
+This is the form of an assignment statement.
+
+.. productionlist:: Tiny
+    assignment: `identifier` ":=" `expression` ";" 
+
+This is the form of an if statement.
+
+.. productionlist:: Tiny
+    if: "if" `expression` "then" `statement`* "end" 
+      | "if" `expression` "then" `statement`* "else" `statement`* "end"
+
+This is the form of a while statement.
+
+.. productionlist:: Tiny
+    while: "while" `expression` "do" `statement`* "end"
+
+
+This is the form of a for statement.
+
+.. productionlist:: Tiny
+    for: "for"  `identifier` ":="  `expression` "to" `expression` "do" `statement`* "end"
+
+This is the form of a read statement.
+
+.. productionlist:: Tiny
+    read: "read" `identifier` ";"
+
+This is the form of a write statement.
+
+.. productionlist:: Tiny
+    write: "write" `expression` ";"
+
+An expression is either a primary, a prefix unary operator and its operand or a binary infix 
+operator with a left hand side operand and a right hand side operand.
+
 ..
-    This is the form of an assignment statement.
-
-    @grammar{assignment} @grammargives{}  @grammar{identifier} @grammarterm{:=}
-    @grammar{expression} @grammarterm{;}
-
-    This is the form of an if statement.
-
-    @grammar{if} @grammargives{} @grammarterm{if}  @grammar{expression} @grammarterm{then}  @grammar{statement}* @grammarterm{end} 
-    @grammaralt{}  @grammarterm{if}  @grammar{expression} @grammarterm{then}  @grammar{statement}* @grammarterm{else}  @grammar{statement}* @grammarterm{end}
-
-    This is the form of a while statement.
-
-    @grammar{while} @grammargives{} @grammarterm{while}  @grammar{expression} @grammarterm{do}  @grammar{statement}* @grammarterm{end}
-
-
-    This is the form of a for statement.
-
-    @grammar{for} @grammargives{} @grammarterm{for}  @grammar{identifier} @grammarterm{:=}  @grammar{expression} @grammarterm{to}  @grammar{expression} @grammarterm{do}  @grammar{statement}* @grammarterm{end}
-
-    This is the form of a read statement.
-
-    @grammar{read} @grammargives{} @grammarterm{read}  @grammar{identifier} @grammarterm{;}
-
-    This is the form of a write statement.
-
-    @grammar{write} @grammargives{} @grammarterm{write}  @grammar{expression} @grammarterm{;}
-
-    An expression is either a primary, a prefix unary operator and its operand or a binary infix 
-    operator with a left hand side operand and a right hand side operand.
-
+    .. productionlist:: Tiny
     @grammar{expression} @grammargives{}  @grammar{primary}  @grammaralt{}   @grammar{unary-op}  @grammar{expression}  @grammaralt{}   @grammar{expression}  @grammar{binary-op}  @grammar{expression}
 
 
     A primary can be a parenthesized expression, an identifier, an integer literal, a float literal or a string literal. In this syntax description + means the preceding element one or more times.
 
+    .. productionlist:: Tiny
     @grammar{primary} @grammargives{} @grammarterm{(} @grammar{expression} @grammarterm{)}  @grammaralt{}   @grammar{identifier}  @grammaralt{}   @grammar{integer-literal}  @grammaralt{}   @grammar{float-literal}  @grammaralt{}   @grammar{string-literal}
 
     @grammar{integer-literal} @grammargives{}  @grammar{digit}+
