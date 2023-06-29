@@ -19,7 +19,7 @@ standardized or defined elsewhere but we will not start from scratch.
 
 
 Our tiny implementation will be based on the 
-`language description available http://www.program-transformation.org/Sts/TinyImperativeLanguage`_
+`language description available <http://www.program-transformation.org/Sts/TinyImperativeLanguage>`_
 in the wiki of Software Transformation Systems.
 
 Programming languages have three facets that we have to consider:
