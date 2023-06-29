@@ -48,8 +48,8 @@ means that an empty program is a valid tiny program. In this syntax description
 In tiny there are 7 kinds of statements. In this syntax description a vertical 
 bar is used to separate alternatives
 
-.. productionlist::
-    program: (statement)*
+.. productionlist:: Tiny
+    program: (`statement`)*
     statement: `declaration` | `assignment` | `if` | `while` | `for` | `read` | `write`
 
 
@@ -59,94 +59,83 @@ A declaration is used to introduce the name of a variable and its type.
 
 Our language will support, for the moment, only two types for variables.
 
-.. productionlist::
+.. productionlist:: Tiny
     declaration: "var" `identifier` ":" `type` ";"
     type: "int" | "float"
 
-..
-    An identifier is a letter (or underscore) followed zero or more letters, digits 
-    and underscores. In this syntax description @{ and @} act as parentheses so * can 
-    be applied to the resulting group.
 
-    @grammar{identifier} @grammargives{} @{ @grammar{letter} @grammaralt{}   @grammar{underscore} @} 
-    @{ @grammar{letter}  @grammaralt{}   @grammar{digit}  @grammaralt{}   @grammar{underscore} @}*
+An identifier is a letter (or underscore) followed zero or more letters, digits 
+and underscores. 
 
-    @grammar{letter} @grammargives{} @grammarterm{a}  
-    @grammaralt{}  ...  
-    @grammaralt{}  @grammarterm{z}  
-    @grammaralt{}  @grammarterm{A}  
-    @grammaralt{}  ...  
-    @grammaralt{}  @grammarterm{Z}
-
-    @grammar{digit} @grammargives{} @grammarterm{0}  
-    @grammaralt{}  @grammarterm{1}
-    @grammaralt{}  @grammarterm{2} 
-    @grammaralt{}  @grammarterm{3} 
-    @grammaralt{}  @grammarterm{4} 
-    @grammaralt{}  @grammarterm{5} 
-    @grammaralt{}  @grammarterm{6} 
-    @grammaralt{}  @grammarterm{7} 
-    @grammaralt{}  @grammarterm{8} 
-    @grammaralt{}  @grammarterm{9}
-
-    @grammar{underscore} @grammargives{} @grammarterm{_}
+.. productionlist:: Tiny
+    identifier: ( `letter` | "_" ) ( `letter` | `digit` | "_" )*
+    letter: "a" .. "z" | "A" .. "Z" 
+    digit: "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"    
 
 
-    Examples of identifiers are foo, foo123, foo_123, hello_world, _foo, foo12a. 
-    If an identifier would match a keyword (like var) then it is always a keyword, 
-    never an identifier.
+Examples of identifiers are foo, foo123, foo_123, hello_world, _foo, foo12a. 
+If an identifier would match a keyword (like var) then it is always a keyword, 
+never an identifier.
 
-    Except where necessary for the proper recognition of lexical elements of the 
-    language, whitespace is not relevant. This means that the three lines below 
-    are syntactically equivalent:
-    @example
+Except where necessary for the proper recognition of lexical elements of the 
+language, whitespace is not relevant. This means that the three lines below 
+are syntactically equivalent:
+
+.. code-block::
     var a : int;
     var       a    :  int   ;
     var a:int;
-    @end example
-    The following two are not (in fact they are syntactically invalid).
 
-    @example
+The following two are not (in fact they are syntactically invalid).
+
+.. code-block::
     vara : int;
     var a : i nt;
-    @end example
 
 
-    This is the form of an assignment statement.
+This is the form of an assignment statement.
 
-    @grammar{assignment} @grammargives{}  @grammar{identifier} @grammarterm{:=}
-    @grammar{expression} @grammarterm{;}
+.. productionlist:: Tiny
+    assignment: `identifier` ":=" `expression` ";" 
 
-    This is the form of an if statement.
+This is the form of an if statement.
 
-    @grammar{if} @grammargives{} @grammarterm{if}  @grammar{expression} @grammarterm{then}  @grammar{statement}* @grammarterm{end} 
-    @grammaralt{}  @grammarterm{if}  @grammar{expression} @grammarterm{then}  @grammar{statement}* @grammarterm{else}  @grammar{statement}* @grammarterm{end}
+.. productionlist:: Tiny
+    if: "if" `expression` "then" `statement`* "end" 
+      | "if" `expression` "then" `statement`* "else" `statement`* "end"
 
-    This is the form of a while statement.
+This is the form of a while statement.
 
-    @grammar{while} @grammargives{} @grammarterm{while}  @grammar{expression} @grammarterm{do}  @grammar{statement}* @grammarterm{end}
+.. productionlist:: Tiny
+    while: "while" `expression` "do" `statement`* "end"
 
 
-    This is the form of a for statement.
+This is the form of a for statement.
 
-    @grammar{for} @grammargives{} @grammarterm{for}  @grammar{identifier} @grammarterm{:=}  @grammar{expression} @grammarterm{to}  @grammar{expression} @grammarterm{do}  @grammar{statement}* @grammarterm{end}
+.. productionlist:: Tiny
+    for: "for"  `identifier` ":="  `expression` "to" `expression` "do" `statement`* "end"
 
-    This is the form of a read statement.
+This is the form of a read statement.
 
-    @grammar{read} @grammargives{} @grammarterm{read}  @grammar{identifier} @grammarterm{;}
+.. productionlist:: Tiny
+    read: "read" `identifier` ";"
 
-    This is the form of a write statement.
+This is the form of a write statement.
 
-    @grammar{write} @grammargives{} @grammarterm{write}  @grammar{expression} @grammarterm{;}
+.. productionlist:: Tiny
+    write: "write" `expression` ";"
 
-    An expression is either a primary, a prefix unary operator and its operand or a binary infix 
-    operator with a left hand side operand and a right hand side operand.
+An expression is either a primary, a prefix unary operator and its operand or a binary infix 
+operator with a left hand side operand and a right hand side operand.
 
+..
+    .. productionlist:: Tiny
     @grammar{expression} @grammargives{}  @grammar{primary}  @grammaralt{}   @grammar{unary-op}  @grammar{expression}  @grammaralt{}   @grammar{expression}  @grammar{binary-op}  @grammar{expression}
 
 
     A primary can be a parenthesized expression, an identifier, an integer literal, a float literal or a string literal. In this syntax description + means the preceding element one or more times.
 
+    .. productionlist:: Tiny
     @grammar{primary} @grammargives{} @grammarterm{(} @grammar{expression} @grammarterm{)}  @grammaralt{}   @grammar{identifier}  @grammaralt{}   @grammar{integer-literal}  @grammaralt{}   @grammar{float-literal}  @grammaralt{}   @grammar{string-literal}
 
     @grammar{integer-literal} @grammargives{}  @grammar{digit}+
