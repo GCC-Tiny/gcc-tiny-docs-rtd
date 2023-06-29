@@ -39,36 +39,31 @@ The rest of the series will be all about the pragmatics.
 Syntax
 ------
 
-    A tiny program is composed by a, possibly empty, sequence of statements. This 
-    means that an empty program is a valid tiny program. In this syntax description 
+A tiny program is composed by a, possibly empty, sequence of statements. This 
+means that an empty program is a valid tiny program. In this syntax description 
+
+.. @grammar{name} means a part of the language and @code{*} means the preceding element zero or more times.
+
+
+In tiny there are 7 kinds of statements. In this syntax description a vertical 
+bar is used to separate alternatives
+
+.. productionlist::
+    program: (statement)*
+    statement: `declaration` | `assignment` | `if` | `while` | `for` | `read` | `write`
+
+
+A declaration is used to introduce the name of a variable and its type. 
+.. In this syntax description a @grammarterm{bold monospaced font face} like this is used 
+.. to denote keywords or verbatim lexical elements.
+
+Our language will support, for the moment, only two types for variables.
+
+.. productionlist::
+    declaration: "var" `identifier` ":" `type` ";"
+    type: "int" | "float"
 
 ..
-    @grammar{name} means a part of the language and @code{*} means the preceding element zero or more times.
-
-    @grammar{program} @grammargives{} @grammar{statement}@code{*}
-
-    In tiny there are 7 kinds of statements. In this syntax description a vertical 
-    bar @grammaralt{} is used to separate alternatives
-
-    @grammar{statement} @grammargives{} @grammar{declaration}
-    @grammaralt{}  @grammar{assignment}
-    @grammaralt{}  @grammar{if}
-    @grammaralt{}  @grammar{while}
-    @grammaralt{}  @grammar{for}
-    @grammaralt{}  @grammar{read}
-    @grammaralt{}  @grammar{write}
-
-
-    A declaration is used to introduce the name of a variable and its type. 
-    In this syntax description a @grammarterm{bold monospaced font face} like this is used 
-    to denote keywords or verbatim lexical elements.
-
-    @grammar{declaration} @grammargives{} @grammarterm{var} @grammar{identifier} @grammarterm{:} @grammar{type} @grammarterm{;}
-
-    Our language will support, for the moment, only two types for variables.
-
-    @grammar{type} @grammargives{} @grammarterm{int}  @grammaralt{}  @grammarterm{float}
-
     An identifier is a letter (or underscore) followed zero or more letters, digits 
     and underscores. In this syntax description @{ and @} act as parentheses so * can 
     be applied to the resulting group.
