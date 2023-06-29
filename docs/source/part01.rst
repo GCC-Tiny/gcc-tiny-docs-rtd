@@ -54,7 +54,7 @@ bar is used to separate alternatives
 
 
 A declaration is used to introduce the name of a variable and its type. 
-.. In this syntax description a @grammarterm{bold monospaced font face} like this is used 
+.. In this syntax description a "bold monospaced font face} like this is used 
 .. to denote keywords or verbatim lexical elements.
 
 Our language will support, for the moment, only two types for variables.
@@ -81,14 +81,16 @@ Except where necessary for the proper recognition of lexical elements of the
 language, whitespace is not relevant. This means that the three lines below 
 are syntactically equivalent:
 
-.. code-block::
+.. code-block:: shell
+
     var a : int;
     var       a    :  int   ;
     var a:int;
 
 The following two are not (in fact they are syntactically invalid).
 
-.. code-block::
+.. code-block:: shell
+
     vara : int;
     var a : i nt;
 
@@ -128,58 +130,49 @@ This is the form of a write statement.
 An expression is either a primary, a prefix unary operator and its operand or a binary infix 
 operator with a left hand side operand and a right hand side operand.
 
+
+.. productionlist:: Tiny
+    expression: `primary` | `unary-op` `expression` | `expression` `binary-op` `expression`
+
+
+A primary can be a parenthesized expression, an identifier, an integer literal, a float literal or a string literal. In this syntax description + means the preceding element one or more times.
+
+.. productionlist:: Tiny
+    primary: "(" expression ")"  | `identifier` | `integer-literal` | `float-literal` | `string-literal`
+    integer-literal: `digit`+
+    float-literal: `digit`+ "." `digit`* | "." `digit`+
+    string-literal: "\"" `any-character-except-newline-or-double-quote`* "\""
+
+
+Unary operators have the following forms.
+
+.. productionlist:: Tiny
+    unary-op: "+"  |  "-" | "not"
+
+Binary operators have the following forms.
+
+.. productionlist:: Tiny
+    binary-op: "+"  |  "-" |  "*"  |  "/"  |  "%"  
+    : |  "=="  |  "!="  |  "<" |  "<="  |  ">" |  ">="  
+    : |  "and" |  "or"
+
+
+All binary operators associate from left to right so x ⊕ y ⊕ z is equivalent to (x ⊕ y) ⊕ z. Likewise for binary operators with the same priority.
+
+
+The following table summarizes priorities between operators. Operators in the same row have the same priority.
+
+    ===================    =================
+    Operators              Priority
+    ===================    =================
+    (unary)+ (unary)-      Highest priority
+    * / %	 
+    (binary)+ (binary)-	 
+    == != < <= > >=	 
+    not, and, or	       Lowest priority
+    ===================    =================
+
 ..
-    .. productionlist:: Tiny
-    @grammar{expression} @grammargives{}  @grammar{primary}  @grammaralt{}   @grammar{unary-op}  @grammar{expression}  @grammaralt{}   @grammar{expression}  @grammar{binary-op}  @grammar{expression}
-
-
-    A primary can be a parenthesized expression, an identifier, an integer literal, a float literal or a string literal. In this syntax description + means the preceding element one or more times.
-
-    .. productionlist:: Tiny
-    @grammar{primary} @grammargives{} @grammarterm{(} @grammar{expression} @grammarterm{)}  @grammaralt{}   @grammar{identifier}  @grammaralt{}   @grammar{integer-literal}  @grammaralt{}   @grammar{float-literal}  @grammaralt{}   @grammar{string-literal}
-
-    @grammar{integer-literal} @grammargives{}  @grammar{digit}+
-
-    @grammar{float-literal} @grammargives{}  @grammar{digit}+@grammarterm{.} @grammar{digit}*  @grammaralt{}  @grammarterm{.} @grammar{digit}+
-
-    @grammar{string-literal} @grammargives{} @grammarterm{"} @grammar{any-character-except-newline-or-double-quote}*@grammarterm{"}
-
-
-    Unary operators have the following forms.
-
-    @grammar{unary-op} @grammargives{} @grammarterm{+}  @grammaralt{}  @grammarterm{-}  @grammaralt{}  @grammarterm{not}
-
-    Binary operators have the following forms.
-
-    @grammar{binary-op} @grammargives{} @grammarterm{+}  
-    @grammaralt{}  @grammarterm{-}  
-    @grammaralt{}  @grammarterm{*}  
-    @grammaralt{}  @grammarterm{/}  
-    @grammaralt{}  @grammarterm{%}  
-    @grammaralt{}  @grammarterm{==}  
-    @grammaralt{}  @grammarterm{!=}  
-    @grammaralt{}  @grammarterm{<}  
-    @grammaralt{}  @grammarterm{<=}  
-    @grammaralt{}  @grammarterm{>}  
-    @grammaralt{}  @grammarterm{>=}  
-    @grammaralt{}  @grammarterm{and}  
-    @grammaralt{}  @grammarterm{or}
-
-    All binary operators associate from left to right so x ⊕ y ⊕ z is equivalent to (x ⊕ y) ⊕ z. Likewise for binary operators with the same priority.
-
-    The following table summarizes priorities between operators. Operators in the same row have the same priority.
-
-    @multitable {----------operators---------} {---------priority------------------}
-    @headitem Operators @tab Priority
-    @item (unary)+ (unary)-
-    @tab Highest priority
-    @item * / %	 
-    @item (binary)+ (binary)-	 
-    @item == != < <= > >=	 
-    @item not, and, or	
-    @tab Lowest priority
-    @end multitable
-
     This means that x + y * z is equivalent to x + (y * z) and x > y 
     and z < w is equivalent to (x > y) and (z < w). Parentheses can be 
     used if needed to change the priority like in (x + y) * z.
@@ -327,21 +320,21 @@ operator with a left hand side operand and a right hand side operand.
     This kind of scoping mechanism is called static or lexical scoping.
     @end quotation
 
-    An @grammarterm{if} statement can have two forms, but the first form is equivalent to 
-    @grammarterm{if}  @grammar{expression} @grammarterm{then}  @grammar{statement}* @grammarterm{else} @grammarterm{end}, 
-    so we only have to define the semantics of the second form. The execution of an @grammarterm{if} statement starts 
+    An "if} statement can have two forms, but the first form is equivalent to 
+    "if}  @grammar{expression} "then}  @grammar{statement}* "else} "end}, 
+    so we only have to define the semantics of the second form. The execution of an "if} statement starts 
     by evaluating its  @grammar{expression} part, called the condition. The condition 
     expression must have a boolean type, otherwise this is an error. If the value of 
     the condition is true then the first  @grammar{statement}* is evaluated. If the 
     value of the condition is false, then the second  @grammar{statement}* is evaluated.
 
-    The execution of a @grammarterm{while} statement starts by evaluating its  @grammar{expression} part, 
+    The execution of a "while} statement starts by evaluating its  @grammar{expression} part, 
     called the condition. The condition expression must have a boolean type, otherwise this 
     is an error. If the value of the condition is false, nothing is executed. If the value 
-    of the condition is true, then the  @grammar{statement}* is executed and then the @grammarterm{while} 
+    of the condition is true, then the  @grammar{statement}* is executed and then the "while} 
     statement is executed again.
 
-    A @grammarterm{for} statement of the form
+    A "for} statement of the form
 
     @verbatim
     for id := L to U do
@@ -359,15 +352,15 @@ operator with a left hand side operand and a right hand side operand.
     end
     @end verbatim
 
-    Execution of a @grammarterm{read} statement causes a tiny program to read from the standard input a 
+    Execution of a "read} statement causes a tiny program to read from the standard input a 
     textual representation of a value of the type of the identifier. Then, the identifier 
     is updated as if by an assignment statement, with the represented value. If the textual 
     representation read is not valid for the type of the identifier, then this is an error.
 
-    Execution of a @grammarterm{write} statement causes a tiny program to write onto the standard output 
+    Execution of a "write} statement causes a tiny program to write onto the standard output 
     a textual representation of the value of the expression.
 
-    For simplicity, the textual representation used by @grammarterm{read} and @grammarterm{write} is the 
+    For simplicity, the textual representation used by "read} and "write} is the 
     same as the syntax of the literals of the corresponding types.
 
     @section Semantics of expressions
@@ -381,28 +374,28 @@ operator with a left hand side operand and a right hand side operand.
     In other words, an integer literal denotes the integer value of that number in base 10.
 
     A float literal denotes a value of float type. A float of the form 
-    d@sub{n}d@sub{n-1}...d@sub{0}@grammarterm{.}d@sub{-1}d@sub{-2}...d@sub{-m} denotes the closest 
+    d@sub{n}d@sub{n-1}...d@sub{0}".}d@sub{-1}d@sub{-2}...d@sub{-m} denotes the closest 
     IEEE 754 Binary32 float value to the value d@sub{n} × 10@sup{n} + d@sub{n-1} × 10@sup{n-1} + ... + d0 + d@sub{-1}10@sup{-1} + d@sub{-2}10@sup{-2} + ... + d@sub{-m}10@sup{-m}
 
 
     A string literal denotes a value of string type, the value of which is the sequence of
     bytes denoted by the characters in the input, not including the delimiting double quotes.
 
-    An expression of the form @grammarterm{(} e @grammarterm{)} denotes the same value and type 
+    An expression of the form "(} e ")} denotes the same value and type 
     of the expression e.
 
     An identifier in an expression denotes the entry in the latest mapping introduced in the 
     scope (likewise the identifier in the assignment statement, see above). If there is not 
     such mapping or maps to the undefined value, then this is an error.
 
-    An expression of the form @grammarterm{+}e or @grammarterm{-}e denotes a value of the same 
+    An expression of the form "+}e or "-}e denotes a value of the same 
     type as the expression e. 
-    Expression e must have int or float type. The value of @grammarterm{+}e is the same as e. 
-    Value of @grammarterm{-}e is the negated value of e.
+    Expression e must have int or float type. The value of "+}e is the same as e. 
+    Value of "-}e is the negated value of e.
 
-    The operands of (binary) operators @grammarterm{+}, @grammarterm{-} @grammarterm{*}, 
-    @grammarterm{/}, @grammarterm{<}, @grammarterm{<=}, @grammarterm{>}, @grammarterm{>=}, 
-    @grammarterm{==} and @grammarterm{!=} must have int or float type, otherwise this is an error. 
+    The operands of (binary) operators "+}, "-} "*}, 
+    "/}, "<}, "<=}, ">}, ">=}, 
+    "==} and "!=} must have int or float type, otherwise this is an error. 
     If only one of the operands is float, the int value of the other one is coerced to the corresponding 
     value of float. The operands of % must have int type. The operands of not, and, or must have boolean type.
 
