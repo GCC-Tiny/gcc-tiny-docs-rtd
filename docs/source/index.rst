@@ -18,5 +18,6 @@ Contents
 
 .. toctree::
 
+   part01
    usage
    api
