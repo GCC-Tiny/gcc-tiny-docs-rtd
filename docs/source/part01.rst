@@ -386,7 +386,6 @@ value of float. The operands of % must have int type. The operands of not, and, 
     int and float. Conversely, binary operators are more relaxed by allowing coercions of int 
     operands to float operands. I know at this point it is a bit arbitrary, but it illustrates 
     some points in programming language design that we usually take for granted but may not be obvious.
-    @end quotation
 
 Operators +, - and \*, compute, respectively, the arithmetic addition, subtraction and 
 multiplication of its (possibly coerced) operands (for the subtraction the second operand 
