@@ -34,7 +34,7 @@ development.
 Let's clone the gcc repository into a gcc-src directory. This directory 
 is the source tree. This will take a while but only has to be done once.
 
-.. code-block:: shell
+.. code-block:: shell-session
 
     $ git clone git://gcc.gnu.org/git/gcc.git gcc-src
     Cloning into 'gcc-src'...
@@ -43,7 +43,7 @@ The next step is make sure we fulfill the requirements of GCC. The easiest
 way to do this is invoking a script found inside the contrib directory. 
 Run it from the top level directory of the source tree.
 
-.. code-block:: shell
+.. code-block:: shell-session
 
     $ cd gcc-src
     $ ./contrib/download_prerequisites
@@ -52,7 +52,8 @@ Run it from the top level directory of the source tree.
 This will add many files that ideally you want git to ignore them. In my case I 
 added the following lines to the existing gcc-src/.gitignore.
 
-.. code-block:: shell
+.. code-block:: shell-session
+
     # .gitignore
     gmp
     gmp-4.3.2
@@ -69,7 +70,7 @@ added the following lines to the existing gcc-src/.gitignore.
 
 Let's create a branch and switch to it, where we will develop the tiny frontend.
 
-.. code-block:: shell
+.. code-block:: shell-session
 
     $ git checkout -b tiny
     Switched to a new branch 'tiny'
@@ -77,14 +78,14 @@ Let's create a branch and switch to it, where we will develop the tiny frontend.
 Now create a directory sibling to that of gcc, we will use it to build gcc. 
 This directory is the build tree.
 
-.. code-block:: shell
+.. code-block:: shell-session
 
     $ cd  ..           # leave source tree
     $ mkdir gcc-build
 
 Now let's configure a minimal gcc with just C and C++ (C++ is required for GCC itself).
 
-.. code-block:: shell
+.. code-block:: shell-session
 
     $ cd gcc-build
     $ ../gcc-src/configure --prefix=$(pwd)/../gcc-install --enable-languages=c,c++
@@ -93,14 +94,14 @@ And make an initial build of the whole GCC. This step may take several minutes
 depending on your specific machine. The flag to -jN will use all the cpus of 
 your system.
 
-.. code-block:: shell
+.. code-block:: shell-session
 
     $ make -j$(getconf _NPROCESSORS_ONLN)
     ... tons of gibberish ...
 
 Finally let's install it.
 
-.. code-block:: shell
+.. code-block:: shell-session
 
     $ make install
 
@@ -165,7 +166,7 @@ Initial boilerplate
 We first need to create a tiny directory inside gcc-src/gcc. All our 
 files will go there. no file outside of it will be changed.
 
-.. code-block:: shell
+.. code-block:: shell-session
 
     $ cd gcc-src/gcc
     $ mkdir tiny
@@ -173,7 +174,7 @@ files will go there. no file outside of it will be changed.
 The next step is telling GCC configure that we are going to build GCC 
 with tiny support. This will fail. Do not worry, this is expected.
 
-.. code-block:: shell
+.. code-block:: shell-session
 
     $ cd gcc-build
     $ ../gcc-src/configure --prefix=$(pwd)/../gcc-install --enable-languages=c,c++,tiny
@@ -193,7 +194,7 @@ compiler (more on this below). It also specifies which languages are required
 to compile this front end. In our case we will use C++, so the command 
 line option --enable-languages will require c++ if we want to build tiny.
 
-.. code-block:: shell
+.. code-block:: shell-session
 
     # gcc-src/gcc/config/config-lang.in
     language="tiny"
@@ -224,9 +225,9 @@ two lines will do. Just believe me here. If you want to understand what is going
 on, you can find more information in the file gcc-src/gcc/gcc.c and in GCC 
 manual about spec files.
 
-.. code-block:: shell
+.. code-block:: c
 
-    \/\* gcc-src/gcc/config/lang-specs.in \*\/
+    /* gcc-src/gcc/config/lang-specs.in */
     {".tiny",  "@tiny", 0, 1, 0},
     {"@tiny",  "tiny1 %i %(cc1_options) %{!fsyntax-only:%(invoke_as)}", 0, 1, 0},
 
@@ -256,7 +257,7 @@ file will invoke tiny1. This would work. But we want a gcctiny driver
 to write a very small file for our gcctiny driver, the rest of the code 
 is shared among drivers.
 	
-.. code-block:: shell
+.. code-block:: makefile
     :linenos:
 
     GCCTINY_INSTALL_NAME := $(shell echo gcctiny|sed '$(program_transform_name)')
@@ -672,7 +673,7 @@ the front end. When we test the compiler we can reenable it again.
 Now we can try again with the configure but this time we will disable 
 the bootstrap, using --disable-bootstrap.
 
-.. code-block:: shell
+.. code-block:: shell-session
 
     $ cd gcc-build
     $ ../gcc-src/configure --prefix=$(pwd)/../gcc-install --disable-bootstrap --enable-languages=c,c++,tiny
@@ -682,7 +683,7 @@ the bootstrap, using --disable-bootstrap.
 
 A gcctiny and its corresponding target should now be in gcc-install/bin.
 
-.. code-block:: shell
+.. code-block:: shell-session
 
     $ ls -1 gcc-install/bin/*tiny*
     gcc-install/bin/gcctiny
@@ -692,7 +693,7 @@ Nice. Let's make a smoke test. First let's create an empty test.tiny.
 We need this because the driver checks for the existence of the input 
 file for us.
 
-.. code-block:: 
+.. code-block:: shell-session
 
     $ touch test.tiny
     $ gcc-install/bin/gcctiny -c test.tiny
@@ -701,7 +702,7 @@ file for us.
 Yay! I have passed the flag -c to avoid linking otherwise we would get 
 an undefined error since there is no main function yet.
 
-.. code-block:: 
+.. code-block:: shell-session
 
     $ gcc-install/bin/gcctiny  test.tiny
     Hello gcctiny!
@@ -711,7 +712,7 @@ an undefined error since there is no main function yet.
 
 If you want to see what is going on, just pass -v.
 
-.. code-block:: shell
+.. code-block:: shell-session
     :linenos:
 
     $ gcc-install/bin/gcctiny -c -v test.tiny
