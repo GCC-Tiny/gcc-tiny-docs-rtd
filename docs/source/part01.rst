@@ -98,25 +98,25 @@ The following two are not (in fact they are syntactically invalid).
 This is the form of an assignment statement.
 
 .. productionlist:: Tiny
-    assignment: `identifier` ":=" `expression` ";" 
+    assignment: `identifier` ":=" `expression` ";"
 
 This is the form of an if statement.
 
 .. productionlist:: Tiny
-    if: "if" `expression` "then" `statement`* "end" 
-      | "if" `expression` "then" `statement`* "else" `statement`* "end"
+    if: "if" `expression` "then" `statement`* "end" ";" 
+      : "if" `expression` "then" `statement`* "else" `statement`* "end" ";"
 
 This is the form of a while statement.
 
 .. productionlist:: Tiny
-    while: "while" `expression` "do" `statement`* "end"
+    while: "while" `expression` "do" `statement`* "end" ";"
 
 
 This is the form of a for statement.
 
 .. productionlist:: Tiny
-    for: "for"  `identifier` ":="  `expression` "to" `expression` "do" `statement`* "end"
-
+    for: "for"  `identifier` ":="  `expression` "to" `expression` "do" `statement`* "end" ";"
+    
 This is the form of a read statement.
 
 .. productionlist:: Tiny
@@ -166,34 +166,31 @@ The following table summarizes priorities between operators. Operators in the sa
     Operators              Priority
     ===================    =================
     (unary)+ (unary)-      Highest priority
-    * / %	 
+    \* / %	 
     (binary)+ (binary)-	 
     == != < <= > >=	 
     not, and, or	       Lowest priority
     ===================    =================
 
+This means that x + y * z is equivalent to x + (y * z) and x > y 
+and z < w is equivalent to (x > y) and (z < w). Parentheses can be 
+used if needed to change the priority like in (x + y) * z.
+
+
+A symbol #, except when inside a string literal, introduces a comment. A comment spans until a 
+newline character. It is not part of the program, it is just a lexical element that is discarded.
+
+A tiny example program follows
+
+.. code-block::
+    :lineno-start: 10
+
+    var i : int;
+    for i := 0 to 10 do     # this is a comment
+    write i;
+    end;
+
 ..
-    This means that x + y * z is equivalent to x + (y * z) and x > y 
-    and z < w is equivalent to (x > y) and (z < w). Parentheses can be 
-    used if needed to change the priority like in (x + y) * z.
-
-
-    A symbol #, except when inside a string literal, introduces a comment. A comment spans until a 
-    newline character. It is not part of the program, it is just a lexical element that is discarded.
-
-    A tiny example program follows
-
-    @multitable {line} {-----code-------------------------------}
-    @item 1
-    @tab var i : int;
-    @item 2
-    @tab for i := 0 to 10 do     # this is a comment
-    @item 3
-    @tab write i;
-    @item 4
-    @tab end;
-    @end multitable
-
 
     @section Semantics
 
