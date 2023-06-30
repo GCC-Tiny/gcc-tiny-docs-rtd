@@ -68,9 +68,10 @@ An identifier is a letter (or underscore) followed zero or more letters, digits
 and underscores. 
 
 .. productionlist:: Tiny
-    identifier: ( `letter` | "_" ) ( `letter` | `digit` | "_" )*
+    identifier: ( `letter` | `underscore` ) ( `letter` | `digit` | `underscore` )*
     letter: "a" .. "z" | "A" .. "Z" 
-    digit: "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"    
+    digit: "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+    underscore: "_"  
 
 
 Examples of identifiers are foo, foo123, foo_123, hello_world, _foo, foo12a. 
