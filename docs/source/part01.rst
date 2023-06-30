@@ -301,7 +301,7 @@ declaration in line 9 hides it) but y does.
 
 .. TODO: fix mark up of if, while, for statements
 
-An :token:`Tiny:if if statement` can have two forms, but the first form is equivalent to 
+An :token:`if statement <Tiny:if>` can have two forms, but the first form is equivalent to 
 if expression then statement* else end, 
 so we only have to define the semantics of the second form. The execution of an if statement starts 
 by evaluating its expression part, called the condition. The condition 
@@ -309,7 +309,7 @@ expression must have a boolean type, otherwise this is an error. If the value of
 the condition is true then the first statement* is evaluated. If the 
 value of the condition is false, then the second statement* is evaluated.
 
-The execution of a while statement starts by evaluating its expression part, 
+The execution of a :token:`~Tiny:while` statement starts by evaluating its expression part, 
 called the condition. The condition expression must have a boolean type, otherwise this 
 is an error. If the value of the condition is false, nothing is executed. If the value 
 of the condition is true, then the statement* is executed and then the while 
