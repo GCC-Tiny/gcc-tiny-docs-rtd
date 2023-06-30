@@ -116,7 +116,7 @@ This is the form of a for statement.
 
 .. productionlist:: Tiny
     for: "for"  `identifier` ":="  `expression` "to" `expression` "do" `statement`* "end" ";"
-    
+
 This is the form of a read statement.
 
 .. productionlist:: Tiny
@@ -190,55 +190,58 @@ A tiny example program follows
     write i;
     end;
 
-..
 
-    @section Semantics
 
-    Since a tiny program is a sequence of statements, executing a tiny program is equivalent to execute, 
-    in order, each statement of the sequence.
+Semantics
+---------
 
-    A tiny program, like any imperative programming language, can be understood as a program with some 
-    state. This state is essentially a mapping of identifiers to values. In tiny, there is a stack of 
-    those mappings, that we collectivelly will call the scope. A tiny program starts with a scope 
-    consisting of just a single empty mapping.
+Since a tiny program is a sequence of statements, executing a tiny program is equivalent to execute, 
+in order, each statement of the sequence.
 
-    A declaration introduces a new entry in the top mapping of the current scope. This entry maps an 
-    identifier (called the variable name) to an undefined value of the  @grammar{type} of the declaration. 
-    This value is called the value of the variable. There can be up to one entry that maps an identifier 
-    to a value, so declaring twice the same identifier in the same scope is an error.
+A tiny program, like any imperative programming language, can be understood as a program with some 
+state. This state is essentially a mapping of identifiers to values. In tiny, there is a stack of 
+those mappings, that we collectivelly will call the scope. A tiny program starts with a scope 
+consisting of just a single empty mapping.
 
-    @quotation
+A declaration introduces a new entry in the top mapping of the current scope. This entry maps an 
+identifier (called the variable name) to an undefined value of the  @grammar{type} of the declaration. 
+This value is called the value of the variable. There can be up to one entry that maps an identifier 
+to a value, so declaring twice the same identifier in the same scope is an error.
+
+.. note::
+
     This is obviously a design decision: another language might choose to define a sensible initial 
     mapping. For example, to a zero value of the type (in our case it would be 0 for int and 0.0 for 
     float). Since the initial mapping is to an undefined value, this means that the variable does 
     not have to be initialized with any particular value.
-    @end quotation
 
-    In tiny the set of values of the int type are those of the 32-bit integers in two's complement 
-    (i.e. -231 to 231 - 1). The set of values of the float type is the same as the values of the of 
-    the Binary32 IEEE 754 representation, excluding (for simplicity) NaN and Infinity. The value of 
-    a variable may be undefined or an element of the set of values of the type of its declaration.
 
-    The set of values of the boolean type is just the elements "true" and "false". Values of string 
-    type are sequences of characters of 1 byte each.
+In tiny the set of values of the int type are those of the 32-bit integers in two's complement 
+(i.e. -231 to 231 - 1). The set of values of the float type is the same as the values of the of 
+the Binary32 IEEE 754 representation, excluding (for simplicity) NaN and Infinity. The value of 
+a variable may be undefined or an element of the set of values of the type of its declaration.
 
-    An assignment, defines a new state where all the existing mappings are left untouched except for 
-    the entry of the identifier which is updated to the value denoted by the expression. The old state 
-    is discarded and the new state becomes the current state. If there is not an entry for the 
-    identifier in any of the mappings of the scope, this is an error. The expression must denote an 
-    int or float type, otherwise this is an error. The identifier must have been declared with the 
-    same type as the type of the expression, otherwise this is an error.
+The set of values of the boolean type is just the elements "true" and "false". Values of string 
+type are sequences of characters of 1 byte each.
 
-    @quotation
+An assignment, defines a new state where all the existing mappings are left untouched except for 
+the entry of the identifier which is updated to the value denoted by the expression. The old state 
+is discarded and the new state becomes the current state. If there is not an entry for the 
+identifier in any of the mappings of the scope, this is an error. The expression must denote an 
+int or float type, otherwise this is an error. The identifier must have been declared with the 
+same type as the type of the expression, otherwise this is an error.
+
+.. note::
+
     Note that we do not allow assigning a float value to an int variable nor an int value to a float 
     variable. I may lift this restriction in the future.
-    @end quotation
 
 
-    For instance, the following tiny program is annotated with the changes in its state. 
-    Here ⊥ means an undefined value.
+For instance, the following tiny program is annotated with the changes in its state. 
+Here ⊥ means an undefined value.
 
-    @verbatim
+.. code-block::
+    
     # [ ]
     var x : int;
     # [ x → ⊥ ]
@@ -252,114 +255,95 @@ A tiny example program follows
     # [ x → 43, y → 1.0 ]
     y = y + x;
     # [ x → 43, y → 44.0 ]
-    @end verbatim
+    
+
+The bodies of if, while and for statements (i.e. their  @grammar{statement}* parts) 
+introduce a new mapping on top of the current scope. The span of this new mapping is 
+restricted to the body. Since the mapping is new, it is valid to declare a variable 
+whose identifier has already been used before. This is commonly called hiding.
+
+.. code-block:: 
+    :linenos:
+
+    # [ ]
+    var x : int;
+    # [ x → ⊥ ]
+    var y : int;
+    # [ x → ⊥, y → ⊥ ]
+    x := 3;
+    # [ x → 3, y → ⊥ ]
+    if (x > 1) then
+       # [ x → 3, y → ⊥ ], [ ]
+       var x : int;
+       # [ x → 3, y → ⊥ ], [ x → ⊥ ]
+       x := 4;
+       # [ x → 3, y → ⊥ ], [ x → 4 ]
+       y := 5
+       # [ x → 3, y → 5 ], [ x → 4 ]
+       var z : int
+       # [ x → 3, y → 5 ], [ x → 4, z → ⊥ ]
+       z := 8
+       # [ x → 3, y → 5 ], [ x → 4, z → 8 ]
+    end
+    # [ x → 3, y → 5 ]
+    z := 8 # ← ERROR HERE, z is not in the scope!!
 
 
-    The bodies of if, while and for statements (i.e. their  @grammar{statement}* parts) 
-    introduce a new mapping on top of the current scope. The span of this new mapping is 
-    restricted to the body. Since the mapping is new, it is valid to declare a variable 
-    whose identifier has already been used before. This is commonly called hiding.
+The meaning of an identifier used in an assignment expression always refers 
+to the entry in the latest mapping introduced. This is why in the example above, 
+inside the if statement, x does not refer to the outermost one (because the 
+declaration in line 9 hides it) but y does.
 
-    @multitable {line} {----code------------------------------------------------}
-    @item 1
-    @tab # [ ]
-    @item 2
-    @tab var x : int;
-    @item 3
-    @tab # [ x → ⊥ ]
-    @item 4
-    @tab var y : int;
-    @item 5
-    @tab # [ x → ⊥, y → ⊥ ]
-    @item 6
-    @tab x := 3;
-    @item 7
-    @tab # [ x → 3, y → ⊥ ]
-    @item 8
-    @tab if (x > 1) then
-    @item 9
-    @tab    # [ x → 3, y → ⊥ ], [ ]
-    @item 10
-    @tab    var x : int;
-    @item 11
-    @tab    # [ x → 3, y → ⊥ ], [ x → ⊥ ]
-    @item 12
-    @tab    x := 4;
-    @item 13
-    @tab    # [ x → 3, y → ⊥ ], [ x → 4 ]
-    @item 14
-    @tab    y := 5
-    @item 15
-    @tab    # [ x → 3, y → 5 ], [ x → 4 ]
-    @item 16
-    @tab    var z : int
-    @item 17
-    @tab    # [ x → 3, y → 5 ], [ x → 4, z → ⊥ ]
-    @item 18
-    @tab    z := 8
-    @item 19
-    @tab    # [ x → 3, y → 5 ], [ x → 4, z → 8 ]
-    @item 10
-    @tab end
-    @item 21
-    @tab # [ x → 3, y → 5 ]
-    @item 22
-    @tab z := 8 # ← ERROR HERE, z is not in the scope!!
-    @end multitable
+.. note::
 
-
-    The meaning of an identifier used in an assignment expression always refers 
-    to the entry in the latest mapping introduced. This is why in the example above, 
-    inside the if statement, x does not refer to the outermost one (because the 
-    declaration in line 9 hides it) but y does.
-
-    @quotation
     This kind of scoping mechanism is called static or lexical scoping.
-    @end quotation
 
-    An "if} statement can have two forms, but the first form is equivalent to 
-    "if}  @grammar{expression} "then}  @grammar{statement}* "else} "end}, 
-    so we only have to define the semantics of the second form. The execution of an "if} statement starts 
-    by evaluating its  @grammar{expression} part, called the condition. The condition 
-    expression must have a boolean type, otherwise this is an error. If the value of 
-    the condition is true then the first  @grammar{statement}* is evaluated. If the 
-    value of the condition is false, then the second  @grammar{statement}* is evaluated.
+.. TODO: fix mark up of if, while, for statements
 
-    The execution of a "while} statement starts by evaluating its  @grammar{expression} part, 
-    called the condition. The condition expression must have a boolean type, otherwise this 
-    is an error. If the value of the condition is false, nothing is executed. If the value 
-    of the condition is true, then the  @grammar{statement}* is executed and then the "while} 
-    statement is executed again.
+An if :ref:`Tiny:if` statement can have two forms, but the first form is equivalent to 
+if expression then statement* else end, 
+so we only have to define the semantics of the second form. The execution of an if statement starts 
+by evaluating its expression part, called the condition. The condition 
+expression must have a boolean type, otherwise this is an error. If the value of 
+the condition is true then the first statement* is evaluated. If the 
+value of the condition is false, then the second statement* is evaluated.
 
-    A "for} statement of the form
+The execution of a while statement starts by evaluating its expression part, 
+called the condition. The condition expression must have a boolean type, otherwise this 
+is an error. If the value of the condition is false, nothing is executed. If the value 
+of the condition is true, then the statement* is executed and then the while 
+statement is executed again.
 
-    @verbatim
+A for statement of the form
+
+.. code-block:: 
+
     for id := L to U do
     S
     end
-    @end verbatim
 
-    is semantically equivalent to
+is semantically equivalent to
 
-    @verbatim
+.. code-block:: 
+
     id := L;
     while (id <= U) do
     S
     id := id + 1;
     end
-    @end verbatim
 
-    Execution of a "read} statement causes a tiny program to read from the standard input a 
-    textual representation of a value of the type of the identifier. Then, the identifier 
-    is updated as if by an assignment statement, with the represented value. If the textual 
-    representation read is not valid for the type of the identifier, then this is an error.
+Execution of a read statement causes a tiny program to read from the standard input a 
+textual representation of a value of the type of the identifier. Then, the identifier 
+is updated as if by an assignment statement, with the represented value. If the textual 
+representation read is not valid for the type of the identifier, then this is an error.
 
-    Execution of a "write} statement causes a tiny program to write onto the standard output 
-    a textual representation of the value of the expression.
+Execution of a write statement causes a tiny program to write onto the standard output 
+a textual representation of the value of the expression.
 
-    For simplicity, the textual representation used by "read} and "write} is the 
-    same as the syntax of the literals of the corresponding types.
+For simplicity, the textual representation used by read and write is the 
+same as the syntax of the literals of the corresponding types.
 
+..
     @section Semantics of expressions
 
     We say that an expression has a specific type when the evaluation of the expression yields 
