@@ -27,3 +27,4 @@ Contents
 .. toctree::
 
    part01
+   part02
