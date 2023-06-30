@@ -1,3 +1,4 @@
+
 *******************
 Initial Boilerplate
 *******************
@@ -48,26 +49,30 @@ Run it from the top level directory of the source tree.
     $ ./contrib/download_prerequisites
     ... downloading stuff ...
 
-This will add many files that ideally you want git to ignore them. In my case I added the following lines to the existing gcc-src/.gitignore.
+This will add many files that ideally you want git to ignore them. In my case I 
+added the following lines to the existing gcc-src/.gitignore.
 
-.. TODO Update list of contributed prerequisites
-gmp
-gmp-4.3.2
-gmp-4.3.2.tar.bz2
-isl
-isl-0.15
-isl-0.15.tar.bz2
-mpc
-mpc-0.8.1
-mpc-0.8.1.tar.gz
-mpfr
-mpfr-2.4.2
-mpfr-2.4.2.tar.bz2
+.. code-block:: shell
+    # .gitignore
+    gmp
+    gmp-4.3.2
+    gmp-4.3.2.tar.bz2
+    isl
+    isl-0.15
+    isl-0.15.tar.bz2
+    mpc
+    mpc-0.8.1
+    mpc-0.8.1.tar.gz
+    mpfr
+    mpfr-2.4.2
+    mpfr-2.4.2.tar.bz2
 
 Let's create a branch and switch to it, where we will develop the tiny frontend.
 
-$ git checkout -b tiny
-Switched to a new branch 'tiny'
+.. code-block:: shell
+
+    $ git checkout -b tiny
+    Switched to a new branch 'tiny'
 
 Now create a directory sibling to that of gcc, we will use it to build gcc. 
 This directory is the build tree.
@@ -128,8 +133,17 @@ architecture supported. If you are interested in this part of the compiler
 you may want to check config/moxie, it is small enough for a newcomer. Do not 
 forget to check their great blog.
 
-There is also one directory per language supported in gcc-src/gcc: 
-c (C), cp (C++), fortran, go, java, jit (libgccjit), lto (Link Time Optimization), objc (Objective-C) and objcp (Objective-C++). 
+There is also one directory per language supported in gcc-src/gcc:
+
+- c (C)
+- cp (C++)
+- fortran
+- go
+- java
+- jit (libgccjit)
+- lto (Link Time Optimization)
+- objc (Objective-C)
+- objcp (Objective-C++) 
 
 Some of these frontends are not real programming languages (like jit or lto). 
 They are front ends in the sense of inputs to the compiler: libgccjit uses as 
@@ -160,7 +174,7 @@ The next step is telling GCC configure that we are going to build GCC
 with tiny support. This will fail. Do not worry, this is expected.
 
 .. code-block:: shell
-    
+
     $ cd gcc-build
     $ ../gcc-src/configure --prefix=$(pwd)/../gcc-install --enable-languages=c,c++,tiny
     ...
