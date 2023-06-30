@@ -188,7 +188,7 @@ A tiny example program follows
 
     var i : int;
     for i := 0 to 10 do     # this is a comment
-    write i;
+      write i;
     end;
 
 
@@ -234,8 +234,8 @@ same type as the type of the expression, otherwise this is an error.
 
 .. note::
 
-    Note that we do not allow assigning a float value to an int variable nor an int value to a float 
-    variable. I may lift this restriction in the future.
+    It is not allowed to assign a float value to an int variable nor an int value to a float 
+    variable. This restriction may be lifted in the future.
 
 
 For instance, the following tiny program is annotated with the changes in its state. 
@@ -315,7 +315,7 @@ is an error. If the value of the condition is false, nothing is executed. If the
 of the condition is true, then the statement* is executed and then the while 
 statement is executed again.
 
-A for statement of the form
+A :token:`for statement <Tiny:for>` of the form
 
 .. code-block:: 
 
@@ -333,12 +333,12 @@ is semantically equivalent to
         id := id + 1;
     end
 
-Execution of a read statement causes a tiny program to read from the standard input a 
+Execution of a :token:`read statement <Tiny:read>` causes a tiny program to read from the standard input a 
 textual representation of a value of the type of the identifier. Then, the identifier 
 is updated as if by an assignment statement, with the represented value. If the textual 
 representation read is not valid for the type of the identifier, then this is an error.
 
-Execution of a write statement causes a tiny program to write onto the standard output 
+Execution of a :token:`write statement <Tiny:write>` causes a tiny program to write onto the standard output 
 a textual representation of the value of the expression.
 
 For simplicity, the textual representation used by read and write is the 
@@ -367,8 +367,8 @@ bytes denoted by the characters in the input, not including the delimiting doubl
 An expression of the form ( e ) denotes the same value and type 
 of the expression e.
 
-An identifier in an expression denotes the entry in the latest mapping introduced in the 
-scope (likewise the identifier in the assignment statement, see above). If there is not 
+An :token:`~Tiny:identifier` in an expression denotes the entry in the latest mapping introduced in the 
+scope (likewise the identifier in the :token:`~Tiny:assignment` statement, see above). If there is not 
 such mapping or maps to the undefined value, then this is an error.
 
 An expression of the form +e or -e denotes a value of the same 
@@ -386,7 +386,6 @@ value of float. The operands of % must have int type. The operands of not, and, 
     int and float. Conversely, binary operators are more relaxed by allowing coercions of int 
     operands to float operands. I know at this point it is a bit arbitrary, but it illustrates 
     some points in programming language design that we usually take for granted but may not be obvious.
-    @end quotation
 
 Operators +, - and \*, compute, respectively, the arithmetic addition, subtraction and 
 multiplication of its (possibly coerced) operands (for the subtraction the second operand 
