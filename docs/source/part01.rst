@@ -300,7 +300,7 @@ declaration in line 9 hides it) but y does.
 
 .. TODO: fix mark up of if, while, for statements
 
-An if :ref:`Tiny:if` statement can have two forms, but the first form is equivalent to 
+An if statement can have two forms, but the first form is equivalent to 
 if expression then statement* else end, 
 so we only have to define the semantics of the second form. The execution of an if statement starts 
 by evaluating its expression part, called the condition. The condition 
@@ -319,7 +319,7 @@ A for statement of the form
 .. code-block:: 
 
     for id := L to U do
-    S
+        S
     end
 
 is semantically equivalent to
@@ -328,8 +328,8 @@ is semantically equivalent to
 
     id := L;
     while (id <= U) do
-    S
-    id := id + 1;
+        S
+        id := id + 1;
     end
 
 Execution of a read statement causes a tiny program to read from the standard input a 
@@ -343,86 +343,85 @@ a textual representation of the value of the expression.
 For simplicity, the textual representation used by read and write is the 
 same as the syntax of the literals of the corresponding types.
 
-..
-    @section Semantics of expressions
 
-    We say that an expression has a specific type when the evaluation of the expression yields 
-    a value of that type. Evaluating an expression is computing such value.
+Semantics of expressions
+------------------------
 
-    An integer literal denotes a value of int type, i.e. a subset of the integers. Given an 
-    integer literal of the form d@sub{n}d@sub{n-1}...d@sub{0}, 
-    the denoted integer value is d@sub{n} × 10@sup{n} + d@sub{n-1} × 10@sup{n-1} + ... + d@sub{0}. 
-    In other words, an integer literal denotes the integer value of that number in base 10.
+We say that an expression has a specific type when the evaluation of the expression yields 
+a value of that type. Evaluating an expression is computing such value.
 
-    A float literal denotes a value of float type. A float of the form 
-    d@sub{n}d@sub{n-1}...d@sub{0}".}d@sub{-1}d@sub{-2}...d@sub{-m} denotes the closest 
-    IEEE 754 Binary32 float value to the value d@sub{n} × 10@sup{n} + d@sub{n-1} × 10@sup{n-1} + ... + d0 + d@sub{-1}10@sup{-1} + d@sub{-2}10@sup{-2} + ... + d@sub{-m}10@sup{-m}
+An integer literal denotes a value of int type, i.e. a subset of the integers. Given an 
+integer literal of the form d\ :sub:`n`\ d\ :sub:`n-1`\ ...d\ :sub:`0`, 
+the denoted integer value is d\ :sub:`n` × 10\ :sup:`n` + d\ :sub:`n-1` × 10\ :sup:`n-1` + ... + d\ :sub:`0`. 
+In other words, an integer literal denotes the integer value of that number in base 10.
+
+A float literal denotes a value of float type. A float of the form 
+d\ :sub:`n`\ d\ :sub:`n-1` ...d\ :sub:`0`.d\ :sub:`-1`\ d\ :sub:`-2`...d\ :sub:`-m` denotes the closest 
+IEEE 754 Binary32 float value to the value d\ :sub:`n` × 10\ :sup:`n` + d\ :sub:`n-1` × 10\ :sup:`n-1` + ... + d\ :sub:`0` + d\ :sub:`-1`\ 10\ :sup:`-1` + d\ :sub:`-2`\ 10\ :sup:`-2` + ... + d\ :sub:`-m`\ 10\ :sup:`-m`
 
 
-    A string literal denotes a value of string type, the value of which is the sequence of
-    bytes denoted by the characters in the input, not including the delimiting double quotes.
+A string literal denotes a value of string type, the value of which is the sequence of
+bytes denoted by the characters in the input, not including the delimiting double quotes.
 
-    An expression of the form "(} e ")} denotes the same value and type 
-    of the expression e.
+An expression of the form ( e ) denotes the same value and type 
+of the expression e.
 
-    An identifier in an expression denotes the entry in the latest mapping introduced in the 
-    scope (likewise the identifier in the assignment statement, see above). If there is not 
-    such mapping or maps to the undefined value, then this is an error.
+An identifier in an expression denotes the entry in the latest mapping introduced in the 
+scope (likewise the identifier in the assignment statement, see above). If there is not 
+such mapping or maps to the undefined value, then this is an error.
 
-    An expression of the form "+}e or "-}e denotes a value of the same 
-    type as the expression e. 
-    Expression e must have int or float type. The value of "+}e is the same as e. 
-    Value of "-}e is the negated value of e.
+An expression of the form +e or -e denotes a value of the same 
+type as the expression e. 
+Expression e must have int or float type. The value of +e is the same as e. 
+Value of -e is the negated value of e.
 
-    The operands of (binary) operators "+}, "-} "*}, 
-    "/}, "<}, "<=}, ">}, ">=}, 
-    "==} and "!=} must have int or float type, otherwise this is an error. 
-    If only one of the operands is float, the int value of the other one is coerced to the corresponding 
-    value of float. The operands of % must have int type. The operands of not, and, or must have boolean type.
+The operands of (binary) operators +, - \*, /, <, <=, >, >=, == and != must have int or float type, otherwise this is an error. 
+If only one of the operands is float, the int value of the other one is coerced to the corresponding 
+value of float. The operands of % must have int type. The operands of not, and, or must have boolean type.
 
-    @quotation
+
+.. note::
     We've seen above that assignment seems overly restrictive by not allowing assignments between 
     int and float. Conversely, binary operators are more relaxed by allowing coercions of int 
     operands to float operands. I know at this point it is a bit arbitrary, but it illustrates 
     some points in programming language design that we usually take for granted but may not be obvious.
     @end quotation
 
-    Operators +, - and *, compute, respectively, the arithmetic addition, subtraction and 
-    multiplication of its (possibly coerced) operands (for the subtraction the second operand 
-    is subtracted from the first operand, as usually). The expression denotes a float type if 
-    any operand is float, int otherwise.
+Operators +, - and \*, compute, respectively, the arithmetic addition, subtraction and 
+multiplication of its (possibly coerced) operands (for the subtraction the second operand 
+is subtracted from the first operand, as usually). The expression denotes a float type if 
+any operand is float, int otherwise.
 
-    Operator / when both operands are int computes the integer division of the first operand 
-    by the second operand rounded towards zero, the resulting value has type int. When any of 
-    the operands is a float, an arithmetic division between the (possibly coerced) operands 
-    is computed. The resulting value has type float.
+Operator / when both operands are int computes the integer division of the first operand 
+by the second operand rounded towards zero, the resulting value has type int. When any of 
+the operands is a float, an arithmetic division between the (possibly coerced) operands 
+is computed. The resulting value has type float.
 
-    Operator % computes the remainder of the integer division of the first operand (where t
-    he remainder has the same sign as the first operand). The resulting value has type int.
+Operator % computes the remainder of the integer division of the first operand (where t
+he remainder has the same sign as the first operand). The resulting value has type int.
 
-    @quotation
+.. note::
     This is deliberately the same modulus that the C language computes.
-    @end quotation
 
-    Operators <, <=, >, >=, == and != compare the (possibly coerced) first operand with the 
-    possibly coerced) second operand. The comparison checks if the first operand is, 
-    respectively, less than, less or equal than, greater than, greater or equal than, 
-    different (not equal) or equal than the second operand. The resulting value has 
-    boolean type.
+Operators <, <=, >, >=, == and != compare the (possibly coerced) first operand with the 
+possibly coerced) second operand. The comparison checks if the first operand is, 
+respectively, less than, less or equal than, greater than, greater or equal than, 
+different (not equal) or equal than the second operand. The resulting value has 
+boolean type.
 
-    Operators not, and, or perform the operations ¬, ∧, ∨ of the boolean algebra. 
-    The resulting value has boolean type.
+Operators not, and, or perform the operations ¬, ∧, ∨ of the boolean algebra. 
+The resulting value has boolean type.
 
-    @quotation
+.. note::
     Probably you have already figured it now, but it is possible to create expressions 
     with types that cannot be used for variables. There are no variables of string or 
     boolean type. For string types we can create a value using a string literal but we 
     cannot operate it in any way. Only the write statement allows it. For boolean values, 
     we can operate them using and, or and not but there are no boolean literals or boolean 
     variables (yet).
-    @end quotation
 
-    @section Wrap-up
+Wrap-up
+-------
 
     Ok, that was long but we will refer to this document when implementing the language. 
     Note that the languages, as it is, is underspecified. For instance, we have not 
