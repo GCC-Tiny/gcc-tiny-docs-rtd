@@ -301,7 +301,7 @@ declaration in line 9 hides it) but y does.
 
 .. TODO: fix mark up of if, while, for statements
 
-An if statement can have two forms, but the first form is equivalent to 
+An :token:`Tiny:if if statement` can have two forms, but the first form is equivalent to 
 if expression then statement* else end, 
 so we only have to define the semantics of the second form. The execution of an if statement starts 
 by evaluating its expression part, called the condition. The condition 
