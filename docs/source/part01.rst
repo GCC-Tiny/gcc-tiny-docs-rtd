@@ -188,7 +188,7 @@ A tiny example program follows
 
     var i : int;
     for i := 0 to 10 do     # this is a comment
-    write i;
+      write i;
     end;
 
 
@@ -234,8 +234,8 @@ same type as the type of the expression, otherwise this is an error.
 
 .. note::
 
-    Note that we do not allow assigning a float value to an int variable nor an int value to a float 
-    variable. I may lift this restriction in the future.
+    It is not allowed to assign a float value to an int variable nor an int value to a float 
+    variable. This restriction may be lifted in the future.
 
 
 For instance, the following tiny program is annotated with the changes in its state. 
