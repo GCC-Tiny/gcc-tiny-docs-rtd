@@ -428,8 +428,8 @@ the two forms share a lot of elements. It may help to split the rule 〈if〉 in
 two rules follows.
 
 .. productionlist:: Tiny
-    if: `if-then` "end" | `if-then` "else" `statement`* "end"
-    if-then: "if" `expression` "then" `statement`*
+    if: `ifthen` "end" | `ifthen` "else" `statement`* "end"
+    ifthen: "if" `expression` "then" `statement`*
 
 From this definition it is clear that we have to parse first an if, followed by 
 an expression, followed by a then and followed by a statement sequence. In this 
@@ -545,7 +545,7 @@ of operands if needed.
 Let's recall first the definition of expressions in tiny.
 
 .. productionlist:: Tiny
-    expression: `primary` | `unary-op` `expression` | `expression` `binary-op` `expression`
+    expression: `primary` | `unaryop` `expression` | `expression` `binaryop` `expression`
 
 This definition is not very useful because it does not define the priority of 
 the operators. We defined, though, the priority of the operators in a table.
@@ -564,29 +564,29 @@ By following the table of priorities above, it is possible to derive the followi
 syntax. The lower the level, the higher the priority of the operand.
 
 .. productionlist:: Tiny
-    expression: `sixth-level`
-    sixth-level: "not" `sixth-level`
-                | `sixth-level` "and" `fifth-level`
-                | `sixth-level` "or" `fifth-level`
-                | `fifth-level`
-    fifth-level:  `fifth-level` "<"  `third-level`
-                | `fifth-level` "<=" `fourth-level`
-                | `fifth-level` ">"  `fourth-level`
-                | `fifth-level` ">=" `fourth-level`
-                | `fifth-level` "==" `fourth-level` 
-                | `fifth-level` "!=" `fourth-level`
-                | `fourth-level`
-    fourth-level: `fourth-level` "+" `third-level`
-                | `fourth-level` "-" `third-level`
-                | `third-level`
-    third-level:  `third-level` "*" `second-level`
-                | `third-level` "/" `second-level`
-                | `third-level` "%" `second-level`
-                | `second-level`
-    second-level: "+"`second-level`
-                | "-"`second-level`
-                | `first-level`
-    first-level: `primary`
+    expression: `sixthlevel`
+    sixthlevel: "not" `sixthlevel`
+                | `sixthlevel` "and" `fifthlevel`
+                | `sixthlevel` "or" `fifthlevel`
+                | `fifthlevel`
+    fifthlevel:  `fifthlevel` "<"  `thirdlevel`
+                | `fifthlevel` "<=" `fourthlevel`
+                | `fifthlevel` ">"  `fourthlevel`
+                | `fifthlevel` ">=" `fourthlevel`
+                | `fifthlevel` "==" `fourthlevel` 
+                | `fifthlevel` "!=" `fourthlevel`
+                | `fourthlevel`
+    fourthlevel: `fourthlevel` "+" `thirdlevel`
+                | `fourthlevel` "-" `thirdlevel`
+                | `thirdlevel`
+    thirdlevel:  `thirdlevel` "*" `secondlevel`
+                | `thirdlevel` "/" `secondlevel`
+                | `thirdlevel` "%" `secondlevel`
+                | `secondlevel`
+    secondlevel: "+"`secondlevel`
+                | "-"`secondlevel`
+                | `firstlevel`
+    firstlevel: `primary`
 
 By restricting lower priority expressions in the right hand side of an expression 
 (but allowing lower or equal priority expressions in the left hand side) we 
@@ -604,10 +604,10 @@ left-recursive. For instance, 〈third-level〉 (and similarly the other
 left-recursive rules) can be rewritten as
 
 .. productionlist:: Tiny
-    third-level:  `second-level` "*" `third-level`
-                | `second-level` "/" `third-level`
-                | `second-level` "%" `third-level`
-                | `second-level`
+    thirdlevel:  `secondlevel` "*" `thirdlevel`
+                | `secondlevel` "/" `thirdlevel`
+                | `secondlevel` "%" `thirdlevel`
+                | `secondlevel`
 
 but unfortunately this would change the association of the expressions: now 
 they would be associated right-to-left. Most tiny operators will behave 
