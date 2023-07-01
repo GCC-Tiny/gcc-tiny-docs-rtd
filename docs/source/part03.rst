@@ -633,7 +633,8 @@ the END_OF_FILE token and stop processing the input.
         // ...
     }
 
-If the character read from the input is not the END_OF_FILE we can start tokenizing it. We have to ignore whitespace by not forming a token but we still have to update location information.
+If the character read from the input is not the END_OF_FILE we can start tokenizing it. We have to ignore 
+whitespace by not forming a token but we still have to update location information.
 
 	
 .. code-block:: c
@@ -708,19 +709,6 @@ Some others may require a bit of peeking, but that's all.
 
 If you wonder how comments are implemented: the lexer just skips over it.
 
-223
-224
-225
-226
-227
-228
-229
-230
-231
-232
-233
-
-	
 .. code-block:: c
     :lineno-start: 223
 
@@ -858,7 +846,7 @@ ses the position of the keyword to index keyword_keys.
 
 
 Tracking location
------------------
+=================
 
 Tracking location can be implemented manually but GCC has good support in this 
 area so it would be a pity not to use it.
@@ -1022,7 +1010,7 @@ After the customary make and make install we can test with the example of sum.ti
 Yay!
 
 Wrap-up
--------
+=======
 
 Now that we are able to create the sequence of tokens of our input program we 
 still have to verify that the sequence forms a syntactically valid program. 
