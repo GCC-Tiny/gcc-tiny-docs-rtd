@@ -112,7 +112,8 @@ we do not care.
 
 Let's recall the syntax of 〈program〉
 
-〈program〉 → 〈statement〉*
+.. productionlist:: Tiny
+    program: (`statement`)*
 
 As said above 〈statement〉* is equivalent to 〈rule〉 → ϵ|〈statement〉〈rule〉. 
 We will call this rule 〈statement-seq〉. Like this.
@@ -184,7 +185,10 @@ And now we rewrite parse_program like.
 
 Now we can proceed to parse a statement. Let's recall the syntax of a statement.
 
-〈statement〉 → 〈declaration〉 | 〈assignment〉 | 〈if〉 | 〈while〉 | 〈for〉 | 〈read〉 | 〈write〉
+.. productionlist:: Tiny
+    statement:   `declaration` | `assignment` | `if` 
+             : | `while` | `for` | `read` | `write`
+
 
 Now we have one of those alternatives. Fortunately tiny is so simple that is easy 
 to tell by just peeking the current token which kind of statement it can be.
@@ -225,7 +229,9 @@ to tell by just peeking the current token which kind of statement it can be.
         }
     }
 
-We peek the current token and we check which statement it can initiate. If no statement can be initiated given the current token, the we call a diagnostic function with the unexpected token. We do some minimal error recovery by skiping all tokens until a semicolon is found.
+We peek the current token and we check which statement it can initiate. If no statement can be 
+initiated given the current token, the we call a diagnostic function with the unexpected token. 
+We do some minimal error recovery by skiping all tokens until a semicolon is found.
 
 .. code-block:: c
 
@@ -299,7 +305,9 @@ parse each individual statement.
 
 A variable declaration statement has the following form.
 
-〈declaration〉 → var 〈identifier〉 : 〈type〉 ;
+.. productionlist:: Tiny
+    declaration: "var" `identifier` ":" `type` ";"
+
 
 So a straightforward implementation of a parser of this statement is the one below.
 
@@ -377,7 +385,9 @@ returns an empty pointer (i.e. a null pointer).
 When parsing a variable declaration we invoke a parse_type function, 
 that parses the rule 〈type〉.
 
-〈type〉 → int | float
+.. productionlist:: Tiny
+    type: "int" | "float"
+
 
 Its associated parsing function is rather obvious too.
 
@@ -409,16 +419,17 @@ Its associated parsing function is rather obvious too.
 Another interesting statement is the if-statement. Let's recall its syntax 
 definition.
 
-〈if〉 → if 〈expression〉 then 〈statement〉* end
-   | if 〈expression〉 then 〈statement〉* else 〈statement〉* end
+.. productionlist:: Tiny
+    if: "if" `expression` "then" `statement`* "end" ";" 
+      : "if" `expression` "then" `statement`* "else" `statement`* "end" ";"
 
 As shown, deriving a parse function for the rule 〈if〉 is not obvious because 
 the two forms share a lot of elements. It may help to split the rule 〈if〉 in 
 two rules follows.
 
-〈if〉 → 〈if-then〉 end
-   | 〈if-then〉 else 〈statement〉* end
-〈if-then〉 → if 〈expression〉 then 〈statement〉*
+.. productionlist:: Tiny
+    if: `if-then` "end" | `if-then` "else" `statement`* "end"
+    if-then: "if" `expression` "then" `statement`*
 
 From this definition it is clear that we have to parse first an if, followed by 
 an expression, followed by a then and followed by a statement sequence. In this 
@@ -533,7 +544,8 @@ of operands if needed.
 
 Let's recall first the definition of expressions in tiny.
 
-〈expression〉 → 〈primary〉 | 〈unary-op〉 〈expression〉 | 〈expression〉 〈binary-op〉 〈expression〉
+.. productionlist:: Tiny
+    expression: `primary` | `unary-op` `expression` | `expression` `binary-op` `expression`
 
 This definition is not very useful because it does not define the priority of 
 the operators. We defined, though, the priority of the operators in a table.
@@ -551,29 +563,30 @@ the operators. We defined, though, the priority of the operators in a table.
 By following the table of priorities above, it is possible to derive the following 
 syntax. The lower the level, the higher the priority of the operand.
 
-〈expression〉 → 〈sixth-level〉
-〈sixth-level〉 →  not 〈sixth-level〉
-   | 〈sixth-level〉 and 〈fifth-level〉
-   | 〈sixth-level〉 or 〈fifth-level〉
-   | 〈fifth-level〉
-〈fifth-level〉 → 〈fifth-level〉 < 〈third-level〉
-   | 〈fifth-level〉 <= 〈fourth-level〉
-   | 〈fifth-level〉 > 〈fourth-level〉
-   | 〈fifth-level〉 >= 〈fourth-level〉
-   | 〈fifth-level〉 == 〈fourth-level〉
-   | 〈fifth-level〉 != 〈fourth-level〉
-   | 〈fourth-level〉
-〈fourth-level〉 → 〈fourth-level〉 + 〈third-level〉
-   | 〈fourth-level〉 - 〈third-level〉
-   | 〈third-level〉
-〈third-level〉 → 〈third-level〉 * 〈second-level〉
-   | 〈third-level〉 / 〈second-level〉
-   | 〈third-level〉 % 〈second-level〉
-   | 〈second-level〉
-〈second-level〉 → +〈second-level〉
-   | -〈second-level〉
-   | 〈first-level〉
-〈first-level〉 → 〈primary〉
+.. productionlist:: Tiny
+    expression: `sixth-level`
+    sixth-level: "not" `sixth-level`
+                | `sixth-level` "and" `fifth-level`
+                | `sixth-level` "or" `fifth-level`
+                | `fifth-level`
+    fifth-level:  `fifth-level` "<"  `third-level`
+                | `fifth-level` "<=" `fourth-level`
+                | `fifth-level` ">"  `fourth-level`
+                | `fifth-level` ">=" `fourth-level`
+                | `fifth-level` "==" `fourth-level` 
+                | `fifth-level` "!=" `fourth-level`
+                | `fourth-level`
+    fourth-level: `fourth-level` "+" `third-level`
+                | `fourth-level` "-" `third-level`
+                | `third-level`
+    third-level:  `third-level` "*" `second-level`
+                | `third-level` "/" `second-level`
+                | `third-level` "%" `second-level`
+                | `second-level`
+    second-level: "+"`second-level`
+                | "-"`second-level`
+                | `first-level`
+    first-level: `primary`
 
 By restricting lower priority expressions in the right hand side of an expression 
 (but allowing lower or equal priority expressions in the left hand side) we 
@@ -590,10 +603,11 @@ infinite recursion. It is, indeed, possible to rewrite the rule so it is not
 left-recursive. For instance, 〈third-level〉 (and similarly the other 
 left-recursive rules) can be rewritten as
 
-〈third-level〉 → 〈second-level〉 * 〈third-level〉
-   | 〈second-level〉 / 〈third-level〉
-   | 〈second-level〉 % 〈third-level〉
-   | 〈second-level〉
+.. productionlist:: Tiny
+    third-level:  `second-level` "*" `third-level`
+                | `second-level` "/" `third-level`
+                | `second-level` "%" `third-level`
+                | `second-level`
 
 but unfortunately this would change the association of the expressions: now 
 they would be associated right-to-left. Most tiny operators will behave 
