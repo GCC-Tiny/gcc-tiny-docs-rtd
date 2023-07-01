@@ -427,7 +427,7 @@ As shown, deriving a parse function for the rule 〈if〉 is not obvious because
 the two forms share a lot of elements. It may help to split the rule 〈if〉 in 
 two rules follows.
 
-.. productionlist:: Tiny1
+.. productionlist:: Tiny2
     if: `ifthen` "end" | `ifthen` "else" `statement`* "end"
     ifthen: "if" `expression` "then" `statement`*
 
@@ -563,7 +563,7 @@ the operators. We defined, though, the priority of the operators in a table.
 By following the table of priorities above, it is possible to derive the following 
 syntax. The lower the level, the higher the priority of the operand.
 
-.. productionlist:: Tiny1
+.. productionlist:: Tiny2
     expression: `sixthlevel`
     sixthlevel: "not" `sixthlevel`
               :  | `sixthlevel` "and" `fifthlevel`
