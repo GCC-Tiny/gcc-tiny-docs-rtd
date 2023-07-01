@@ -5,6 +5,7 @@
 project = 'GCC Tiny'
 copyright = '2023, GCC Tiny Project'
 author = 'GCC Tiny'
+license = 'CC-BY-SA 4.0'
 
 release = '0.1'
 version = '0.1.0'
