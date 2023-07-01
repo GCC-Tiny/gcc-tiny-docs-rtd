@@ -54,7 +54,7 @@ bar is used to separate alternatives
 
 
 A declaration is used to introduce the name of a variable and its type. 
-.. In this syntax description a "bold monospaced font face} like this is used 
+.. TODO In this syntax description a bold monospaced font face like this is used 
 .. to denote keywords or verbatim lexical elements.
 
 Our language will support, for the moment, only two types for variables.
