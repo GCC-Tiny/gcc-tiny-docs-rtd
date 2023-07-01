@@ -133,7 +133,7 @@ operator with a left hand side operand and a right hand side operand.
 
 
 .. productionlist:: Tiny
-    expression: `primary` | `unary-op` `expression` | `expression` `binary-op` `expression`
+    expression: `primary` | `unaryop` `expression` | `expression` `binaryop` `expression`
 
 
 A primary can be a parenthesized expression, an identifier, an integer literal, a float literal or a string literal. In this syntax description + means the preceding element one or more times.
@@ -148,12 +148,12 @@ A primary can be a parenthesized expression, an identifier, an integer literal, 
 Unary operators have the following forms.
 
 .. productionlist:: Tiny
-    unary-op: "+"  |  "-" | "not"
+    unaryop: "+"  |  "-" | "not"
 
 Binary operators have the following forms.
 
 .. productionlist:: Tiny
-    binary-op: "+"  |  "-" |  "*"  |  "/"  |  "%"  
+    binaryop: "+"  |  "-" |  "*"  |  "/"  |  "%"  
     : |  "=="  |  "!="  |  "<" |  "<="  |  ">" |  ">="  
     : |  "and" |  "or"
 
