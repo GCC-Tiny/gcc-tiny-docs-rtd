@@ -136,19 +136,21 @@ operator with a left hand side operand and a right hand side operand.
     expression: `primary` | `unaryop` `expression` | `expression` `binaryop` `expression`
 
 
-A primary can be a parenthesized expression, an identifier, an integer literal, a float literal or a string literal. In this syntax description + means the preceding element one or more times.
+A primary can be a parenthesized expression, an identifier, an integer literal, 
+a float literal or a string literal. In this syntax description + means the 
+preceding element one or more times.
 
 .. productionlist:: Tiny
-    primary: "(" expression ")"  | `identifier` | `integer-literal` | `float-literal` | `string-literal`
-    integer-literal: `digit`+
-    float-literal: `digit`+ "." `digit`* | "." `digit`+
-    string-literal: "\"" `any-character-except-newline-or-double-quote`* "\""
+    primary: "(" `expression` ")"  | `identifier` | `integerliteral` | `floatliteral` | `stringliteral`
+    integerliteral: `digit`+
+    floatliteral: `digit`+ "." `digit`* | "." `digit`+
+    stringliteral: "\"" any-character-except-newline-or-double-quote* "\""
 
 
 Unary operators have the following forms.
 
 .. productionlist:: Tiny
-    unaryop: "+"  |  "-" | "not"
+    unaryop: "+" | "-" | "not"
 
 Binary operators have the following forms.
 
@@ -158,10 +160,12 @@ Binary operators have the following forms.
     : |  "and" |  "or"
 
 
-All binary operators associate from left to right so x ⊕ y ⊕ z is equivalent to (x ⊕ y) ⊕ z. Likewise for binary operators with the same priority.
+All binary operators associate from left to right so x ⊕ y ⊕ z is equivalent to (x ⊕ y) ⊕ z. 
+Likewise for binary operators with the same priority.
 
 
-The following table summarizes priorities between operators. Operators in the same row have the same priority.
+The following table summarizes priorities between operators. Operators in the same 
+row have the same priority.
 
     ===================    =================
     Operators              Priority
@@ -258,7 +262,7 @@ Here ⊥ means an undefined value.
     # [ x → 43, y → 44.0 ]
     
 
-The bodies of if, while and for statements (i.e. their  @grammar{statement}* parts) 
+The bodies of if, while and for statements (i.e. their  :token:`~Tiny:statement` parts) 
 introduce a new mapping on top of the current scope. The span of this new mapping is 
 restricted to the body. Since the mapping is new, it is valid to declare a variable 
 whose identifier has already been used before. This is commonly called hiding.
@@ -299,8 +303,6 @@ declaration in line 9 hides it) but y does.
 
     This kind of scoping mechanism is called static or lexical scoping.
 
-.. TODO: fix mark up of if, while, for statements
-
 An :token:`if statement <Tiny:if>` can have two forms, but the first form is equivalent to 
 if expression then statement* else end, 
 so we only have to define the semantics of the second form. The execution of an if statement starts 
@@ -333,13 +335,14 @@ is semantically equivalent to
         id := id + 1;
     end
 
-Execution of a :token:`read statement <Tiny:read>` causes a tiny program to read from the standard input a 
-textual representation of a value of the type of the identifier. Then, the identifier 
-is updated as if by an assignment statement, with the represented value. If the textual 
-representation read is not valid for the type of the identifier, then this is an error.
+Execution of a :token:`read statement <Tiny:read>` causes a tiny program to read from 
+the standard input a textual representation of a value of the type of the identifier. 
+Then, the identifier is updated as if by an assignment statement, with the represented 
+value. If the textual representation read is not valid for the type of the identifier, 
+then this is an error.
 
-Execution of a :token:`write statement <Tiny:write>` causes a tiny program to write onto the standard output 
-a textual representation of the value of the expression.
+Execution of a :token:`write statement <Tiny:write>` causes a tiny program to write onto 
+the standard output a textual representation of the value of the expression.
 
 For simplicity, the textual representation used by read and write is the 
 same as the syntax of the literals of the corresponding types.
@@ -358,7 +361,8 @@ In other words, an integer literal denotes the integer value of that number in b
 
 A float literal denotes a value of float type. A float of the form 
 d\ :sub:`n`\ d\ :sub:`n-1` ...d\ :sub:`0`.d\ :sub:`-1`\ d\ :sub:`-2`...d\ :sub:`-m` denotes the closest 
-IEEE 754 Binary32 float value to the value d\ :sub:`n` × 10\ :sup:`n` + d\ :sub:`n-1` × 10\ :sup:`n-1` + ... + d\ :sub:`0` + d\ :sub:`-1`\ 10\ :sup:`-1` + d\ :sub:`-2`\ 10\ :sup:`-2` + ... + d\ :sub:`-m`\ 10\ :sup:`-m`
+IEEE 754 Binary32 float value to the value d\ :sub:`n` × 10\ :sup:`n` + d\ :sub:`n-1` × 10\ :sup:`n-1` + ... + 
+d\ :sub:`0` + d\ :sub:`-1`\ 10\ :sup:`-1` + d\ :sub:`-2`\ 10\ :sup:`-2` + ... + d\ :sub:`-m`\ 10\ :sup:`-m`
 
 
 A string literal denotes a value of string type, the value of which is the sequence of
@@ -376,9 +380,10 @@ type as the expression e.
 Expression e must have int or float type. The value of +e is the same as e. 
 Value of -e is the negated value of e.
 
-The operands of (binary) operators +, - \*, /, <, <=, >, >=, == and != must have int or float type, otherwise this is an error. 
-If only one of the operands is float, the int value of the other one is coerced to the corresponding 
-value of float. The operands of % must have int type. The operands of not, and, or must have boolean type.
+The operands of (binary) operators +, - \*, /, <, <=, >, >=, == and != must have int or float type, 
+otherwise this is an error. If only one of the operands is float, the int value of the other one 
+is coerced to the corresponding value of float. The operands of % must have int type. 
+The operands of not, and, or must have boolean type.
 
 
 .. note::
@@ -423,9 +428,9 @@ The resulting value has boolean type.
 Wrap-up
 -------
 
-    Ok, that was long but we will refer to this document when implementing the language. 
-    Note that the languages, as it is, is underspecified. For instance, we have not 
-    specified what happens when an addition overflows. We will revisit some of these 
-    questions in coming posts.
+Ok, that was long but we will refer to this document when implementing the language. 
+Note that the languages, as it is, is underspecified. For instance, we have not 
+specified what happens when an addition overflows. We will revisit some of these 
+questions in coming posts.
 
-    That's all for today.
+That's all for today.
