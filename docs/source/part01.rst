@@ -141,16 +141,16 @@ a float literal or a string literal. In this syntax description + means the
 preceding element one or more times.
 
 .. productionlist:: Tiny
-    primary: "(" expression ")"  | `identifier` | `integer-literal` | `float-literal` | `string-literal`
-    integer-literal: `digit`+
-    float-literal: `digit`+ "." `digit`* | "." `digit`+
-    string-literal: "\"" `any-character-except-newline-or-double-quote`* "\""
+    primary: "(" `expression` ")"  | `identifier` | `integerliteral` | `floatliteral` | `stringliteral`
+    integerliteral: `digit`+
+    floatliteral: `digit`+ "." `digit`* | "." `digit`+
+    stringliteral: "\"" any-character-except-newline-or-double-quote* "\""
 
 
 Unary operators have the following forms.
 
 .. productionlist:: Tiny
-    unaryop: "+"  |  "-" | "not"
+    unaryop: "+" | "-" | "not"
 
 Binary operators have the following forms.
 
@@ -262,7 +262,7 @@ Here ⊥ means an undefined value.
     # [ x → 43, y → 44.0 ]
     
 
-The bodies of if, while and for statements (i.e. their  @grammar{statement}* parts) 
+The bodies of if, while and for statements (i.e. their  :token:`~Tiny:statement` parts) 
 introduce a new mapping on top of the current scope. The span of this new mapping is 
 restricted to the body. Since the mapping is new, it is valid to declare a variable 
 whose identifier has already been used before. This is commonly called hiding.
@@ -302,8 +302,6 @@ declaration in line 9 hides it) but y does.
 .. note::
 
     This kind of scoping mechanism is called static or lexical scoping.
-
-.. TODO: fix mark up of if, while, for statements
 
 An :token:`if statement <Tiny:if>` can have two forms, but the first form is equivalent to 
 if expression then statement* else end, 
