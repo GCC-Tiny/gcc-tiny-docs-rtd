@@ -9,7 +9,7 @@ Semantical Analysis and Generics II
 In this part we will complete the missing statements from part 6 and finish our front end.
 
 Semantic values (cont)
-===============
+======================
 
 Read statement
 --------------
