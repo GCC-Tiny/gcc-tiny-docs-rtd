@@ -138,7 +138,8 @@ Types
 
 A variable declaration has a type.
 
-〈type〉 → int | float
+.. productionlist:: Tiny6
+    type: "int" | "float"
 
 In part 5 we classified nodes in three kinds: declarations, expressions 
 and types. In GENERIC, types are represented obviously as trees. Some 
@@ -184,7 +185,8 @@ Variable assignment
 
 Ok, now we can declare variables. Let's assign them some value.
 
-〈assignment〉 → 〈identifier〉 := 〈expression〉 ;
+.. productionlist:: Tiny6
+    assignment: `identifier` ":=" `expression` ";"
 
 .. code-block:: c
   :linenos:
@@ -261,7 +263,9 @@ In part 4 we used a Pratt parser to parse expressions. Now it is time
 to extend it so it creates GENERIC trees that represent the expressions 
 of the program.
 
-〈expression〉 → 〈primary〉 | 〈unary-op〉 〈expression〉 | 〈expression〉 〈binary-op〉 〈expression〉
+.. productionlist:: Tiny6
+    expression: `primary` | `unaryop` `expression` | `expression` `binaryop` `expression`
+
 
 Null denotations
 ----------------
@@ -280,10 +284,11 @@ null denotations handle primaries and unary operands.
     switch (tok->get_id ())
       {
 
-〈primary〉 → ( expression ) | 〈identifier〉 |〈integer-literal〉 | 〈float-literal〉 | 〈string-literal〉
-〈integer-literal〉 → 〈digit〉+
-〈float-literal〉 → 〈digit〉+.〈digit〉* | .〈digit〉+
-〈string-literal〉 → "〈any-character-except-newline-or-double-quote〉*"
+.. productionlist:: Tiny6
+    primary: "(" `expression` ")"  | `identifier` | `integerliteral` | `floatliteral` | `stringliteral`
+    integerliteral: `digit`+
+    floatliteral: `digit`+ "." `digit`* | "." `digit`+
+    stringliteral: "\"" any-character-except-newline-or-double-quote* "\""
 
 When we encounter an identifier, we have to look it up in the scope 
 (this was defined in part 5). The expression is just its VAR_DECL 
@@ -739,7 +744,8 @@ And we are done with the expressions!
 Write statement
 ---------------
 
-〈write〉 → write 〈expression〉 ;
+.. productionlist:: Tiny6
+    write: "write" `expression` ";"
 
 A write statement is not particularly complicated at first.
 
