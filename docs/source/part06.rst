@@ -5,90 +5,41 @@ Semantical Analysis and Generics I
 .. note:: 
   Work in progress
 
-..    
-  @insertcopying
+In part 5 we described the objects that we will need to semantically analyze 
+a tiny program. In current part we will extend the parser of part 4 to do 
+the semantic analysis and create the GENERIC trees.
+  
+Semantic values
+===============
 
-  @ignore
+If you recheck part 4 you will see that several parse_xxx functions returned 
+a false boolean value when there was a syntax error, true otherwise. If we 
+are just checking if the input is syntactically valid this will do. But we 
+want to compute something more interesting thus we need something a bit 
+more useful. What if we were able to compute a value representing what the 
+part of the language does. This set of values that are computed by a syntax 
+rule are commonly called semantic values.
+
+Tiny is a simple language that will require only a single semantic value: a 
+Tree (recall that it is just a wrapper to GENERIC trees). If the parsing 
+succeeds, the tree will express what the input does. If parsing fails it 
+will simply return error_mark_node.
+
+Variable declaration
+--------------------
+
+Let's recall the syntax of a variable declaration.
+
+.. productionlist:: Tiny6
+  declaration: "var" `identifier` ":" `type` ";"
+
+Recall that a variable declaration statement adds a new mapping for the 
+:token:`~Tiny:identifier` in the topmost mapping of the scope. Let's see 
+how we have to change parse_variable_declaration to do this.
 
 
-  Think In Geek | In geek we trust
-  Arm Assembler Raspberry PiGCC tinyPosts by Bernat RàfalesArchives
-  A tiny GCC front end – Part 6
-
-  Jan 17, 2016 • Roger Ferrer Ibáñez • compilers, GCC • gcc, tiny
-
-  In part 5 we described the objects that we will need to semantically analyze a tiny program. In current part we will extend the parser of part 4 to do the semantic analysis and create the GENERIC trees.
-  Semantic values
-
-  If you recheck part 4 you will see that several parse_xxx functions returned a false boolean value when there was a syntax error, true otherwise. If we are just checking if the input is syntactically valid this will do. But we want to compute something more interesting thus we need something a bit more useful. What if we were able to compute a value representing what the part of the language does. This set of values that are computed by a syntax rule are commonly called semantic values.
-
-  Tiny is a simple language that will require only a single semantic value: a Tree (recall that it is just a wrapper to GENERIC trees). If the parsing succeeds, the tree will express what the input does. If parsing fails it will simply return error_mark_node.
-  Variable declaration
-
-  Let's recall the syntax of a variable declaration.
-
-  〈declaration〉 → var 〈identifier〉 : 〈type〉 ;
-
-  Recall that a variable declaration statement adds a new mapping for the 〈identifier〉 in the topmost mapping of the scope. Let's see how we have to change parse_variable_declaration to do this.
-
-  1
-  2
-  3
-  4
-  5
-  6
-  7
-  8
-  9
-  10
-  11
-  12
-  13
-  14
-  15
-  16
-  17
-  18
-  19
-  20
-  21
-  22
-  23
-  24
-  25
-  26
-  27
-  28
-  29
-  30
-  31
-  32
-  33
-  34
-  35
-  36
-  37
-  38
-  39
-  40
-  41
-  42
-  43
-  44
-  45
-  46
-  47
-  48
-  49
-  50
-  51
-  52
-  53
-  54
-  55
-  56
-
-    
+.. code-block:: c
+  :linenos:
 
   Tree
   Parser::parse_variable_declaration ()
@@ -147,24 +98,62 @@ Semantical Analysis and Generics I
     return stmt;
   }
 
-  We first parse the syntactic elements of a variable declaration. We skip the initial var in lines 4 to 8. In line 10 we keep the identifier token because it will be used later. We skip the colon in lines 17 to 21. In line 23 we parse the type (by calling parse_type, more on this later) and finally in line 31 we skip the semicolon.
+We first parse the syntactic elements of a variable declaration. We skip the 
+initial var in lines 4 to 8. In line 10 we keep the identifier token because 
+it will be used later. We skip the colon in lines 17 to 21. In line 23 we 
+parse the type (by calling parse_type, more on this later) and finally in 
+line 31 we skip the semicolon.
 
-  Now the semantic checks of a variable declaration can start. In line 33, we check if the current mapping of the scope already contains a mapping for the identifier. If there is such a mapping, this is an error and we give up, otherwise we create a new symbol (line 39) using the given identifier and we insert it into the current mapping (line 40).
+Now the semantic checks of a variable declaration can start. In line 33, we 
+check if the current mapping of the scope already contains a mapping for the 
+identifier. If there is such a mapping, this is an error and we give up, 
+otherwise we create a new symbol (line 39) using the given identifier and 
+we insert it into the current mapping (line 40).
 
-  Now we need to create some GENERIC for this new variable declaration (line 43). It will have a tree code of VAR_DECL. The first operand of that tree is an IDENTIFIER_NODE for the identifier itself. These trees are shared in GENERIC: two identical identifiers will use the same tree. For this reason we need to request an IDENTIFIER_NODE rather than creating it manually. We do that calling the (GCC-provided) function get_identifier (line 44). The second operand that we will need is the type of the declaration. This was obtained in an earlier call to parse_type. Note that we are calling the (GCC-provided) function build_decl. This is so because there is an extra step (setting some internal type and operation mode of the declaration) that has to be performed for a VAR_DECL. Function build_decl takes care of that for us and it is in practice like calling build2_loc.
+Now we need to create some GENERIC for this new variable declaration (line 43). 
+It will have a tree code of VAR_DECL. The first operand of that tree is an 
+IDENTIFIER_NODE for the identifier itself. These trees are shared in GENERIC: 
+two identical identifiers will use the same tree. For this reason we need to 
+request an IDENTIFIER_NODE rather than creating it manually. We do that 
+calling the (GCC-provided) function get_identifier (line 44). The second 
+operand that we will need is the type of the declaration. This was obtained 
+in an earlier call to parse_type. Note that we are calling the (GCC-provided) 
+function build_decl. This is so because there is an extra step (setting some 
+internal type and operation mode of the declaration) that has to be performed 
+for a VAR_DECL. Function build_decl takes care of that for us and it is in 
+practice like calling build2_loc.
 
-  In line 50 we associate the new Symbol with the VAR_DECL we have created. We do this because every time we need to refer to an existing variable in GENERIC we will need to use a VAR_DECL. But it cannot be a new VAR_DECL every time since this would mean a new variable with the same name. So we just keep a single VAR_DECL in a Symbol so we can reuse it as many times as needed.
+In line 50 we associate the new Symbol with the VAR_DECL we have created. 
+We do this because every time we need to refer to an existing variable in 
+GENERIC we will need to use a VAR_DECL. But it cannot be a new VAR_DECL 
+every time since this would mean a new variable with the same name. So we 
+just keep a single VAR_DECL in a Symbol so we can reuse it as many times 
+as needed.
 
-  The VAR_DECL is also kept in the top list of the stack stack_var_decl_chain. We will need this later when we talk about blocks.
-  Types
+The VAR_DECL is also kept in the top list of the stack stack_var_decl_chain. 
+We will need this later when we talk about blocks.
 
-  A variable declaration has a type.
+Types
+-----
 
-  〈type〉 → int | float
+A variable declaration has a type.
 
-  In part 5 we classified nodes in three kinds: declarations, expressions and types. In GENERIC, types are represented obviously as trees. Some basic types have dedicated trees, other may have to be constructed. For tiny we will use integer_type_node, float_type_node, boolean_type_node and void_type_node. The last one will be used to designate that the computed value of an expression is of no interest (i.e. the expression is computed only for its side-effects).
+.. productionlist:: Tiny6
+    type: "int" | "float"
 
-  Our parse_type will return either integer_type_node or float_type_node as we do not allow other types in a variable declaration.
+In part 5 we classified nodes in three kinds: declarations, expressions 
+and types. In GENERIC, types are represented obviously as trees. Some 
+basic types have dedicated trees, other may have to be constructed. For 
+tiny we will use integer_type_node, float_type_node, boolean_type_node 
+and void_type_node. The last one will be used to designate that the 
+computed value of an expression is of no interest (i.e. the expression 
+is computed only for its side-effects).
+
+Our parse_type will return either integer_type_node or float_type_node 
+as we do not allow other types in a variable declaration.
+
+.. code-block:: c
+  :linenos:
 
   Tree
   Parser::parse_type ()
@@ -188,65 +177,19 @@ Semantical Analysis and Generics I
       }
   }
 
-  An additional type will be used for string-literals but let's postpone discussing it until then.
-  Variable assignment
+An additional type will be used for string-literals but let's postpone 
+discussing it until then.
 
-  Ok, now we can declare variables. Let's assign them some value.
+Variable assignment
+-------------------
 
-  〈assignment〉 → 〈identifier〉 := 〈expression〉 ;
+Ok, now we can declare variables. Let's assign them some value.
 
-  1
-  2
-  3
-  4
-  5
-  6
-  7
-  8
-  9
-  10
-  11
-  12
-  13
-  14
-  15
-  16
-  17
-  18
-  19
-  20
-  21
-  22
-  23
-  24
-  25
-  26
-  27
-  28
-  29
-  30
-  31
-  32
-  33
-  34
-  35
-  36
-  37
-  38
-  39
-  40
-  41
-  42
-  43
-  44
-  45
-  46
-  47
-  48
-  49
-  50
+.. productionlist:: Tiny6
+    assignment: `identifier` ":=" `expression` ";"
 
-    
+.. code-block:: c
+  :linenos:
 
   Tree
   Parser::parse_assignment_statement ()
@@ -298,28 +241,42 @@ Semantical Analysis and Generics I
 
     return assig_expr;
   }
+  
+In lines 4 to 9 we gather the identifier at the left hand side of the 
+assignment token :=. Next we will query in the current scope the Symbol 
+associated to this identifier, lines 11 to 17. We skip the assignment 
+token and then we parse the expression.
 
-  In lines 4 to 9 we gather the identifier at the left hand side of the assignment token :=. Next we will query in the current scope the Symbol associated to this identifier, lines 11 to 17. We skip the assignment token and then we parse the expression.
+In line 37 we enforce the tiny rule that the right hand side of the 
+assignment has to have the same type as the type of the variable in 
+the left hand side. For the diagnostic we will need a function print_type 
+that we will see below.
 
-  In line 37 we enforce the tiny rule that the right hand side of the assignment has to have the same type as the type of the variable in the left hand side. For the diagnostic we will need a function print_type that we will see below.
+The GENERIC tree that is used to express the update of a variable is 
+MODIFY_EXPR and has two operands: the variable being updated and the 
+new value for it. And that's it.
 
-  The GENERIC tree that is used to express the update of a variable is MODIFY_EXPR and has two operands: the variable being updated and the new value for it. And that's it.
-  Expressions
+Expressions
+-----------
 
-  In part 4 we used a Pratt parser to parse expressions. Now it is time to extend it so it creates GENERIC trees that represent the expressions of the program.
+In part 4 we used a Pratt parser to parse expressions. Now it is time 
+to extend it so it creates GENERIC trees that represent the expressions 
+of the program.
 
-  〈expression〉 → 〈primary〉 | 〈unary-op〉 〈expression〉 | 〈expression〉 〈binary-op〉 〈expression〉
-  Null denotations
+.. productionlist:: Tiny6
+    expression: `primary` | `unaryop` `expression` | `expression` `binaryop` `expression`
 
-  Recall that a Pratt parser works by decomposing the expression into a null denotation and then a left denotation. The null denotation receives as a parameter the current token. In the expression grammar of tiny, null denotations handle primaries and unary operands.
 
-  1
-  2
-  3
-  4
-  5
+Null denotations
+----------------
 
-    
+Recall that a Pratt parser works by decomposing the expression into a 
+null denotation and then a left denotation. The null denotation receives 
+as a parameter the current token. In the expression grammar of tiny, 
+null denotations handle primaries and unary operands.
+
+.. code-block:: c
+  :linenos:
 
   Tree
   Parser::null_denotation (const_TokenPtr tok)
@@ -327,27 +284,18 @@ Semantical Analysis and Generics I
     switch (tok->get_id ())
       {
 
-  〈primary〉 → ( expression ) | 〈identifier〉 |〈integer-literal〉 | 〈float-literal〉 | 〈string-literal〉
-  〈integer-literal〉 → 〈digit〉+
-  〈float-literal〉 → 〈digit〉+.〈digit〉* | .〈digit〉+
-  〈string-literal〉 → "〈any-character-except-newline-or-double-quote〉*"
+.. productionlist:: Tiny6
+    primary: "(" `expression` ")"  | `identifier` | `integerliteral` | `floatliteral` | `stringliteral`
+    integerliteral: `digit`+
+    floatliteral: `digit`+ "." `digit`* | "." `digit`+
+    stringliteral: "\"" any-character-except-newline-or-double-quote* "\""
 
-  When we encounter an identifier, we have to look it up in the scope (this was defined in part 5). The expression is just its VAR_DECL that we stored in the Symbol when it was declared.
+When we encounter an identifier, we have to look it up in the scope 
+(this was defined in part 5). The expression is just its VAR_DECL 
+that we stored in the Symbol when it was declared.
 
-  6
-  7
-  8
-  9
-  10
-  11
-  12
-  13
-  14
-  15
-  16
-  17
-
-    
+.. code-block:: c
+    :lineno-start: 6
 
       case Tiny::IDENTIFIER:
         {
@@ -362,18 +310,18 @@ Semantical Analysis and Generics I
     return Tree (s->get_tree_decl (), tok->get_locus ());
         }
 
-  Note that using Tree rather than the GENERIC tree is essential for primaries. In the code above s->get_tree_decl() returns a tree with the location of the variable declaration. We could use this tree but for diagnostics purposes we want the location where the variable is being referenced.
+Note that using Tree rather than the GENERIC tree is essential for 
+primaries. In the code above s->get_tree_decl() returns a tree with 
+the location of the variable declaration. We could use this tree but 
+for diagnostics purposes we want the location where the variable is 
+being referenced.
 
-  For literals, the literal itself encodes the value. So the text of the token will have to be interpreted as the appropiate value. For integers we can just use atoi.
+For literals, the literal itself encodes the value. So the text of 
+the token will have to be interpreted as the appropiate value. For 
+integers we can just use atoi.
 
-  18
-  19
-  20
-  21
-  22
-  23
-
-    
+.. code-block:: c
+    :lineno-start: 18
 
       case Tiny::INTEGER_LITERAL:
         // We should check the range. See note below
@@ -382,21 +330,13 @@ Semantical Analysis and Generics I
         tok->get_locus ());
         break;
 
-  Note: we still have to check that the value represented by the token lies in the valid range of the integer type. Let's ignore this for now.
+Note: we still have to check that the value represented by the token 
+lies in the valid range of the integer type. Let's ignore this for now.
 
-  Real literals are similar.
+Real literals are similar.
 
-  24
-  25
-  26
-  27
-  28
-  29
-  30
-  31
-  32
-
-    
+.. code-block:: c
+    :lineno-start: 24
 
       case Tiny::REAL_LITERAL:
         {
@@ -408,19 +348,17 @@ Semantical Analysis and Generics I
           tok->get_locus ());
         }
 
-  For a real literal we have to invoke the (GCC-provided) function real_from_string3 (line 27) to get a real value representation from a string. This function expects the machine (i.e. architecture dependent) mode of the type, that we can obtain using TYPE_MODE. It returns its value in a REAL_VALUE_TYPE that then can be used to build a real constant tree using the (GCC-provided) function build_real.
+For a real literal we have to invoke the (GCC-provided) function 
+real_from_string3 (line 27) to get a real value representation from 
+a string. This function expects the machine (i.e. architecture 
+dependent) mode of the type, that we can obtain using TYPE_MODE. 
+It returns its value in a REAL_VALUE_TYPE that then can be used 
+to build a real constant tree using the (GCC-provided) function build_real.
 
-  Likewise with string literals.
+Likewise with string literals.
 
-  33
-  34
-  35
-  36
-  37
-  38
-  39
-
-    
+.. code-block:: c
+    :lineno-start: 33
 
       case Tiny::STRING_LITERAL:
         {
@@ -430,9 +368,20 @@ Semantical Analysis and Generics I
           tok->get_locus ());
         }
 
-  To create a string literal we use the (GCC-provided) function build_string_literal. For practical reasons our string literal will contain the NULL terminator, otherwise the string literal itself will not be useable in C functions (more on this later).
+To create a string literal we use the (GCC-provided) function 
+build_string_literal. For practical reasons our string literal will contain 
+the NULL terminator, otherwise the string literal itself will not be useable 
+in C functions (more on this later).
 
-  While the type GENERIC trees created for integer and real literals was obviously integer_type_node and float_type_node, it is not so clear for string literals. The tree created by build_string_literal has type pointer to a character type. Pointer types have a tree code of POINTER_TYPE and the pointee type is found in TREE_TYPE. Sometimes we will need to check if an expression has the type of a string literal, so we will use the following auxiliar function.
+While the type GENERIC trees created for integer and real literals was 
+obviously integer_type_node and float_type_node, it is not so clear for 
+string literals. The tree created by build_string_literal has type pointer 
+to a character type. Pointer types have a tree code of POINTER_TYPE and 
+the pointee type is found in TREE_TYPE. Sometimes we will need to check 
+if an expression has the type of a string literal, so we will use the 
+following auxiliar function.
+
+.. code-block:: c
 
   bool
   is_string_type (Tree type)
@@ -442,23 +391,15 @@ Semantical Analysis and Generics I
     && TYPE_MAIN_VARIANT (TREE_TYPE (type.get_tree ())) == char_type_node;
   }
 
-  In the function above, TYPE_MAIN_VARIANT returns the main variant of the pointee of the given pointer type and checks if it is char_type_node. In C parlance, this function checks if type represents the type «char *».
+In the function above, TYPE_MAIN_VARIANT returns the main variant of the 
+pointee of the given pointer type and checks if it is char_type_node. 
+In C parlance, this function checks if type represents the type «char \*».
 
-  Back to the nullary denotation: a parenthesized expression like ( e ) just parses the expression e and returns its tree.
+Back to the nullary denotation: a parenthesized expression like ( e ) 
+just parses the expression e and returns its tree.
 
-  40
-  41
-  42
-  43
-  44
-  45
-  46
-  47
-  48
-  49
-  50
-
-    
+.. code-block:: c
+    :lineno-start: 40
 
       case Tiny::LEFT_PAREN:
         {
@@ -472,25 +413,11 @@ Semantical Analysis and Generics I
     return Tree (expr, tok->get_locus ());
         }
 
-  Unary plus operator actually does nothing in tiny but it can only be applied to integer and float expressions.
+Unary plus operator actually does nothing in tiny but it can only be 
+applied to integer and float expressions.
 
-  51
-  52
-  53
-  54
-  55
-  56
-  57
-  58
-  59
-  60
-  61
-  62
-  63
-  64
-  65
-
-    
+.. code-block:: c
+    :lineno-start: 51
 
       case Tiny::PLUS:
         {
@@ -508,7 +435,11 @@ Semantical Analysis and Generics I
     return Tree (expr, tok->get_locus ());
         }
 
-  Now we can define the print_type function that we use to print human readable names for the types.
+Now we can define the print_type function that we use to print human 
+readable names for the types.
+
+.. code-block:: c
+  :linenos:
 
   const char *
   Parser::print_type (Tree type)
@@ -529,9 +460,12 @@ Semantical Analysis and Generics I
         return "<<unknown-type>>";
   }
 
-  Note that print_type uses the is_string_type function we defined above.
+Note that print_type uses the is_string_type function we defined above.
 
-  Unary minus operator is similar to the plus operator but it negates its operand.
+Unary minus operator is similar to the plus operator but it negates its operand.
+
+.. code-block:: c
+    :linenos:
 
       case Tiny::MINUS:
         {
@@ -554,30 +488,12 @@ Semantical Analysis and Generics I
     return expr;
         }
 
-  A GENERIC tree with tree code NEGATE_EXPR computes the negation of its operand.
+A GENERIC tree with tree code NEGATE_EXPR computes the negation of its operand.
 
-  Unary not operator computes the logical negation of its boolean argument.
+Unary not operator computes the logical negation of its boolean argument.
 
-  66
-  67
-  68
-  69
-  70
-  71
-  72
-  73
-  74
-  75
-  76
-  77
-  78
-  79
-  80
-  81
-  82
-  83
-
-    
+.. code-block:: c
+    :lineno-start: 66
 
       case Tiny::NOT:
         {
@@ -598,17 +514,13 @@ Semantical Analysis and Generics I
     return expr;
         }
 
-  The GENERIC tree code for a logical negation is TRUTH_NOT_EXPR.
+The GENERIC tree code for a logical negation is TRUTH_NOT_EXPR.
 
-  Finally, any other token is a syntax error, so diagnose them as usual. This completes the handling of null denotations.
+Finally, any other token is a syntax error, so diagnose them as usual. T
+his completes the handling of null denotations.
 
-  84
-  85
-  86
-  87
-  88
-
-    
+.. code-block:: c
+  :lineno-start: 84
 
       default:
         unexpected_token (tok);
@@ -616,9 +528,13 @@ Semantical Analysis and Generics I
       }
   }
 
-  Left denotations
+Left denotations
+----------------
 
-  Left denotations are used for infix operators.
+Left denotations are used for infix operators.
+
+.. code-block:: c
+  :linenos:
 
   Tree
   Parser::left_denotation (const_TokenPtr tok, Tree left)
@@ -633,9 +549,18 @@ Semantical Analysis and Generics I
     return (this->*binary_handler) (tok, left);
   }
 
-  If you recall from part 4, we used the function get_binary_handler to get a handler of our binary expression and then dispatch to it the handling of the current token. In contrast to the version of left_denotation in part 4, in addition to the token we will have to pass the left tree (computed by a call to null_denotation or left_denotation, possibly in a recursive way).
+If you recall from part 4, we used the function get_binary_handler to get a 
+handler of our binary expression and then dispatch to it the handling of the 
+current token. In contrast to the version of left_denotation in part 4, in 
+addition to the token we will have to pass the left tree (computed by a 
+call to null_denotation or left_denotation, possibly in a recursive way).
 
-  Now come a bunch of expression handlers for binary operators. We will focus on the most interesting ones. You can find the remaining ones in the tiny parser. Let's start with the addition.
+Now come a bunch of expression handlers for binary operators. We will 
+focus on the most interesting ones. You can find the remaining ones in the 
+tiny parser. Let's start with the addition.
+
+.. code-block:: c
+  :linenos:
 
   Tree
   Parser::binary_plus (const_TokenPtr tok, Tree left)
@@ -651,9 +576,21 @@ Semantical Analysis and Generics I
     return build_tree (PLUS_EXPR, tok->get_locus (), tree_type, left, right);
   }
 
-  We parse the right hand side (recall that the token tok has already been consumed in parse_expression). Now using the left hand side and the right hand side we have to compute the resulting type of this binary operator. We call coerce_binary_arithmetic that returns the type of the binary operation and may modify its input trees, more on this below. Finally we construct a GENERIC tree with code PLUS_EXPR that is used to represent binary addition.
+We parse the right hand side (recall that the token tok has already been 
+consumed in parse_expression). Now using the left hand side and the right 
+hand side we have to compute the resulting type of this binary operator. 
+We call coerce_binary_arithmetic that returns the type of the binary operation 
+and may modify its input trees, more on this below. Finally we construct a 
+GENERIC tree with code PLUS_EXPR that is used to represent binary addition.
 
-  Function coerce_binary_arithmetic simply applies the rules of tiny regarding arithmetic operations: operating two integers or two floats returns integer and float respectively. Mixing a float and an integer returns a float value. The integer operand, thus, must be first converted to a float. The tree code FLOAT_EXPR is used to convert from integer to float.
+Function coerce_binary_arithmetic simply applies the rules of tiny regarding 
+arithmetic operations: operating two integers or two floats returns integer 
+and float respectively. Mixing a float and an integer returns a float value. 
+The integer operand, thus, must be first converted to a float. The tree 
+code FLOAT_EXPR is used to convert from integer to float.
+
+.. code-block:: c
+  :linenos:
 
   Tree
   Parser::coerce_binary_arithmetic (const_TokenPtr tok, Tree *left, Tree *right)
@@ -695,9 +632,15 @@ Semantical Analysis and Generics I
     return Tree::error ();
   }
 
-  Subtraction and multiplication are exactly the same code but the GENERIC tree is MINUS_EXPR and MULT_EXPR respectively.
+Subtraction and multiplication are exactly the same code but the GENERIC 
+tree is MINUS_EXPR and MULT_EXPR respectively.
 
-  Binary division is a bit more interesting. When both operands are integer, we will do an integer division, otherwise a real division. Each operation is represented using different tree codes.
+Binary division is a bit more interesting. When both operands are integer, 
+we will do an integer division, otherwise a real division. Each operation 
+is represented using different tree codes.
+
+.. code-block:: c
+  :linenos:
 
   Tree
   Parser::binary_div (const_TokenPtr tok, Tree left)
@@ -726,9 +669,15 @@ Semantical Analysis and Generics I
       }
   }
 
-  Modulus is similar to division but there is no real modulus operation, so this case diagnoses an error. The tree code for the integer modulus is TRUNC_MOD_EXPR.
+Modulus is similar to division but there is no real modulus operation, so 
+this case diagnoses an error. The tree code for the integer modulus is 
+TRUNC_MOD_EXPR.
 
-  All handlers for relational operators ==, !=, <, >, <= and >= have the same code. Only their tree codes change.
+All handlers for relational operators ==, !=, <, >, <= and >= have the 
+same code. Only their tree codes change.
+
+.. code-block:: c
+  :linenos:
 
   Tree
   Parser::binary_equal (const_TokenPtr tok, Tree left)
@@ -745,9 +694,13 @@ Semantical Analysis and Generics I
           right);
   }
 
-  Tree codes for !=, <, >, <= and >= are (respectively) NE_EXPR, LT_EXPR, GT_EXPR, LE_EXPR and GE_EXPR.
+Tree codes for !=, <, >, <= and >= are (respectively) NE_EXPR, LT_EXPR, 
+GT_EXPR, LE_EXPR and GE_EXPR.
 
-  Likewise, binary logical operators and and or only differ in their tree codes.
+Likewise, binary logical operators and and or only differ in their tree codes.
+
+.. code-block:: c
+  :linenos:
 
   Tree
   Parser::binary_logical_and (const_TokenPtr tok, Tree left)
@@ -763,7 +716,11 @@ Semantical Analysis and Generics I
           left, right);
   }
 
-  The tree code for logical or is TRUTH_ORIF_EXPR. Function check_logical_operands simply verifies that both operands are logical.
+The tree code for logical or is TRUTH_ORIF_EXPR. Function check_logical_operands 
+simply verifies that both operands are logical.
+
+.. code-block:: c
+  :linenos:
 
   bool
   Parser::check_logical_operands (const_TokenPtr tok, Tree left, Tree right)
@@ -782,33 +739,18 @@ Semantical Analysis and Generics I
     return true;
   }
 
-  And we are done with the expressions!
-  Write statement
+And we are done with the expressions!
 
-  〈write〉 → write 〈expression〉 ;
+Write statement
+---------------
 
-  A write statement is not particularly complicated at first.
+.. productionlist:: Tiny6
+    write: "write" `expression` ";"
 
-  1
-  2
-  3
-  4
-  5
-  6
-  7
-  8
-  9
-  10
-  11
-  12
-  13
-  14
-  15
-  16
-  17
-  18
+A write statement is not particularly complicated at first.
 
-    
+.. code-block:: c
+  :linenos:
 
   Tree
   Parser::parse_write_statement ()
@@ -829,28 +771,15 @@ Semantical Analysis and Generics I
     if (expr.is_error ())
       return Tree::error ();
 
-  Now we have to print the value of the expression. To do this we will emit a call to printf with the appropiate format conversion: %d for integers, and %f for floats. For strings, we will simply call puts (although we could have called printf with a format conversion %s).
+Now we have to print the value of the expression. To do this we will emit a call 
+to printf with the appropiate format conversion: %d for integers, and %f for floats. 
+For strings, we will simply call puts (although we could have called printf with 
+a format conversion %s).
 
-  Let's see the case for integers.
+Let's see the case for integers.
 
-  20
-  21
-  22
-  23
-  24
-  25
-  26
-  27
-  28
-  29
-  30
-  31
-  32
-  33
-  34
-  35
-
-    
+.. code-block:: c
+  :lineno-start: 20
 
     if (expr.get_type () == integer_type_node)
       {
@@ -869,35 +798,20 @@ Semantical Analysis and Generics I
         return stmt;
       }
 
-  In line 31 we build a call to the print function (represented in printf_fn). In this call we will pass two arguments, that we have in the array args. The first argument is the format string, so we build a string literal "%d\n" (line 25, mind the NULL terminator) and the second is our expression of type integer (line 26). Function build_call_array_loc is provided by GCC.
+In line 31 we build a call to the print function (represented in printf_fn). 
+In this call we will pass two arguments, that we have in the array args. The 
+first argument is the format string, so we build a string literal "%d\n" 
+(line 25, mind the NULL terminator) and the second is our expression of type 
+integer (line 26). Function build_call_array_loc is provided by GCC.
 
-  To be able to call printf we need first to obtain its declaration, i.e. a FUNCTION_DECL. But for some reason, though, GENERIC trees do not allow calling a FUNCTION_DECL directly, it has to be done through an address to the function declaration. Function get_printf_addr thus, returns an address to a function declaration of printf.
+To be able to call printf we need first to obtain its declaration, i.e. a 
+FUNCTION_DECL. But for some reason, though, GENERIC trees do not allow 
+calling a FUNCTION_DECL directly, it has to be done through an address 
+to the function declaration. Function get_printf_addr thus, returns an 
+address to a function declaration of printf.
 
-  1
-  2
-  3
-  4
-  5
-  6
-  7
-  8
-  9
-  10
-  11
-  12
-  13
-  14
-  15
-  16
-  17
-  18
-  19
-  20
-  21
-  22
-  23
-
-    
+.. code-block:: c
+  :linenos:
 
   Tree
   Parser::get_printf_addr ()
@@ -923,13 +837,31 @@ Semantical Analysis and Generics I
     return printf_fn;
   }
 
-  To avoid repeatedly creating function declarations to the same printf function, our Parser class will keep a printf_fn tree with the address to printf. The first time we request the address of printf it will be a NULL_TREE so we will have to compute it.
+To avoid repeatedly creating function declarations to the same printf function, 
+our Parser class will keep a printf_fn tree with the address to printf. 
+The first time we request the address of printf it will be a NULL_TREE so 
+we will have to compute it.
 
-  Functions, like variables, have type. We need to create a function with a variable number of arguments that returns integer and has one fixed argument of type const char*. This is because the definition in C of printf is int printf(const char*, ...). The type const char* is created by constructing a pointer type to a const qualified version of the char_type_node (line 7). Then we build the function type itself (line 12).
+Functions, like variables, have type. We need to create a function with a 
+variable number of arguments that returns integer and has one fixed argument 
+of type const char*. This is because the definition in C of printf is int 
+printf(const char*, ...). The type const char* is created by constructing 
+a pointer type to a const qualified version of the char_type_node (line 7). 
+Then we build the function type itself (line 12).
 
-  Once we have the function type, we can build the declaration as a variable argument function (line 15). This function will not be defined by tiny, but it will come elsewhere, so we set that property in the declaration itself by marking it as DECL_EXTERNAL (line 16). Finally we build an ADDR_EXPR which simply returns a pointer to the type of the function type. This tree represents the address to the function. This is what the function will return.
+Once we have the function type, we can build the declaration as a variable 
+argument function (line 15). This function will not be defined by tiny, but 
+it will come elsewhere, so we set that property in the declaration itself by 
+marking it as DECL_EXTERNAL (line 16). Finally we build an ADDR_EXPR which 
+simply returns a pointer to the type of the function type. This tree represents 
+the address to the function. This is what the function will return.
 
-  Back to the implementation of the write statement, the case for float is similar to that of the integer but requires us to convert the float value into a double value, because this is how it works in C.
+Back to the implementation of the write statement, the case for float is similar 
+to that of the integer but requires us to convert the float value into a double 
+value, because this is how it works in C.
+
+.. code-block:: c
+  :linenos:
 
     else if (expr.get_type () == float_type_node)
       {
@@ -948,9 +880,14 @@ Semantical Analysis and Generics I
         return stmt;
       }
 
-  To convert the float into a double we invoke the GCC convert function that will require an extra file with some generic boilerplate. That file is not interesting enough to put it here. Alternatively a CONVERT_EXPR tree could be used instead.
+To convert the float into a double we invoke the GCC convert function that will 
+require an extra file with some generic boilerplate. That file is not interesting 
+enough to put it here. Alternatively a CONVERT_EXPR tree could be used instead.
 
-  Finally to print a string, we just call puts.
+Finally to print a string, we just call puts.
+
+.. code-block:: c
+  :linenos:
 
     else if (is_string_type (expr.get_type ()))
       {
@@ -965,7 +902,11 @@ Semantical Analysis and Generics I
         return stmt;
       }
 
-  In contrast to printf, puts is not a variable argument function, so its type is constructed slightly different. Everything else is the same.
+In contrast to printf, puts is not a variable argument function, so its type 
+is constructed slightly different. Everything else is the same.
+
+.. code-block:: c
+  :linenos:
 
   Tree
   Parser::get_puts_addr ()
@@ -990,7 +931,10 @@ Semantical Analysis and Generics I
     return puts_fn;
   }
 
-  Having handled all valid types, this completes our write statement.
+Having handled all valid types, this completes our write statement.
+
+.. code-block:: c
+  :linenos:
 
     else
       {
@@ -1003,35 +947,40 @@ Semantical Analysis and Generics I
     gcc_unreachable ();
   }
 
-  Blocks
+Blocks
+------
 
-  Both a tiny program and statements if, while and for statements have in their syntax 〈statement〉*. In addition, if, while and for statements introduce a new symbol mapping in each of its 〈statement〉*. The top level is actually not that different if we understand that the program has a top level symbol mapping.
+Both a tiny program and statements if, while and for statements have in their 
+syntax 〈statement〉*. In addition, if, while and for statements introduce a new 
+symbol mapping in each of its 〈statement〉*. The top level is actually not that 
+different if we understand that the program has a top level symbol mapping.
 
-  This suggests that, whenever we are going to parse a 〈statement〉*, the same process will happen: a) we will push a new symbol mapping b) parse the statements c) pop the scope.
+This suggests that, whenever we are going to parse a 〈statement〉*, the same process 
+will happen: a) we will push a new symbol mapping b) parse the statements 
+c) pop the scope.
+
+.. code-block:: c
+  :linenos:
 
   enter_scope ();
   parse_statement_seq (done);
   leave_scope ();
 
-  Functions enter_scope and leave_scope will make sure a new symbol mapping is pushed/popped.
+Functions enter_scope and leave_scope will make sure a new symbol mapping is 
+pushed/popped.
 
-  GENERIC trees represent mappings using a BIND_EXPR. A BIND_EXPR will contain a list of statements and also a list of VAR_DECLs related to the variable declarations in the current symbol mapping. Recall that when we declared a variable, one of the things we did is adding the variable into a stack of lists called stack_var_decl_chain. This is the list we will use to gather all the VAR_DECLs in a mapping.
+GENERIC trees represent mappings using a BIND_EXPR. A BIND_EXPR will contain a 
+ist of statements and also a list of VAR_DECLs related to the variable declarations 
+in the current symbol mapping. Recall that when we declared a variable, one of 
+the things we did is adding the variable into a stack of lists called 
+stack_var_decl_chain. This is the list we will use to gather all the VAR_DECLs 
+in a mapping.
 
-  Unfortunately at this point, GENERIC makes things a bit complicated because of another kind of tree called block. Let's explain this seeing the code of enter_scope.
+Unfortunately at this point, GENERIC makes things a bit complicated because of 
+another kind of tree called block. Let's explain this seeing the code of enter_scope.
 
-  1
-  2
-  3
-  4
-  5
-  6
-  7
-  8
-  9
-  10
-  11
-
-    
+.. code-block:: c
+  :linenos:
 
   void
   Parser::enter_scope ()
@@ -1045,9 +994,15 @@ Semantical Analysis and Generics I
     stack_block_chain.push_back (BlockChain ());
   }
 
-  We first push a new symbol mapping (line 4). And then we have three stacks: a first stack of lists of statements, a second stack of lists var declarations and a third stack of chains of blocks (lines 7 to 10).
+We first push a new symbol mapping (line 4). And then we have three stacks: a 
+first stack of lists of statements, a second stack of lists var declarations 
+and a third stack of chains of blocks (lines 7 to 10).
 
-  TreeStmtList is just a tiny wrapper around STATEMENT_LIST. This is a tree used to represent lists of statements.
+TreeStmtList is just a tiny wrapper around STATEMENT_LIST. This is a tree 
+used to represent lists of statements.
+
+.. code-block:: c
+  :linenos:
 
   struct TreeStmtList
   {
@@ -1071,9 +1026,16 @@ Semantical Analysis and Generics I
     tree list;
   };
 
-  Functions alloc_stmt_list and append_to_statement_list are GCC-provided and do the obvious things.
+Functions alloc_stmt_list and append_to_statement_list are GCC-provided 
+nd do the obvious things.
 
-  TreeChain and BlockChain are conceptually singly-linked lists implemented using GENERIC trees. In fact they work exactly the same, but unfortunately a different accessor has to be used for each. To reduce the differences both have been wrapped in two classes that inherit from a generic one.
+TreeChain and BlockChain are conceptually singly-linked lists implemented using 
+GENERIC trees. In fact they work exactly the same, but unfortunately a different 
+accessor has to be used for each. To reduce the differences both have been 
+wrapped in two classes that inherit from a generic one.
+
+.. code-block:: c
+  :linenos:
 
   template <typename Append> struct TreeChainBase
   {
@@ -1116,58 +1078,31 @@ Semantical Analysis and Generics I
   {
   };
 
-  We keep the first tree and the last one in order to handle this list. The Append process has been abstracted away since a TreeChain must use TREE_CHAIN and BlockChain must use BLOCK_CHAIN.
+We keep the first tree and the last one in order to handle this list. The Append 
+process has been abstracted away since a TreeChain must use TREE_CHAIN and 
+BlockChain must use BLOCK_CHAIN.
 
-  So, what are these two stacks of TreeChain and BlockChain? TreeChain will be used for the VAR_DECLs. So the append you saw in line 48 of parse_variable_declaration above is actually appending to the top TreeChain in stack_var_decl_chain.
+So, what are these two stacks of TreeChain and BlockChain? TreeChain will be 
+used for the VAR_DECLs. So the append you saw in line 48 of 
+parse_variable_declaration above is actually appending to the top 
+TreeChain in stack_var_decl_chain.
 
-  BlockChain is used for a chain of blocks that GENERIC requires us to maintain. Each block, a GENERIC tree of tree code BLOCK, has a list of VAR_DECLs. This list is the same as the BIND_EXPR representing the symbol mapping. Blocks also have a list of subblocks and a parent context. This parent context is another block, except for the topmost one that will be a function declaration, more on this below.
+BlockChain is used for a chain of blocks that GENERIC requires us to maintain. 
+Each block, a GENERIC tree of tree code BLOCK, has a list of VAR_DECLs. This list 
+is the same as the BIND_EXPR representing the symbol mapping. Blocks also have a 
+list of subblocks and a parent context. This parent context is another block, 
+except for the topmost one that will be a function declaration, more on this 
+below.
 
-  The complexity arises when we have several sibling blocks. We have to gather them in a way that when we leave their containing block: a) we set the containing block as the parent of the blocks b) that containing block has a list of subblocks. And this is where the BlockChain is used.
+The complexity arises when we have several sibling blocks. We have to gather 
+them in a way that when we leave their containing block: a) we set the containing 
+block as the parent of the blocks b) that containing block has a list of subblocks. 
+And this is where the BlockChain is used.
 
-  All this complex process happens in leave_scope.
+All this complex process happens in leave_scope.
 
-  1
-  2
-  3
-  4
-  5
-  6
-  7
-  8
-  9
-  10
-  11
-  12
-  13
-  14
-  15
-  16
-  17
-  18
-  19
-  20
-  21
-  22
-  23
-  24
-  25
-  26
-  27
-  28
-  29
-  30
-  31
-  32
-  33
-  34
-  35
-  36
-  37
-  38
-  39
-  40
-
-    
+.. code-block:: c
+  :linenos:
 
   Parser::TreeSymbolMapping
   Parser::leave_scope ()
@@ -1210,20 +1145,43 @@ Semantical Analysis and Generics I
     return tree_scope;
   }
 
-  We get the current list of statements and we pop them from the stack of statement lists (lines 4 and 5). Likewise for the list of VAR_DECLs (lines 7 to 8). And again for the current chain of blocks (lines 10 and 11). Now we have to build a new block using the (GCC-provided) function build_block. Its first operand will be the list of VAR_DECLs, its second is the list of sub blocks that we may have gathered. We cannot set yet the parent (called the supercontext) so we leave it is a NULL_TREE. This block does not have any chain, yet, either, so the fourth operand is also NULL_TREE.
+We get the current list of statements and we pop them from the stack of statement 
+lists (lines 4 and 5). Likewise for the list of VAR_DECLs (lines 7 to 8). And again 
+for the current chain of blocks (lines 10 and 11). Now we have to build a new block 
+using the (GCC-provided) function build_block. Its first operand will be the list of 
+VAR_DECLs, its second is the list of sub blocks that we may have gathered. We cannot 
+set yet the parent (called the supercontext) so we leave it is a NULL_TREE. This 
+block does not have any chain, yet, either, so the fourth operand is also NULL_TREE.
 
-  Then, if this block is not the topmost one, it has to be added to the current block chain (lines 19 to 21). The topmost block will not be enclosed anywhere, this is why the stack might be empty (see line 11).
+Then, if this block is not the topmost one, it has to be added to the current 
+block chain (lines 19 to 21). The topmost block will not be enclosed anywhere, 
+this is why the stack might be empty (see line 11).
 
-  When we create the blocks, we leave their parent empty (line 16). Now it is the right moment to take all the subblocks and set their parent (i.e. their supercontext) to the newly created block (lines 25 to 27). This is required because BLOCKs are somehow doubly-linked: the current block knows its subblocks and each subblock knows its parent.
+When we create the blocks, we leave their parent empty (line 16). Now it is 
+the right moment to take all the subblocks and set their parent (i.e. their 
+supercontext) to the newly created block (lines 25 to 27). This is required 
+because BLOCKs are somehow doubly-linked: the current block knows its subblocks 
+and each subblock knows its parent.
 
-  Now we can create a BIND_EXPR (line 29). Its first operand is the list of VAR_DECLs. The same as the block we have just created. The second operand is the list of statements and the third operand is the block we have just created.
+Now we can create a BIND_EXPR (line 29). Its first operand is the list of 
+VAR_DECLs. The same as the block we have just created. The second operand is 
+the list of statements and the third operand is the block we have just created.
 
-  This function does not return a single Tree but a TreeMapping that is just a tuple containing both the just created bind_expr and the just created block (lines 33 to 35). The block is only required in the top level statement. Any other statement will use bind_expr.
+This function does not return a single Tree but a TreeMapping that is just a 
+tuple containing both the just created bind_expr and the just created block 
+(lines 33 to 35). The block is only required in the top level statement. 
+Any other statement will use bind_expr.
 
-  Finally we pop the symbol mapping and return (line 37).
-  Statement sequences
+Finally we pop the symbol mapping and return (line 37).
 
-  Ok, enter_scope and leave_scope are to be called after and before 〈statement〉* but we still have to parse the statements themselves.
+Statement sequences
+-------------------
+
+Ok, enter_scope and leave_scope are to be called after and before 
+〈statement〉* but we still have to parse the statements themselves.
+
+.. code-block:: c
+  :linenos:
 
   void
   Parser::parse_statement_seq (bool (Parser::*done) ())
@@ -1236,7 +1194,13 @@ Semantical Analysis and Generics I
       }
   }
 
-  In contrast to most parse_xxx functions, this one does not return a Tree. What it does instead is appending each parsed statement to the current statement list. Recall that enter_scope and leave_scope update the stack of statement list, thus the current one is always the one in the top of the stack.
+In contrast to most parse_xxx functions, this one does not return a Tree. 
+What it does instead is appending each parsed statement to the current statement 
+list. Recall that enter_scope and leave_scope update the stack of statement 
+list, thus the current one is always the one in the top of the stack.
+
+.. code-block:: c
+  :linenos:
 
   TreeStmtList &
   Parser::get_current_stmt_list ()
@@ -1244,60 +1208,15 @@ Semantical Analysis and Generics I
     return stack_stmt_list.back ();
   }
 
-  Program
 
-  Since this post is already too long, let's end with what we have to do for a tiny program.
+Program
+-------
 
-  1
-  2
-  3
-  4
-  5
-  6
-  7
-  8
-  9
-  10
-  11
-  12
-  13
-  14
-  15
-  16
-  17
-  18
-  19
-  20
-  21
-  22
-  23
-  24
-  25
-  26
-  27
-  28
-  29
-  30
-  31
-  32
-  33
-  34
-  35
-  36
-  37
-  38
-  39
-  40
-  41
-  42
-  43
-  44
-  45
-  46
-  47
-  48
 
-    
+Since this post is already too long, let's end with what we have to do for a tiny program.
+
+.. code-block:: c
+  :linenos:
 
   void
   Parser::parse_program ()
@@ -1348,37 +1267,59 @@ Semantical Analysis and Generics I
     main_fndecl = NULL_TREE;
   }
 
-  In order for our program to be able to start, we need a main function (like in C). We do this in lines 4 to 12. This is similar to what we did for the printf and puts functions.
+In order for our program to be able to start, we need a main function 
+(like in C). We do this in lines 4 to 12. This is similar to what we did for 
+the printf and puts functions.
 
-  Then we enter the top level scope. We parse the sequence of statements (line 17). Before leaving the current scope, we want to return 0, to signal that the program ends correctly. We will append a return expression to the current statement list. Before we can return anything, though, in GENERIC we first need to create a RESULT_DECL declaration (lines 19 to 21) and initialize it with some value using a INIT_EXPR (lines 22 to 24). Now we can create a return expression that, aside from returning, initializes the return variable (line 25). Finally we append it to the current statement list (line 27).
+Then we enter the top level scope. We parse the sequence of statements (line 17). 
+Before leaving the current scope, we want to return 0, to signal that the program 
+ends correctly. We will append a return expression to the current statement 
+list. Before we can return anything, though, in GENERIC we first need to 
+create a RESULT_DECL declaration (lines 19 to 21) and initialize it with 
+some value using a INIT_EXPR (lines 22 to 24). Now we can create a return 
+expression that, aside from returning, initializes the return variable (line 25). 
+Finally we append it to the current statement list (line 27).
 
-  Now we leave the scope, this returns a pair of trees block and bind_expression. We have to set the parent (i.e. the supercontext) of the block to the main function, since it is the topmost block (line 34). Then we set the main block of the function (line 35) and the code proper of the function to be bind_expr (line 36). Then we make sure the main function is not set as extern because it is being defined by ourselves (line 38) and we tell the compiler to preserve it, otherwise it would be removed since nobody is explicitly using it (line 39).
+Now we leave the scope, this returns a pair of trees block and bind_expression. 
+We have to set the parent (i.e. the supercontext) of the block to the main 
+function, since it is the topmost block (line 34). Then we set the main block 
+of the function (line 35) and the code proper of the function to be 
+bind_expr (line 36). Then we make sure the main function is not set as 
+extern because it is being defined by ourselves (line 38) and we tell the 
+compiler to preserve it, otherwise it would be removed since nobody is 
+explicitly using it (line 39).
 
-  Now, we have to convert this function from GENERIC to GIMPLE (line 42) by calling the (GCC-provided) gimplify_function_tree. GIMPLE is a subset of GENERIC that is used by the middle end. Once converted the function can be queued for compilation in later passes of the compiler (line 45).
-  Smoke test
+Now, we have to convert this function from GENERIC to GIMPLE (line 42) by 
+calling the (GCC-provided) gimplify_function_tree. GIMPLE is a subset of 
+GENERIC that is used by the middle end. Once converted the function can 
+be queued for compilation in later passes of the compiler (line 45).
 
-  At this point our tiny front end is starting to be useful. A very basic smoketest that should work is the following one.
+Smoke test
+----------
+
+At this point our tiny front end is starting to be useful. A very basic 
+smoketest that should work is the following one.
+
+.. code-block:: c
 
   # test.tiny
   var a : int;
   a := 42;
   write a;
 
+.. code-block:: shell-session
+
   $ gcctiny -o test test.tiny 
   $ ./test 
   42
 
-  Yay!
-  Wrap-up
+Yay!
 
-  Ok, that post was again a long one. I have skipped some statements (read, if, while and for) that we will see in the next chapter but at least now we can play with assignment and the write statement.
+Wrap-up
+-------
 
-  That's all for today.
-  « A tiny GCC front end – Part 5
-  A tiny GCC front end – Part 7 »
+Ok, that post was again a long one. I have skipped some statements (read, if, 
+while and for) that we will see in the next chapter but at least now we can 
+play with assignment and the write statement.
 
-  Powered by Jekyll. Theme based on whiteglass
-  Subscribe via RSS
-
-
-  @end ignore
+That's all for today.
