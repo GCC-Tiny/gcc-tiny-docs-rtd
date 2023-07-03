@@ -8,8 +8,11 @@ Semantical Analysis and Generics II
 
 In this part we will complete the missing statements from part 6 and finish our front end.
 
+Semantic values (cont)
+======================
+
 Read statement
-==============
+--------------
 
 A read statement is a bit like the dual of a write statement. We will implement it using a call to scanf.
 
@@ -85,9 +88,9 @@ Now comes an interesting aspect of GENERIC: VAR_DECLs do not have to be in memor
 We then prepare the call to scanf, first we set the appropiate format string depending on the type of the variable (lines 28 to 43). Then we build the arguments to scanf. The first one is the format string as a string literal (line 46) and the second one (line 47) is an ADDR_EXPR. This tree means getting the address of its operand. The type of this expression should be a pointer type to our variable. Similar to what we did with puts and printf in the write statement, we get the address of scanf (line 51). Finally everything is set to make the call to scanf (line 55).
 
 If statement
-============
+------------
 
-.. productionlist:: Tiny
+.. productionlist:: Tiny7
     if: "if" `expression` "then" `statement`* "end" ";" 
       : "if" `expression` "then" `statement`* "else" `statement`* "end" ";"
 
@@ -262,7 +265,7 @@ If there is else part we append a goto endif, so the then part branches to the e
 Finally we define the label for the end if (lines 52 and 53), append it to the statement list (line 54) before we just return it (line 56).
 
 While statement
-===============
+---------------
 
 We will use the same strategy for the while statement: first parse its syntactic elements and then build a statement list to implement it.
 
@@ -355,7 +358,7 @@ Parsing a while statement is relatively easy: a condition expression of boolean 
 We start by creating a label for the condition check (line 10) and defining its location that we will append to the statement list (lines 12 to 15). Then we define two other labels one for the body of the loop and one to end the loop (lines 17 to 20). Now we add a COND_EXPR tree that evaluates the condition expression. It will branch to the body of the loop when the condition is true, to the end of the while otherwise (lines 22 to 28). Then we define the location of the label for the body of the loop (lines 30 to 33) and append the while body (line 35). Then we have to branch back (this is why it is a loop) to the condition check (lines 37 to 39). Then we just define the location of the label for the end of the while (lines 41 to 44). Our while statement is done, so let's return it (line 46).
 
 For-statement
-=============
+-------------
 
 .. productionlist:: Tiny7
     for: "for"  `identifier` ":="  `expression` "to" `expression` "do" `statement`* "end" ";"
