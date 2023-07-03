@@ -1,9 +1,7 @@
-Template for the Read the Docs tutorial
-=======================================
+GCC Tiny Documentation
+======================
 
-This GitHub template includes fictional Python library
-with some basic Sphinx docs.
+Read-The-Docs project: https://readthedocs.org/projects/gcc-tiny-docs-rtd/
 
-Read the tutorial here:
+Latest Version: https://gcc-tiny-docs-rtd.readthedocs.io/en/latest/
 
-https://docs.readthedocs.io/en/stable/tutorial/
