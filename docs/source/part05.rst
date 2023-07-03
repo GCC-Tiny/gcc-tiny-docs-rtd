@@ -345,8 +345,8 @@ Symbol
 
 We will use the class Symbol to represent a named entity of a tiny program. 
 So far the only named entities we have in tiny are variables. Other languages
- may have types, constants and functions in their set of entities with names. 
- Symbol class would be used as well for such entities.
+may have types, constants and functions in their set of entities with names. 
+Symbol class would be used as well for such entities.
 
 There will be a single Symbol object for each named instance, so this class 
 is mostly used by reference. Similar to what we did with tokens in part 3, 
