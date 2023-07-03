@@ -5,39 +5,87 @@ Data Required by Semantical Analysis
 .. note:: 
   Work in progress
 
-In the last installment of this series we saw how to verify that the sequence of tokens of the input is syntactically valid. Today we will see what we need to give it meaning.
+In the last installment of this series we saw how to verify that the sequence 
+of tokens of the input is syntactically valid. Today we will see what we need 
+to give it meaning.
 
-Semantics concerns to the meaning of the program. This means that our sequence of tokens, once they follow some syntax, have meaning in the context of the programming language. In part 1 we gave a more or less abstract semantics of tiny. Now, as compiler writers, it is up to us to materialize such semantics in an implementation that fulfills it.
+Semantics concerns to the meaning of the program. This means that our sequence 
+of tokens, once they follow some syntax, have meaning in the context of the 
+programming language. In part 1 we gave a more or less abstract semantics of tiny. 
+Now, as compiler writers, it is up to us to materialize such semantics in an 
+implementation that fulfills it.
 
 GENERIC
 =======
 
-If you recall part 2, the final goal of our front end is creating a GENERIC tree and handing it to the rest of the compiler. Let's talk about bit more about GENERIC trees.
+If you recall part 2, the final goal of our front end is creating a GENERIC tree 
+nd handing it to the rest of the compiler. Let's talk about bit more about 
+GENERIC trees.
 
-GENERIC trees are represented using the type tree. A tree can be a NULL_TREE or point to an actual tree. Each tree has a tree code that is specified at the moment of creation. Given a tree we can use the macro TREE_CODE to get the tree code. Most trees, but not all, have a location that we can obtain using the macro EXPR_LOC, if it does not have location it will return UNKNOWN_LOCATION.
+GENERIC trees are represented using the type tree. A tree can be a NULL_TREE 
+or point to an actual tree. Each tree has a tree code that is specified at the 
+moment of creation. Given a tree we can use the macro TREE_CODE to get the tree 
+code. Most trees, but not all, have a location that we can obtain using the 
+macro EXPR_LOC, if it does not have location it will return UNKNOWN_LOCATION.
 
-Trees are created using macros build0, build1, build2, ..., build5. The first parameter of each buildN macro is the tree code and the remaining N arguments are trees, called the operands. As an alternative build0_loc, build1_loc, build2_loc, ..., build5_loc can be used instead to create a tree along with a location. The location goes in the first argument and the remaining arguments are the same as in buildN.
+Trees are created using macros build0, build1, build2, ..., build5. The first 
+parameter of each buildN macro is the tree code and the remaining N arguments 
+are trees, called the operands. As an alternative build0_loc, build1_loc, 
+build2_loc, ..., build5_loc can be used instead to create a tree along with a 
+location. The location goes in the first argument and the remaining arguments 
+are the same as in buildN.
 
-Despite their name, GENERIC trees do not collectively form a tree but a graph. This happens because it is not an error that a tree appears as the operand of two or more trees.
+Despite their name, GENERIC trees do not collectively form a tree but a graph. 
+This happens because it is not an error that a tree appears as the operand of 
+two or more trees.
 
-Each tree of a specific tree code may have associated several attributes. These attributes are accessed using macros. Most of these macros expand in a way that can be used to set the attribute to the tree. So given a tree t, an attribute can be queried doing SOME_TREE_PROPERTY(t) and can be set doing SOME_TREE_PROPERTY(t) = property. These attributes are of different nature, sometimes are other trees, sometimes are boolean values (zero or nonzero), etc.
+Each tree of a specific tree code may have associated several attributes. These 
+attributes are accessed using macros. Most of these macros expand in a way that 
+can be used to set the attribute to the tree. So given a tree t, an attribute 
+can be queried doing SOME_TREE_PROPERTY(t) and can be set doing 
+SOME_TREE_PROPERTY(t) = property. These attributes are of different nature, 
+sometimes are other trees, sometimes are boolean values (zero or nonzero), etc.
 
-GENERIC trees are used to represent many aspects of a program but there are three important classes of trees: declarations, expressions and types.
+GENERIC trees are used to represent many aspects of a program but there are 
+three important classes of trees: declarations, expressions and types.
 
-Declarations are used to tell the compiler about the existence of something. Variables go into a tree with code VAR_DECL. Labels of the program (used for gotos) go into a LABEL_DECL. tiny does not have functions explicitly but if we declare a function, it goes into a FUNCTION_DECL and each of its parameters would be represented using PARM_DECL.
+Declarations are used to tell the compiler about the existence of something. 
+Variables go into a tree with code VAR_DECL. Labels of the program (used for 
+gotos) go into a LABEL_DECL. tiny does not have functions explicitly but if 
+we declare a function, it goes into a FUNCTION_DECL and each of its parameters 
+would be represented using PARM_DECL.
 
-Expressions represent trees that can be evaluated. There are a lot of tree codes related to expressions that we will see later. One distinguished node, error_mark_node, will be used as a marker for erroneous trees that may appear during semantic analysis. Given a tree t, the macro error_operand_p(t) returns true if t is error_mark_node.
+Expressions represent trees that can be evaluated. There are a lot of tree 
+codes related to expressions that we will see later. One distinguished node, 
+error_mark_node, will be used as a marker for erroneous trees that may appear 
+during semantic analysis. Given a tree t, the macro error_operand_p(t) returns 
+true if t is error_mark_node.
 
-Finally, types represent data types. They are represented as trees because most type systems have a recursive structure that fits well in a graph-like structure like GENERIC. Type trees are heavily reused in GENERIC. In tiny we will need tree types for int, float, boolean and strings. Expressions and declarations have type and it can be accessed using TREE_TYPE.
+Finally, types represent data types. They are represented as trees because 
+most type systems have a recursive structure that fits well in a graph-like 
+structure like GENERIC. Type trees are heavily reused in GENERIC. In tiny we 
+will need tree types for int, float, boolean and strings. Expressions and 
+declarations have type and it can be accessed using TREE_TYPE.
 
-GENERIC is an intermediate representation that is heavily biased towards a C model of execution (like a relatively high-level assembler). The reason is that GCC was originally a C compiler that later on was extended to support other programming languages. Imperative programming languages, like tiny, fit relatively well in GENERIC. Other programming languages, like functional ones, do not fit so well in GENERIC and a front end for such languages likely uses its own representation that ends being lowered to GENERIC.
+GENERIC is an intermediate representation that is heavily biased towards a C 
+model of execution (like a relatively high-level assembler). The reason is 
+that GCC was originally a C compiler that later on was extended to support 
+other programming languages. Imperative programming languages, like tiny, fit 
+relatively well in GENERIC. Other programming languages, like functional ones, 
+do not fit so well in GENERIC and a front end for such languages likely uses 
+its own representation that ends being lowered to GENERIC.
 
 Almost GENERIC
 ==============
 
-Tiny is so simple that we can use GENERIC trees almost directly. Almost, because not all GENERIC trees may have locations so we will pair a tree and a location, to make sure we have a location. Getting the GENERIC tree is, then, as simple as requesting the tree member of the pair. We want to have location in all trees for diagnostic purposes.
+Tiny is so simple that we can use GENERIC trees almost directly. Almost, because 
+not all GENERIC trees may have locations so we will pair a tree and a location, 
+to make sure we have a location. Getting the GENERIC tree is, then, as simple 
+as requesting the tree member of the pair. We want to have location in all trees 
+for diagnostic purposes.
 
-In order to ease using GENERIC trees, we will use a Tree class (mind the uppercase) that will be a very thin wrapper to tree.
+In order to ease using GENERIC trees, we will use a Tree class (mind the uppercase) 
+that will be a very thin wrapper to tree.
 
 .. code-block:: c
 
@@ -112,14 +160,16 @@ In order to ease using GENERIC trees, we will use a Tree class (mind the upperca
     location_t loc;
   };
 
-A GENERIC tree is actually a pointer, so comparison by identity is possible. For simplicity, let's teach Tree to do identity comparisons as well.
+A GENERIC tree is actually a pointer, so comparison by identity is possible. For 
+simplicity, let's teach Tree to do identity comparisons as well.
 
 .. code-block:: c
 
   inline bool operator==(Tree t1, Tree t2) { return t1.get_tree () == t2.get_tree (); }
   inline bool operator!=(Tree t1, Tree t2) { return !(t1 == t2); }
 
-For convenience we will also wrap the creation of Trees into a set of build_tree overloaded functions.
+For convenience we will also wrap the creation of Trees into a set of build_tree 
+overloaded functions.
 
 .. code-block:: c
 
@@ -162,7 +212,12 @@ For convenience we will also wrap the creation of Trees into a set of build_tree
 Scope
 -----
 
-In the definition of tiny we also talked about a stack of mappings from identifiers to values that we collectively called the scope. Note that the mappings in the scope, as defined in the tiny definition, are a dynamic entity so the exact value of the mapping will likely not be known at compile time. That said, the mapping itself must exist. We will represent this mapping in a class called SymbolMapping. It will map identifiers (i.e. strings) to SymbolPtrs (later on we will see what is a SymbolPtr).
+In the definition of tiny we also talked about a stack of mappings from identifiers to 
+values that we collectively called the scope. Note that the mappings in the scope, as 
+defined in the tiny definition, are a dynamic entity so the exact value of the mapping 
+will likely not be known at compile time. That said, the mapping itself must exist. 
+We will represent this mapping in a class called SymbolMapping. It will map 
+identifiers (i.e. strings) to SymbolPtrs (later on we will see what is a SymbolPtr).
 
 .. code-block:: c
 
@@ -179,9 +234,12 @@ In the definition of tiny we also talked about a stack of mappings from identifi
     Map map;
   };
 
-As you can see it is a very thin wrapper to a map of strings to Symbol (for this reason sometimes a structure like this is called a symbol table).
+As you can see it is a very thin wrapper to a map of strings to Symbol (for 
+this reason sometimes a structure like this is called a symbol table).
 
-SymbolMapping::insert adds a new Symbol into the map using its name as the key. It also checks that the name is not being added twice: this is not possible in tiny.
+SymbolMapping::insert adds a new Symbol into the map using its name as the key. 
+It also checks that the name is not being added twice: this is not possible 
+in tiny.
 
 .. code-block:: c
 
@@ -195,7 +253,8 @@ SymbolMapping::insert adds a new Symbol into the map using its name as the key. 
     gcc_assert (p.second);
   }
 
-SymbolMapping::get returns the mapped Symbol for the given string. Since it may happen that there is no such mapping this function may return a nul Symbol.
+SymbolMapping::get returns the mapped Symbol for the given string. Since it
+may happen that there is no such mapping this function may return a nul Symbol.
 
 .. code-block:: c
 
@@ -236,9 +295,14 @@ Class Scope is, as we said, a stack of SymbolMapping.
     MapStack map_stack;
   };
 
-We can manage the current symbol mapping using Scope::push_scope() and Scope::pop_scope(). The former will be used when we need a fresh mapping (as it will happen when handling if, while and for statements). Scope::get_current_mapping returns the current mapping (i.e. the one that was created in the last push_scope that has not been popped yet).
+We can manage the current symbol mapping using Scope::push_scope() and 
+Scope::pop_scope(). The former will be used when we need a fresh mapping 
+(as it will happen when handling if, while and for statements). 
+Scope::get_current_mapping returns the current mapping (i.e. the one that 
+was created in the last push_scope that has not been popped yet).
 
-Function Scope::lookup is used to get the last mapping for a given string (or null if there is no such mapping).
+Function Scope::lookup is used to get the last mapping for a given string 
+(or null if there is no such mapping).
 
 .. code-block:: c
 
@@ -256,7 +320,8 @@ Function Scope::lookup is used to get the last mapping for a given string (or nu
     return SymbolPtr();
   }
 
-We have to traverse the stack from the top (end of the MapStack) to the bottom (beginning of the MapStack), so we use a reverse_iterator for this.
+We have to traverse the stack from the top (end of the MapStack) to the 
+bottom (beginning of the MapStack), so we use a reverse_iterator for this.
 
 Scope::push_scope and Scope::pop_scope have obvious implementations.
 
@@ -278,16 +343,26 @@ Scope::push_scope and Scope::pop_scope have obvious implementations.
 Symbol
 ------
 
-We will use the class Symbol to represent a named entity of a tiny program. So far the only named entities we have in tiny are variables. Other languages may have types, constants and functions in their set of entities with names. Symbol class would be used as well for such entities.
+We will use the class Symbol to represent a named entity of a tiny program. 
+So far the only named entities we have in tiny are variables. Other languages
+ may have types, constants and functions in their set of entities with names. 
+ Symbol class would be used as well for such entities.
 
-There will be a single Symbol object for each named instance, so this class is mostly used by reference. Similar to what we did with tokens in part 3, we will define SymbolPtr and const_SymbolPtr as smart pointers. We have already used SymbolPtr in classes Scope and SymbolMapping above.
+There will be a single Symbol object for each named instance, so this class 
+is mostly used by reference. Similar to what we did with tokens in part 3, 
+we will define SymbolPtr and const_SymbolPtr as smart pointers. We have 
+already used SymbolPtr in classes Scope and SymbolMapping above.
 
 .. code-block:: c
 
   typedef std::tr1::shared_ptr<Symbol> SymbolPtr;
   typedef std::tr1::shared_ptr<const Symbol> const_SymbolPtr;
 
-Tiny is so simple that we only need to keep the name of a symbol (something slightly redundant since GENERIC will have the name somewhere as well) and the associated VAR_DECL tree. In a language with other kind of symbols we would probably want to keep the kind of the symbol and we would probably store other kind of _DECL trees.
+Tiny is so simple that we only need to keep the name of a symbol (something 
+slightly redundant since GENERIC will have the name somewhere as well) 
+and the associated VAR_DECL tree. In a language with other kind of symbols 
+we would probably want to keep the kind of the symbol and we would probably 
+store other kind of _DECL trees.
 
 .. code-block:: c
 
@@ -352,4 +427,6 @@ Our gcc-src/gcc/tiny directory now looks like this.
   ├── tiny-token.h
   └── tiny-tree.h
 
-Today we will stop here. We have seen the objects that will be required for the semantic analysis itself. In the next part we will change the parser to generate GENERIC trees that will represent the semantics of our program.
+Today we will stop here. We have seen the objects that will be required for 
+the semantic analysis itself. In the next part we will change the parser to 
+generate GENERIC trees that will represent the semantics of our program.
