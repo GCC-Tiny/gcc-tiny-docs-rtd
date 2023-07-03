@@ -13,7 +13,8 @@ Read statement
 
 A read statement is a bit like the dual of a write statement. We will implement it using a call to scanf.
 
-  〈read〉 → read 〈identifier〉 ;
+.. productionlist:: Tiny7
+  read: "read" `identifier` ";"
 
 .. code-block:: c
   :lineno-start: 1
@@ -86,8 +87,9 @@ We then prepare the call to scanf, first we set the appropiate format string dep
 If statement
 ============
 
-  〈if〉 → if 〈expression〉 then 〈statement〉* end
-     | if 〈expression〉 then 〈statement〉* else 〈statement〉* end
+.. productionlist:: Tiny
+    if: "if" `expression` "then" `statement`* "end" ";" 
+      : "if" `expression` "then" `statement`* "else" `statement`* "end" ";"
 
 Control statements are a bit more complicated than other statements so we will split the parsing proper and the GENERIC tree construction. You will also see that the tree synthesized for these control statements is often a TreeStmtList: the implementation of these statements require several GENERIC trees. Let's see first how to parse an if statement.
 
@@ -264,7 +266,8 @@ While statement
 
 We will use the same strategy for the while statement: first parse its syntactic elements and then build a statement list to implement it.
 
-〈while〉 → while 〈expression〉 do 〈statement〉* end
+.. productionlist:: Tiny7
+    while: "while" `expression` "do" `statement`* "end" ";"
 
 .. code-block:: c
   :lineno-start: 1
@@ -354,7 +357,9 @@ We start by creating a label for the condition check (line 10) and defining its 
 For-statement
 =============
 
-〈for〉 → for 〈identifier〉 := 〈expression〉 to 〈expression〉 do 〈statement〉* end
+.. productionlist:: Tiny7
+    for: "for"  `identifier` ":="  `expression` "to" `expression` "do" `statement`* "end" ";"
+
 
 If you recall part 1, we defined a for statement like the following
 
@@ -492,7 +497,9 @@ Then we define the condition that we will use for the while. In this case we sim
 Now we synthesize the increment of the induction variable, again we use a MODIFY_EXPR and a PLUS_EXPR that represents ind_var := ind_var + 1 (lines 31 to 36). We append this increment to the body of the for statement (lines 39 and 40).
 
 Next is a call to build_while_statement with the while condition built above (lines 25 to 27) and the body of the for statement plus the increment of the induction variable (line 44). This will return a tree with the while statement that we append to the initialization of the induction variable (line 45). Finally we return the whole list.
+
 Completion
+----------
 
 Ok, so far our front end is more or less complete since it implements all the statements and expressions we defined in part 1. Let's try it with some not-totally trivial examples.
 
