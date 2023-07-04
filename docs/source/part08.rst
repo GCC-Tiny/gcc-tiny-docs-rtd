@@ -15,80 +15,91 @@ An important element of programming languages is their type system. Type systems
 
 A type system is a set of types along with the rules that govern them. An element of the type system, i.e. a type, will be denoted by τ. As we said, tiny has four types.
 
-  τ → int
-     | float
-     | bool
-     | string
+.. productionlist:: Tiny8
+      τ: "int" | "float" | "bool" | "string"
 
-  A type is a set of values: int values are the 32 bit signed integers, float values are the reals encoded by IEEE 754 Binary32, bool has only two values true or false and values of string type are (possibly empty) finite sequences of characters.
 
-  Now we want to add an array type. An array type has a size and an element type. The size is an integer expression of the language, that we will denote as ε that evaluates to a positive (nonzero) integer.
+A type is a set of values: int values are the 32 bit signed integers, float values are the reals encoded by IEEE 754 Binary32, bool has only two values true or false and values of string type are (possibly empty) finite sequences of characters.
 
-  τ → array ε τ
+Now we want to add an array type. An array type has a size and an element type. The size is an integer expression of the language, that we will denote as ε that evaluates to a positive (nonzero) integer.
 
-  This means that our typesystem has a type array constructed using an integer expression ε (the size) and a type τ (the element type).
+.. productionlist:: Tiny8a
+  τ: "array" ε τ
 
-  After this addition, our typesystem looks like this.
+This means that our typesystem has a type array constructed using an integer expression ε (the size) and a type τ (the element type).
 
-  τ → int
-     | float
-     | bool
-     | string
-     | array ε τ
+After this addition, our typesystem looks like this.
 
-  What are, thus, the values of a type array ε τ? A value of array type is a set of values of type τ called the elements of the array. There is an integer associated to each element, called the index. The set of indexes of the elements is such that they form an ascending sequence, where each index is the previous one plus one. The first index is called the lower bound (say it L) and the last one is the upper bound (say it U). This way it holds that U - L + 1 = ε.
+.. productionlist:: Tiny8b
+  τ:   "int"
+   : | "float"
+   : | "bool"
+   : | "string"
+   : | "array" ε τ
 
-  I know that at this point this seems unnecessarily theoretic but let's make a simple example. Consider array 3 float. A possible array value could be the following one, where L = 0 and U = 2.
+What are, thus, the values of a type array ε τ? A value of array type is a set of values of type τ called the elements of the array. There is an integer associated to each element, called the index. The set of indexes of the elements is such that they form an ascending sequence, where each index is the previous one plus one. The first index is called the lower bound (say it L) and the last one is the upper bound (say it U). This way it holds that U - L + 1 = ε.
 
-  〈0 → 1.2, 1 → 2.3, 2 → 2.3〉
+I know that at this point this seems unnecessarily theoretic but let's make a simple example. Consider array 3 float. A possible array value could be the following one, where L = 0 and U = 2.
 
-  for another example where L = 4 and U = 6
+〈0 → 1.2, 1 → 2.3, 2 → 2.3〉
 
-  〈4 → 1.2, 5 → 2.3, 6 → 2.3〉
+for another example where L = 4 and U = 6
 
-  The indexes form a growing sequence wherer each index equals the previous one plus one. The following would not be the value of an array.
+〈4 → 1.2, 5 → 2.3, 6 → 2.3〉
 
-  〈12 → 1.2, 25 → 2.3, 42 → 2.3〉
-  Syntax
+The indexes form a growing sequence wherer each index equals the previous one plus one. The following would not be the value of an array.
 
-  We will extend the rule of types of tiny to let us define a variable of array type.
+〈12 → 1.2, 25 → 2.3, 42 → 2.3〉
 
-  〈type〉 → int | float | 〈type〉[〈expression〉] | 〈type〉(〈expression〉:〈expression〉)
+Syntax
+------
 
-  We will also need to extend expressions so we can designate one of the elements of the array.
+We will extend the rule of types of tiny to let us define a variable of array type.
 
-  〈primary〉 → ( expression )
-     | 〈identifier〉
-     | 〈integer-literal〉
-     | 〈float-literal〉
-     | 〈string-literal〉
-     | 〈array-element〉
-  〈array-element〉 → 〈primary〉[〈expression〉]
-  Semantics
+.. productionlist:: Tiny8
+    type:   "int" | "float" 
+        : | `type`"[""`expression`"]" 
+        : | `type` "[" `expression` ":" `expression` "]"
 
-  A 〈type〉 of the form
 
-  〈type〉[〈expression〉]
+We will also need to extend expressions so we can designate one of the elements of the array.
 
-  designates an array type. If 〈type〉 is not an array then the designated type is just array 〈type〉 〈expression〉. The set of indexes range from 0 to 〈expression〉 minus one.
+.. productionlist:: Tiny8
+  primary〉: "(" expression ")"
+          : | `identifier`
+          : | `integerliteral`
+          : | `floatliteral`
+          : | `stringliteral`
+          : | `arrayelement`
+  arrayelement: `primary` "[" `expression` "]"
+
+Semantics
+---------
+A 〈type〉 of the form 〈type〉[〈expression〉]
+
+designates an array type. If 〈type〉 is not an array then the designated type is just array 〈type〉 〈expression〉. The set of indexes range from 0 to 〈expression〉 minus one.
+
+.. code-block:: c
 
   var a : int[10];       # array 10 int
 
-  Things are a bit more complicated if 〈type〉 is an array because now there are two possible interpretations. In the comments below, parentheses are used only to express grouping
+Things are a bit more complicated if 〈type〉 is an array because now there are two possible interpretations. In the comments below, parentheses are used only to express grouping
+
+.. code-block:: c
 
   var b : int[10][20];  # array 10 (array 20 int)
                         #    or
                         # array 20 (array 10 int) ?
 
-  We will chose the first interpretation. Some programming languages, like Fortran, choose the second one.
+We will chose the first interpretation. Some programming languages, like Fortran, choose the second one.
 
-  For the case when 〈type〉 is an array, let's assume it is of the form array ε0 τ0. Then the designated type will be array ε0 (array τ0 〈expression〉)
+For the case when 〈type〉 is an array, let's assume it is of the form array ε0 τ0. Then the designated type will be array ε0 (array τ0 〈expression〉)
 
-  The other syntax is similar.
+The other syntax is similar.
 
-  〈type〉 → 〈type〉(〈expression0〉:〈expression1〉)
+〈type〉 → 〈type〉(〈expression0〉:〈expression1〉)
 
-  Now ε is 〈expression1〉 - 〈expression0〉 + 1 and the indexes of the array range from 〈expression0〉 to 〈expression1〉 (both ends included). 〈expression1〉 must be larger or equal than 〈expression0〉, otherwise this is an error.
+Now ε is 〈expression1〉 - 〈expression0〉 + 1 and the indexes of the array range from 〈expression0〉 to 〈expression1〉 (both ends included). 〈expression1〉 must be larger or equal than 〈expression0〉, otherwise this is an error.
 
 .. code-block:: c
 
@@ -101,9 +112,9 @@ A 〈primary〉 of the form
 
 〈array-element〉 → 〈primary〉[〈expression〉]
 
-  designates a single element of 〈primary〉. The type of 〈primary〉 must be array, otherwise this is an error. The 〈expression〉 must be an expression of integer type the value of which must be contained in the range of indexes of the array type, otherwise this is an error. The type of an array element is the same as the element type of the array.
+designates a single element of 〈primary〉. The type of 〈primary〉 must be array, otherwise this is an error. The 〈expression〉 must be an expression of integer type the value of which must be contained in the range of indexes of the array type, otherwise this is an error. The type of an array element is the same as the element type of the array.
 
-  Given the declarations of a1, b1, c1, d1 above, valid array elements are.
+Given the declarations of a1, b1, c1, d1 above, valid array elements are.
 
 .. code-block:: c
 
@@ -119,11 +130,11 @@ A 〈primary〉 of the form
 
 Primaries of the form 〈identifier〉 and 〈array-element〉 can be used in the left hand side of an assignment and in the read statement. We will call this subset of expressions as variables. Some programming languages, like C and C++, name these expressions lvalues (or L-values) for historical reasons: an lvalue can appear in the left hand side of an assignment.
 
-  〈assignment〉 → 〈variable〉 := 〈expression〉 ;
-  〈read〉 → read 〈variable〉 ;
-
-  〈variable〉 → 〈identifier〉
-     | 〈array-element〉
+.. productionlist:: Tiny8
+  assignment: `variable` ":=" `expression` ";"
+  read: "read" `variable` ";"
+  variable:   `identifier`
+          : | `arrayelement`
 
 .. code-block:: c
   
@@ -182,7 +193,7 @@ Implementation
 Adding support for arrays to our front end is not too hard.
 
 Minor issue first
-=================
+-----------------
 
 Before we proceed we need to fix an issue that may cause us problems when we play with arrays: We want all the declarations have a DECL_CONTEXT. Current code only sets it for LABEL_DECL but all declarations (except those that are global) should have some DECL_CONTEXT. In our case VAR_DECLs and the RESULT_DECL of main are missing the DECL_CONTEXT. We have to set it to the FUNCTION_DECL of the main function (this effectively makes them local variables of the main function).
 
@@ -208,7 +219,7 @@ Before we proceed we need to fix an issue that may cause us problems when we pla
     stack_var_decl_chain.back ().append (decl);
 
 Lexer
-=====
+-----
 
 For the lexer we only have to add three tokens [ and ]. The remaining punctuation required for arrays (, ) and : were already in tiny.
 
@@ -244,10 +255,10 @@ For the lexer we only have to add three tokens [ and ]. The remaining punctuatio
 
 
 Parser
-======
+------
 
 Array type
-----------
+^^^^^^^^^^
 
 First let's see how to parse a type that designates an array. In member function Parser::parse_type we cannot just return the parsed type. Instead we will keep it.
 
@@ -344,7 +355,7 @@ Now we can start building the array type.
 Due to the semantics of the array types described above, we have to traverse the list in reverse order. We get the lower and upper expressions and we fold it (lines 4 to 5). This GCC function will attempt to simplify the expression if possible. For instance 1+2*3 will become 7. Now we build a GCC range type. A range type is a type the values of which are integers in the specified range. In this case we use the lower and the upper to create the range type (lines 8 to 10). A range type is represented as a GENERIC tree with tree code RANGE_TYPE. Once we have this range type, we take the current type (which may be at this point an integer type, a float type or another array type) and the range type to build an array type (line 11). An array type is represented as a GENERIC tree with three code ARRAY_TYPE.
 
 .. note::
-  Note that we currently do not check that the ε of the array type is actually a positive, nonzero, integer value. If the bounds of the array are constant, such error can be detected at compile time (the earlier an error is detected the better). If the bounds are non-constant then the semantics of the language should specify what to do during the execution of the program. Tiny semantics simply say that it is an error. Since we have not clarified what "to be an error" is, we will not do anything special yet.
+  We currently do not check that the ε of the array type is actually a positive, nonzero, integer value. If the bounds of the array are constant, such error can be detected at compile time (the earlier an error is detected the better). If the bounds are non-constant then the semantics of the language should specify what to do during the execution of the program. Tiny semantics simply say that it is an error. Since we have not clarified what "to be an error" is, we will not do anything special yet.
 
 Array element
 -------------
