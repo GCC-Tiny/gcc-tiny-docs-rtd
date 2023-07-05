@@ -58,7 +58,7 @@ We will extend the rule of types of tiny to let us define a variable of array ty
 
 .. productionlist:: Tiny8
     type:   "int" | "float" 
-        : | `type`"[""`expression`"]" 
+        : | `type` "[" `expression` "]" 
         : | `type` "[" `expression` ":" `expression` "]"
 
 
@@ -197,7 +197,7 @@ Minor issue first
 
 Before we proceed we need to fix an issue that may cause us problems when we play with arrays: We want all the declarations have a DECL_CONTEXT. Current code only sets it for LABEL_DECL but all declarations (except those that are global) should have some DECL_CONTEXT. In our case VAR_DECLs and the RESULT_DECL of main are missing the DECL_CONTEXT. We have to set it to the FUNCTION_DECL of the main function (this effectively makes them local variables of the main function).
 
-.. code-block:: shell-session
+.. code-block:: diff
 
   diff --git a/gcc/tiny/tiny-parser.cc b/gcc/tiny/tiny-parser.cc
   index 709b517..0ce295d 100644
@@ -223,7 +223,7 @@ Lexer
 
 For the lexer we only have to add three tokens [ and ]. The remaining punctuation required for arrays (, ) and : were already in tiny.
 
-.. code-block:: shell-session
+.. code-block:: diff
 
   diff --git a/gcc/tiny/tiny-token.h b/gcc/tiny/tiny-token.h
   index d469980..2d81386 100644
@@ -236,6 +236,8 @@ For the lexer we only have to add three tokens [ and ]. The remaining punctuatio
                                                                                   \
     TINY_TOKEN_KEYWORD (AND, "and")                                              \
     TINY_TOKEN_KEYWORD (DO, "do")                                                \
+
+.. code-block:: diff
 
   diff --git a/gcc/tiny/tiny-lexer.cc b/gcc/tiny/tiny-lexer.cc
   index 1b9c8be..b67470d 100644
@@ -362,8 +364,9 @@ Array element
 
 Now we have to add support for array elements in expressions. Recall that we use a Pratt parser to recognize them. We can recognize an array element by just acting as if [ were a binary operation with very high priority.
 
-.. code-block:: shell-session
-  
+ 
+.. code-block:: diff
+
   diff --git a/gcc/tiny/tiny-parser.cc b/gcc/tiny/tiny-parser.cc
   index 0ce295d..37c6397 100644
   @@ -1157,6 +1220,8 @@ enum binding_powers
