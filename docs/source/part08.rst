@@ -6,27 +6,41 @@ Datatype Arrays
   Work in progress
 
 
-Now that we have the basic language set implemented we can consider adding new features to it. Today we will add arrays.
+Now that we have the basic language set implemented we can consider adding 
+new features to it. Today we will add arrays.
 
 Array type and array values
 ===========================
 
-An important element of programming languages is their type system. Type systems are crucial in the semantics of programming languages and are an actively researched topic nowadays. tiny, so far, has a very simple type system: there are only four types (int, float, boolean and string). We can express lots of things already with those types but it may fall short in some contexts.
+An important element of programming languages is their type system. Type 
+systems are crucial in the semantics of programming languages and are an 
+actively researched topic nowadays. tiny, so far, has a very simple type 
+system: there are only four types (int, float, boolean and string). We can 
+express lots of things already with those types but it may fall short in 
+some contexts.
 
-A type system is a set of types along with the rules that govern them. An element of the type system, i.e. a type, will be denoted by τ. As we said, tiny has four types.
+A type system is a set of types along with the rules that govern them. 
+An element of the type system, i.e. a type, will be denoted by τ. As we 
+said, tiny has four types.
 
 .. productionlist:: Tiny8
       τ: "int" | "float" | "bool" | "string"
 
 
-A type is a set of values: int values are the 32 bit signed integers, float values are the reals encoded by IEEE 754 Binary32, bool has only two values true or false and values of string type are (possibly empty) finite sequences of characters.
+A type is a set of values: int values are the 32 bit signed integers, 
+float values are the reals encoded by IEEE 754 Binary32, bool has only 
+two values true or false and values of string type are (possibly empty) 
+finite sequences of characters.
 
-Now we want to add an array type. An array type has a size and an element type. The size is an integer expression of the language, that we will denote as ε that evaluates to a positive (nonzero) integer.
+Now we want to add an array type. An array type has a size and an element 
+type. The size is an integer expression of the language, that we will 
+denote as ε that evaluates to a positive (nonzero) integer.
 
 .. productionlist:: Tiny8a
   τ: "array" ε τ
 
-This means that our typesystem has a type array constructed using an integer expression ε (the size) and a type τ (the element type).
+This means that our typesystem has a type array constructed using an integer 
+expression ε (the size) and a type τ (the element type).
 
 After this addition, our typesystem looks like this.
 
@@ -37,9 +51,17 @@ After this addition, our typesystem looks like this.
    : | "string"
    : | "array" ε τ
 
-What are, thus, the values of a type array ε τ? A value of array type is a set of values of type τ called the elements of the array. There is an integer associated to each element, called the index. The set of indexes of the elements is such that they form an ascending sequence, where each index is the previous one plus one. The first index is called the lower bound (say it L) and the last one is the upper bound (say it U). This way it holds that U - L + 1 = ε.
+What are, thus, the values of a type array ε τ? A value of array type is 
+a set of values of type τ called the elements of the array. There is an 
+integer associated to each element, called the index. The set of indexes 
+of the elements is such that they form an ascending sequence, where each 
+index is the previous one plus one. The first index is called the lower 
+bound (say it L) and the last one is the upper bound (say it U). This way 
+it holds that U - L + 1 = ε.
 
-I know that at this point this seems unnecessarily theoretic but let's make a simple example. Consider array 3 float. A possible array value could be the following one, where L = 0 and U = 2.
+I know that at this point this seems unnecessarily theoretic but let's make 
+a simple example. Consider array 3 float. A possible array value could be 
+the following one, where L = 0 and U = 2.
 
 〈0 → 1.2, 1 → 2.3, 2 → 2.3〉
 
@@ -47,7 +69,8 @@ for another example where L = 4 and U = 6
 
 〈4 → 1.2, 5 → 2.3, 6 → 2.3〉
 
-The indexes form a growing sequence wherer each index equals the previous one plus one. The following would not be the value of an array.
+The indexes form a growing sequence wherer each index equals the previous 
+one plus one. The following would not be the value of an array.
 
 〈12 → 1.2, 25 → 2.3, 42 → 2.3〉
 
@@ -58,11 +81,12 @@ We will extend the rule of types of tiny to let us define a variable of array ty
 
 .. productionlist:: Tiny8
     type:   "int" | "float" 
-        : | `type`"[""`expression`"]" 
+        : | `type` "[" `expression` "]" 
         : | `type` "[" `expression` ":" `expression` "]"
 
 
-We will also need to extend expressions so we can designate one of the elements of the array.
+We will also need to extend expressions so we can designate one of the 
+elements of the array.
 
 .. productionlist:: Tiny8
   primary〉: "(" expression ")"
@@ -75,15 +99,20 @@ We will also need to extend expressions so we can designate one of the elements 
 
 Semantics
 ---------
-A 〈type〉 of the form 〈type〉[〈expression〉]
 
-designates an array type. If 〈type〉 is not an array then the designated type is just array 〈type〉 〈expression〉. The set of indexes range from 0 to 〈expression〉 minus one.
+A :token:`~Tiny8:type` of the form :token:`~Tiny8:type`\ [:token:`~Tiny:expression`\ ]
+
+designates an array type. If :token:`~Tiny8:type` is not an array then the designated 
+type is just array :token:`~Tiny8:type` :token:`~Tiny:expression`. The set of indexes 
+range from 0 to :token:`~Tiny:expression` minus one.
 
 .. code-block:: c
 
   var a : int[10];       # array 10 int
 
-Things are a bit more complicated if 〈type〉 is an array because now there are two possible interpretations. In the comments below, parentheses are used only to express grouping
+Things are a bit more complicated if :token:`~Tiny8:type` is an array because now there 
+are two possible interpretations. In the comments below, parentheses are used only to 
+express grouping
 
 .. code-block:: c
 
@@ -91,15 +120,21 @@ Things are a bit more complicated if 〈type〉 is an array because now there ar
                         #    or
                         # array 20 (array 10 int) ?
 
-We will chose the first interpretation. Some programming languages, like Fortran, choose the second one.
+We will chose the first interpretation. Some programming languages, like Fortran, 
+choose the second one.
 
-For the case when 〈type〉 is an array, let's assume it is of the form array ε0 τ0. Then the designated type will be array ε0 (array τ0 〈expression〉)
+For the case when type is an array, let's assume it is of the form array ε0 τ0. 
+Then the designated type will be array ε0 (array τ0 〈expression〉)
 
 The other syntax is similar.
 
-〈type〉 → 〈type〉(〈expression0〉:〈expression1〉)
+.. productionlist:: Tiny8d
+    type: `type` "[" `expression0` ":" `expression1` "]"
 
-Now ε is 〈expression1〉 - 〈expression0〉 + 1 and the indexes of the array range from 〈expression0〉 to 〈expression1〉 (both ends included). 〈expression1〉 must be larger or equal than 〈expression0〉, otherwise this is an error.
+
+Now ε is :token:`~Tiny:expression`\ 1 - :token:`~Tiny:expression`\ 0 + 1 and the indexes of 
+the array range from expression0 to expression1 (both ends included). expression1
+must be larger or equal than expression0, otherwise this is an error.
 
 .. code-block:: c
 
@@ -108,11 +143,16 @@ Now ε is 〈expression1〉 - 〈expression0〉 + 1 and the indexes of the array
   var c1 : int(5:5);       # array 1 int
   var d1 : int(-5:-3)      # array 3 int
 
-A 〈primary〉 of the form
+A :token:`~Tiny8:primary` of the form
 
-〈array-element〉 → 〈primary〉[〈expression〉]
+.. productionlist:: Tiny8e
+  arrayelement: `primary` "[" `expression` "]"
 
-designates a single element of 〈primary〉. The type of 〈primary〉 must be array, otherwise this is an error. The 〈expression〉 must be an expression of integer type the value of which must be contained in the range of indexes of the array type, otherwise this is an error. The type of an array element is the same as the element type of the array.
+designates a single element of primary. The type of primary must be array, 
+otherwise this is an error. The expression must be an expression of integer 
+type the value of which must be contained in the range of indexes of the 
+array type, otherwise this is an error. The type of an array element is the 
+same as the element type of the array.
 
 Given the declarations of a1, b1, c1, d1 above, valid array elements are.
 
@@ -128,7 +168,11 @@ Given the declarations of a1, b1, c1, d1 above, valid array elements are.
   d1[-4]
   d1[-3]
 
-Primaries of the form 〈identifier〉 and 〈array-element〉 can be used in the left hand side of an assignment and in the read statement. We will call this subset of expressions as variables. Some programming languages, like C and C++, name these expressions lvalues (or L-values) for historical reasons: an lvalue can appear in the left hand side of an assignment.
+Primaries of the form identifier and array-element can be used in the left hand 
+side of an assignment and in the read statement. We will call this subset of 
+expressions as variables. Some programming languages, like C and C++, name 
+these expressions lvalues (or L-values) for historical reasons: an lvalue can 
+appear in the left hand side of an assignment.
 
 .. productionlist:: Tiny8
   assignment: `variable` ":=" `expression` ";"
@@ -141,7 +185,8 @@ Primaries of the form 〈identifier〉 and 〈array-element〉 can be used in th
   a1[1] := 3;
   read a1[2];
 
-This opens up many possibilities. For instance now we can write a tiny program (bubble.tiny) that sorts a given set of numbers.
+This opens up many possibilities. For instance now we can write a tiny 
+program (bubble.tiny) that sorts a given set of numbers.
 
 .. code-block:: c
   
@@ -197,7 +242,7 @@ Minor issue first
 
 Before we proceed we need to fix an issue that may cause us problems when we play with arrays: We want all the declarations have a DECL_CONTEXT. Current code only sets it for LABEL_DECL but all declarations (except those that are global) should have some DECL_CONTEXT. In our case VAR_DECLs and the RESULT_DECL of main are missing the DECL_CONTEXT. We have to set it to the FUNCTION_DECL of the main function (this effectively makes them local variables of the main function).
 
-.. code-block:: shell-session
+.. code-block:: diff
 
   diff --git a/gcc/tiny/tiny-parser.cc b/gcc/tiny/tiny-parser.cc
   index 709b517..0ce295d 100644
@@ -223,7 +268,7 @@ Lexer
 
 For the lexer we only have to add three tokens [ and ]. The remaining punctuation required for arrays (, ) and : were already in tiny.
 
-.. code-block:: shell-session
+.. code-block:: diff
 
   diff --git a/gcc/tiny/tiny-token.h b/gcc/tiny/tiny-token.h
   index d469980..2d81386 100644
@@ -236,6 +281,8 @@ For the lexer we only have to add three tokens [ and ]. The remaining punctuatio
                                                                                   \
     TINY_TOKEN_KEYWORD (AND, "and")                                              \
     TINY_TOKEN_KEYWORD (DO, "do")                                                \
+
+.. code-block:: diff
 
   diff --git a/gcc/tiny/tiny-lexer.cc b/gcc/tiny/tiny-lexer.cc
   index 1b9c8be..b67470d 100644
@@ -362,8 +409,9 @@ Array element
 
 Now we have to add support for array elements in expressions. Recall that we use a Pratt parser to recognize them. We can recognize an array element by just acting as if [ were a binary operation with very high priority.
 
-.. code-block:: shell-session
-  
+ 
+.. code-block:: diff
+
   diff --git a/gcc/tiny/tiny-parser.cc b/gcc/tiny/tiny-parser.cc
   index 0ce295d..37c6397 100644
   @@ -1157,6 +1220,8 @@ enum binding_powers
