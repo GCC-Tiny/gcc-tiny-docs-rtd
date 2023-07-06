@@ -19,7 +19,7 @@ standardized or defined elsewhere but we will not start from scratch.
 
 
 Our tiny implementation will be based on the 
-`language description available <http://www.program-transformation.org/Sts/TinyImperativeLanguage>`_
+`language description available <https://www.program-transformation.org/Sts/TinyImperativeLanguage>`_
 in the wiki of Software Transformation Systems.
 
 Programming languages have three facets that we have to consider:
@@ -42,9 +42,6 @@ Syntax
 A tiny program is composed by a, possibly empty, sequence of statements. This 
 means that an empty program is a valid tiny program. In this syntax description 
 
-.. @grammar{name} means a part of the language and @code{*} means the preceding element zero or more times.
-
-
 In tiny there are 7 kinds of statements. In this syntax description a vertical 
 bar is used to separate alternatives
 
@@ -54,8 +51,6 @@ bar is used to separate alternatives
 
 
 A declaration is used to introduce the name of a variable and its type. 
-.. TODO In this syntax description a bold monospaced font face like this is used 
-.. to denote keywords or verbatim lexical elements.
 
 Our language will support, for the moment, only two types for variables.
 
@@ -128,12 +123,15 @@ This is the form of a write statement.
 .. productionlist:: Tiny
     write: "write" `expression` ";"
 
-An expression is either a primary, a prefix unary operator and its operand or a binary infix 
-operator with a left hand side operand and a right hand side operand.
+An expression is either a primary, a prefix unary operator and its operand 
+or a binary infix operator with a left hand side operand and a right hand 
+side operand.
 
 
 .. productionlist:: Tiny
-    expression: `primary` | `unaryop` `expression` | `expression` `binaryop` `expression`
+    expression:   `primary` 
+              : | `unaryop` `expression` 
+              : | `expression` `binaryop` `expression`
 
 
 A primary can be a parenthesized expression, an identifier, an integer literal, 
@@ -141,7 +139,11 @@ a float literal or a string literal. In this syntax description + means the
 preceding element one or more times.
 
 .. productionlist:: Tiny
-    primary: "(" `expression` ")"  | `identifier` | `integerliteral` | `floatliteral` | `stringliteral`
+    primary: "(" `expression` ")"  
+           : | `identifier` 
+           : | `integerliteral` 
+           : | `floatliteral` 
+           : | `stringliteral`
     integerliteral: `digit`+
     floatliteral: `digit`+ "." `digit`* | "." `digit`+
     stringliteral: "\"" any-character-except-newline-or-double-quote* "\""
