@@ -13,22 +13,30 @@ Record types
 Before we added arrays to tiny, the value of our variables was simple, atomic, non-structured at all. When we introduced arrays we let a single variable denote several values, but all the values have to be of the same type. We are missing the possibility of representing several values of different types: we need a record type (or tuple type).
 
 Record types are constructed using an ordered set of types. We will need to refer the elements of such set in some way. We could access the field using some index derived from its order (e.g. the first element could be indexed using a zero, the second element using one). Usually, though, the elements of the record are given names, so the name can be used to refer to the element. While both approaches are feasible using names is probably easier for the programmer. In tiny we will use names.
+
 Syntax
+------
 
 Similar to arrays, we will need special syntax to define a record type. A record type is made of a sequence of pairs of names and types that we will call fields. First let's see how to declare a field.
 
-  〈field-declaration〉 → 〈identifier〉 : 〈type〉 ;
+.. productionlist:: Tiny11
+  fielddeclaration: `identifier` ":" `type` ";"
 
 A field declaration has the same syntax as a variable/type declaration but without an initial var/type. A keyword is not needed because a field declaration will always appear inside a record type.
 Recall that * means the previous element of the language repeated zero or more times
 
-  〈type〉 → record 〈field-declaration〉* end
+.. productionlist:: Tiny11
+  type: "record" `fielddeclaration`* "end"
 
 For instance we can declare a variable with a record type made of two floats x and y, like this.
+
+ .. code-block:: c
 
   var one_point : record x : float; y : float; end;
 
 In chapter 10 we introduced type declarations, so we can declare a point type of record type.
+
+ .. code-block:: c
 
   type point : record x : float; y : float; end;
 
@@ -41,14 +49,16 @@ This way we can now declare several points without having to repeat the record t
 
 We need a way to access the field of a record type inside an expression or in the left hand side of an assignment. We will add a new 〈primary〉 expression.
 
-  〈primary〉 → ( expression )
-     | 〈identifier〉
-     | 〈integer-literal〉
-     | 〈float-literal〉
-     | 〈string-literal〉
-     | 〈array-element〉
-     | 〈field-access〉
-  〈field-access〉 → 〈primary〉 . 〈identifier〉
+.. productionlist:: Tiny11
+  primary: "(" `expression` ")"
+         : | `identifier`
+         : | `integerliteral`
+         : | `boolliteral`
+         : | `floatliteral`
+         : | `stringliteral`
+         : | `arrayelement`
+         : | `fieldaccess`
+  fieldaccess: `primary` "." `identifier`
 
 For instance, fields of p1 and p2 can be accessed like this.
 
