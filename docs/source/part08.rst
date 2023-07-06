@@ -129,7 +129,7 @@ Then the designated type will be array ε0 (array τ0 〈expression〉)
 The other syntax is similar.
 
 .. productionlist:: Tiny8d
-    type: `type` "[" `expression0` ":" `expression1` "]"
+    type: `type` "[" `expression`\ 0 ":" `expression`\ 1 "]"
 
 
 Now ε is :token:`~Tiny:expression`\ 1 - :token:`~Tiny:expression`\ 0 + 1 and the indexes of 
@@ -240,7 +240,13 @@ Adding support for arrays to our front end is not too hard.
 Minor issue first
 -----------------
 
-Before we proceed we need to fix an issue that may cause us problems when we play with arrays: We want all the declarations have a DECL_CONTEXT. Current code only sets it for LABEL_DECL but all declarations (except those that are global) should have some DECL_CONTEXT. In our case VAR_DECLs and the RESULT_DECL of main are missing the DECL_CONTEXT. We have to set it to the FUNCTION_DECL of the main function (this effectively makes them local variables of the main function).
+Before we proceed we need to fix an issue that may cause us problems when 
+we play with arrays: We want all the declarations have a DECL_CONTEXT. 
+Current code only sets it for LABEL_DECL but all declarations (except those 
+that are global) should have some DECL_CONTEXT. In our case VAR_DECLs and 
+the RESULT_DECL of main are missing the DECL_CONTEXT. We have to set it to 
+the FUNCTION_DECL of the main function (this effectively makes them local 
+variables of the main function).
 
 .. code-block:: diff
 
@@ -266,7 +272,8 @@ Before we proceed we need to fix an issue that may cause us problems when we pla
 Lexer
 -----
 
-For the lexer we only have to add three tokens [ and ]. The remaining punctuation required for arrays (, ) and : were already in tiny.
+For the lexer we only have to add three tokens [ and ]. The remaining 
+punctuation required for arrays (, ) and : were already in tiny.
 
 .. code-block:: diff
 
@@ -307,7 +314,9 @@ Parser
 Array type
 ^^^^^^^^^^
 
-First let's see how to parse a type that designates an array. In member function Parser::parse_type we cannot just return the parsed type. Instead we will keep it.
+First let's see how to parse a type that designates an array. In member 
+function Parser::parse_type we cannot just return the parsed type. Instead 
+we will keep it.
 
 .. code-block:: diff
   
@@ -336,7 +345,11 @@ First let's see how to parse a type that designates an array. In member function
         break;
       }
 
-Now we will start parsing the indexes ranges. We will have a list of pairs of expressions, each pair denoting the lower and the upper indexes of the array type. For arrays of the form [e] we will set the lower bound to zero and the upper bound to the e - 1. For arrays of the form (e0:e1), the lower and the upper will be e0 and e1 respectively.
+Now we will start parsing the indexes ranges. We will have a list of pairs of 
+expressions, each pair denoting the lower and the upper indexes of the array 
+type. For arrays of the form [e] we will set the lower bound to zero and the 
+upper bound to the e - 1. For arrays of the form (e0:e1), the lower and the 
+upper will be e0 and e1 respectively.
 
 .. code-block:: diff
   
@@ -399,15 +412,33 @@ Now we can start building the array type.
   +
   +  return type;
 
-Due to the semantics of the array types described above, we have to traverse the list in reverse order. We get the lower and upper expressions and we fold it (lines 4 to 5). This GCC function will attempt to simplify the expression if possible. For instance 1+2*3 will become 7. Now we build a GCC range type. A range type is a type the values of which are integers in the specified range. In this case we use the lower and the upper to create the range type (lines 8 to 10). A range type is represented as a GENERIC tree with tree code RANGE_TYPE. Once we have this range type, we take the current type (which may be at this point an integer type, a float type or another array type) and the range type to build an array type (line 11). An array type is represented as a GENERIC tree with three code ARRAY_TYPE.
+Due to the semantics of the array types described above, we have to traverse 
+the list in reverse order. We get the lower and upper expressions and we fold 
+it (lines 4 to 5). This GCC function will attempt to simplify the expression 
+if possible. For instance 1+2*3 will become 7. Now we build a GCC range type. 
+A range type is a type the values of which are integers in the specified range. 
+In this case we use the lower and the upper to create the range type 
+(lines 8 to 10). A range type is represented as a GENERIC tree with tree code 
+RANGE_TYPE. Once we have this range type, we take the current type (which may 
+be at this point an integer type, a float type or another array type) and the 
+range type to build an array type (line 11). An array type is represented as a 
+GENERIC tree with three code ARRAY_TYPE.
 
 .. note::
-  We currently do not check that the ε of the array type is actually a positive, nonzero, integer value. If the bounds of the array are constant, such error can be detected at compile time (the earlier an error is detected the better). If the bounds are non-constant then the semantics of the language should specify what to do during the execution of the program. Tiny semantics simply say that it is an error. Since we have not clarified what "to be an error" is, we will not do anything special yet.
+  We currently do not check that the ε of the array type is actually a positive,
+  nonzero, integer value. If the bounds of the array are constant, such error 
+  can be detected at compile time (the earlier an error is detected the better). 
+  If the bounds are non-constant then the semantics of the language should 
+  specify what to do during the execution of the program. Tiny semantics 
+  simply say that it is an error. Since we have not clarified what 
+  "to be an error" is, we will not do anything special yet.
 
 Array element
 -------------
 
-Now we have to add support for array elements in expressions. Recall that we use a Pratt parser to recognize them. We can recognize an array element by just acting as if [ were a binary operation with very high priority.
+Now we have to add support for array elements in expressions. Recall that 
+we use a Pratt parser to recognize them. We can recognize an array element 
+by just acting as if [ were a binary operation with very high priority.
 
  
 .. code-block:: diff
@@ -470,9 +501,21 @@ The binary handler is actually rather straightforward.
                       Tree(), Tree());
   }
 
-Recall that a binary handler has the lexer positioned right after the infix operator. This means that we have already consumed [. So we have to parse the integer expression enclosed by the square brackets (line 4). Recall that any token unknown to the Pratt parser has the lowest possible binding power, this means that parsing the integer expression will stop when it encounters the ]. This behaviour is actually the one we want. We still have to consume the ] (line 8). Now we verify if the left operand has array type (line 9). If it does not, this is an error. If it does, we compute the type of the array element. To do this we have to use the accessor TREE_TYPE from GCC which given an ARRAY_TYPE will return its element type (line 14). Finally we build the GENERIC tree ARRAY_REF that repreents an access the array element (line 16).
+Recall that a binary handler has the lexer positioned right after the 
+infix operator. This means that we have already consumed [. So we have 
+to parse the integer expression enclosed by the square brackets (line 4). 
+Recall that any token unknown to the Pratt parser has the lowest 
+possible binding power, this means that parsing the integer expression 
+will stop when it encounters the ]. This behaviour is actually the one 
+we want. We still have to consume the ] (line 8). Now we verify if the l
+eft operand has array type (line 9). If it does not, this is an error. 
+If it does, we compute the type of the array element. To do this we have 
+to use the accessor TREE_TYPE from GCC which given an ARRAY_TYPE will 
+return its element type (line 14). Finally we build the GENERIC tree 
+ARRAY_REF that repreents an access the array element (line 16).
 
-Checking if a tree in GENERIC represents an array type is done using this auxiliar function.
+Checking if a tree in GENERIC represents an array type is done using 
+this auxiliar function.
 
 .. code-block:: c
   
@@ -483,12 +526,17 @@ Checking if a tree in GENERIC represents an array type is done using this auxili
     return type.get_tree_code () == ARRAY_TYPE;
   }
 
-Likewise with ε, we are not verifying that the expression of the array element evaluates to an integer contained in the range of indexes of the declared array. Recall that the semantics of tiny are not complete enough regarding errors.
+Likewise with ε, we are not verifying that the expression of the array 
+element evaluates to an integer contained in the range of indexes of 
+the declared array. Recall that the semantics of tiny are not complete 
+enough regarding errors.
 
 Final touches
 -------------
 
-As we said above we allow variables and array elements in the expression of a read statement and in the left hand side of an assignment. Let's first create a couple of functions that expression r that check this for us.
+As we said above we allow variables and array elements in the expression 
+of a read statement and in the left hand side of an assignment. Let's 
+first create a couple of functions that expression r that check this for us.
 
 .. code-block:: c
   
@@ -514,7 +562,9 @@ As we said above we allow variables and array elements in the expression of a re
     return parse_expression_naming_variable();
   }
 
-Since we allow the same thing in both cases, parse_lhs_assignment_expression just forwards to parse_expression_naming_variable. Now we can update parse_assignment.
+Since we allow the same thing in both cases, parse_lhs_assignment_expression 
+just forwards to parse_expression_naming_variable. Now we can update 
+parse_assignment.
 
 .. code-block:: diff
   
@@ -572,11 +622,16 @@ Since we allow the same thing in both cases, parse_lhs_assignment_expression jus
 Language hook
 -------------
 
-If we want to use arrays with non-constant size, GCC will invoke a language hook when internally computing the size of the array. This is for those cases where the language supports variable-sized types in a global scope. In this case the hook must return true, false otherwise.
+If we want to use arrays with non-constant size, GCC will invoke a 
+language hook when internally computing the size of the array. This 
+is for those cases where the language supports variable-sized types 
+in a global scope. In this case the hook must return true, false otherwise.
 
-Since in tiny where everything is conceptually inside an implicit main function, the binding must return false.
+Since in tiny where everything is conceptually inside an implicit main 
+function, the binding must return false.
 
-Our hook, currently crashes the compiler, so we need to adjust it first. Recall that this hook is in tiny1.cc.
+Our hook, currently crashes the compiler, so we need to adjust it first. 
+Recall that this hook is in tiny1.cc.
 
 .. code-block:: diff
   
