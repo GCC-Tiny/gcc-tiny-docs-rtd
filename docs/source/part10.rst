@@ -12,7 +12,8 @@ Variable declarations
 
 Our current version of tiny has the concept of variable declaration, where a name is introduced in the program to represent a variable value type.
 
-   〈declaration〉 → var 〈identifier〉 : 〈type〉 ;
+.. productionlist:: Tiny10a
+    declartion: "var" `identifier` ":" `type` ;
 
 For example, in the code below:
 
@@ -30,21 +31,24 @@ Syntax
 
 First we will generalize a bit the 〈declaration〉 rules to encompass 〈variable-declaration〉 and 〈type-declaration〉.
 
-   〈declaration〉 → 〈variable-declaration〉 | 〈type-declaration〉
+.. productionlist:: Tiny10b
+    declartion: `variabledeclaration` | `typedeclaration`
+
 
 Now we can define the syntax of type-declarations.
 
-   〈variable-declaration〉 → var 〈identifier〉 : 〈type〉 ;
-   〈type-declaration〉 → type 〈identifier〉 : 〈type〉 ;
+.. productionlist:: Tiny10a
+   variabledeclaration: "var" `identifier` ":" `type` ";"
+   typedeclaration: "type" `identifier` ":" `type` ";""
+
 
 Since we want to be able to use the type declaration where types are specified, we need to extend our syntax for 〈type〉 (note the addition of 〈identifier〉 after bool).
 
-   〈type〉 → int
-     | float
-     | bool
-     | 〈identifier〉
-     | 〈type〉[〈expression〉]
-     | 〈type〉(〈expression〉:〈expression〉)
+.. productionlist:: Tiny10a
+    type:   "int" | "float" | "bool"
+        : | `identifier`
+        : | `type` "[" `expression` "]" 
+        : | `type` "[" `expression` ":" `expression` "]"
 
 Semantics
 ---------
