@@ -5,12 +5,14 @@ Datatype Type Names
 .. note:: 
   Work in progress
 
-Today we will add a relatively simple feature that will be very useful for a future extension: type declarations.
+Today we will add a relatively simple feature that will be very useful for a 
+future extension: type declarations.
 
 Variable declarations
 =====================
 
-Our current version of tiny has the concept of variable declaration, where a name is introduced in the program to represent a variable value type.
+Our current version of tiny has the concept of variable declaration, where a name 
+is introduced in the program to represent a variable value type.
 
 .. productionlist:: Tiny10a
     declartion: "var" `identifier` ":" `type` ;
@@ -22,14 +24,18 @@ For example, in the code below:
    var x : int;
    x := 3;
 
-After this variable declaration, the name x can be used as a variable: inside an expression or in the left hand side of an assignment.
+After this variable declaration, the name x can be used as a variable: inside an 
+expression or in the left hand side of an assignment.
 
-But what if we were able to declare things that are not only variables, like types? Associate to a name a type so we can use the type where a type is expected? This is what we are doing today: we are introducing type declarations.
+But what if we were able to declare things that are not only variables, like types? 
+Associate to a name a type so we can use the type where a type is expected? This is 
+what we are doing today: we are introducing type declarations.
 
 Syntax
 ------
 
-First we will generalize a bit the 〈declaration〉 rules to encompass 〈variable-declaration〉 and 〈type-declaration〉.
+First we will generalize a bit the :token:`~Tiny10b:declaration` rules to encompass 
+:token:`~Tiny10b:variabledeclaration` and :token:`~Tiny10b:typedeclaration`.
 
 .. productionlist:: Tiny10b
     declartion: `variabledeclaration` | `typedeclaration`
@@ -37,14 +43,16 @@ First we will generalize a bit the 〈declaration〉 rules to encompass 〈varia
 
 Now we can define the syntax of type-declarations.
 
-.. productionlist:: Tiny10a
+.. productionlist:: Tiny10b
    variabledeclaration: "var" `identifier` ":" `type` ";"
    typedeclaration: "type" `identifier` ":" `type` ";""
 
 
-Since we want to be able to use the type declaration where types are specified, we need to extend our syntax for 〈type〉 (note the addition of 〈identifier〉 after bool).
+Since we want to be able to use the type declaration where types are specified, 
+we need to extend our syntax for :token:`~Tiny10b:type` (note the addition of 
+:token:`~Tiny:identifier` after bool).
 
-.. productionlist:: Tiny10a
+.. productionlist:: Tiny10b
     type:   "int" | "float" | "bool"
         : | `identifier`
         : | `type` "[" `expression` "]" 
@@ -53,9 +61,17 @@ Since we want to be able to use the type declaration where types are specified, 
 Semantics
 ---------
 
-If a variable declaration introduce a variable name, a type declaration introduces a type name. The same rules we use for variable names apply for type declaration names. We need a few restrictions though. The 〈identifier〉 of a type declaration cannot appear in the 〈type〉 of its own 〈type-declaration〉 (e.g. type T : T[10]; is not valid). A type name can only be used where a type is expected, this means that it cannot be used inside an expression or the left hand side of an assignment. Finally, a name can either be a variable name or a type name but not both.
+If a variable declaration introduce a variable name, a type declaration introduces 
+a type name. The same rules we use for variable names apply for type declaration 
+names. We need a few restrictions though. The :token:`~Tiny:identifier` of a type declaration 
+cannot appear in the type of its own type declaration 
+(e.g. type T : T[10]; is not valid). A type name can only be used where a type 
+is expected, this means that it cannot be used inside an expression or the 
+left hand side of an assignment. Finally, a name can either be a variable 
+name or a type name but not both.
 
-The interpretation of using a type name inside a 〈type〉 is simple: it denotes the 〈type〉 of the corresponding 〈type-declaration〉 of that type name.
+The interpretation of using a type name inside a type is simple: it 
+denotes the type of the corresponding type declaration of that type name.
 
 Implementation
 --------------
@@ -65,7 +81,8 @@ With all that knowledge, we can start implementing type names.
 Lexer
 -----
 
-We are introducing a new token type. This is easy, we just add it to our list of token keywords.
+We are introducing a new token type. This is easy, we just add it to 
+our list of token keywords.
 
 .. code-block:: diff
 
@@ -87,7 +104,8 @@ Our existing lexer machinery will do the rest.
 Parser
 ------
 
-This part is as usual a bit more involved. First we need to recognize a new declaration.
+This part is as usual a bit more involved. First we need to recognize 
+a new declaration.
 
 .. code-block:: diff
 
@@ -98,7 +116,8 @@ This part is as usual a bit more involved. First we need to recognize a new decl
       Tree parse_variable_declaration ();
    +  Tree parse_type_declaration ();
 
-When parsing a statement, if we see a token type it means that a type-declaration starts.
+When parsing a statement, if we see a token type it means that a 
+type declaration starts.
 
 .. code-block:: diff
 
@@ -153,9 +172,13 @@ The implementation is pretty straightforward...
    +
    +  skip_token (Tiny::SEMICOLON);
 
-... except for a detail: we need to create a type name. This means that the scope of names will contain two different kinds of names: variable names and type names. So before we can continue we will need to be able to distinguish the different kinds of names.
+... except for a detail: we need to create a type name. This means that the 
+scope of names will contain two different kinds of names: variable names and 
+type names. So before we can continue we will need to be able to distinguish 
+the different kinds of names.
 
-This is not very complicated, though, it is just a matter of extending or Symbol class with a SymbolKind field.
+This is not very complicated, though, it is just a matter of extending or Symbol 
+class with a SymbolKind field.
 
 .. code-block:: diff
 
@@ -195,7 +218,9 @@ This is not very complicated, though, it is just a matter of extending or Symbol
       Tree decl;
    };
 
-Now it is mandatory to specify the kind of Symbol when we create it, so parse_variable_declaration and query_variable in tiny-parser.cc will have to be updated.
+Now it is mandatory to specify the kind of Symbol when we create it, so 
+parse_variable_declaration and query_variable in tiny-parser.cc will have 
+to be updated.
 
 .. code-block:: diff
 
@@ -223,7 +248,8 @@ Now it is mandatory to specify the kind of Symbol when we create it, so parse_va
       return sym;
    }
 
-Now we can complete the implementation of parse_type_declaration that we left halfways above.
+Now we can complete the implementation of parse_type_declaration that 
+we left halfways above.
 
 .. code-block:: diff
 
@@ -253,9 +279,17 @@ Now we can complete the implementation of parse_type_declaration that we left ha
    +  return stmt;
    +}
 
-The implementation is pretty identical to parse_variable_declaration (we could of course refactor the code to avoid some duplication here) but instead of a variable name we create a type name. In GCC a declaration of a type is represented using a node with tree code TYPE_DECL. That node can then be used in the TREE_TYPE of any expression or declaration (including another TYPE_DECL).
+The implementation is pretty identical to parse_variable_declaration 
+(we could of course refactor the code to avoid some duplication here) 
+but instead of a variable name we create a type name. In GCC a declaration 
+of a type is represented using a node with tree code TYPE_DECL. That node 
+can then be used in the TREE_TYPE of any expression or declaration 
+(including another TYPE_DECL).
 
-Once a type has been declared we want to use its type name. The only place where we can currently use a type name in tiny is in 〈type〉 so we will need to update parse_type. This will require a query_type function that we will see later.
+Once a type has been declared we want to use its type name. The only 
+place where we can currently use a type name in tiny is in 〈type〉 so 
+we will need to update parse_type. This will require a query_type 
+function that we will see later.
 
 .. code-block:: diff
 
@@ -275,7 +309,8 @@ Once a type has been declared we want to use its type name. The only place where
    +      }
    +      break;
 
-We will also allow the remaining part of parse_type work to work with an erroneous type in case query_type fails.
+We will also allow the remaining part of parse_type work to work with an 
+erroneous type in case query_type fails.
 
 .. code-block:: diff
 
@@ -298,7 +333,8 @@ We will also allow the remaining part of parse_type work to work with an erroneo
       return type;
    }
 
-This uses a new function called query_type similar to query_variable that does the same query in the lookup but checks the name is a type name.
+This uses a new function called query_type similar to query_variable that 
+does the same query in the lookup but checks the name is a type name.
 
 .. code-block:: diff
 
@@ -359,5 +395,6 @@ We can try our new extension.
 
 Yay!
 
-Admittedly this new extension does not look very interesting now but it will be when we add record types to the language.
+Admittedly this new extension does not look very interesting now but it will 
+be when we add record types to the language.
 
