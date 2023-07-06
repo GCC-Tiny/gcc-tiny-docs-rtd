@@ -89,12 +89,12 @@ We will also need to extend expressions so we can designate one of the
 elements of the array.
 
 .. productionlist:: Tiny8
-  primary〉: "(" expression ")"
-          : | `identifier`
-          : | `integerliteral`
-          : | `floatliteral`
-          : | `stringliteral`
-          : | `arrayelement`
+  primary: "(" expression ")"
+         : | `identifier`
+         : | `integerliteral`
+         : | `floatliteral`
+         : | `stringliteral`
+         : | `arrayelement`
   arrayelement: `primary` "[" `expression` "]"
 
 Semantics
