@@ -111,7 +111,8 @@ This is the form of a while statement.
 This is the form of a for statement.
 
 .. productionlist:: Tiny
-    for: "for"  `identifier` ":="  `expression` "to" `expression` "do" `statement`* "end" ";"
+    for: "for"  `identifier` ":="  `expression` "to" `expression` 
+    : "do" `statement`* "end" ";"
 
 This is the form of a read statement.
 
