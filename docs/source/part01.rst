@@ -100,8 +100,8 @@ This is the form of an assignment statement.
 This is the form of an if statement.
 
 .. productionlist:: Tiny
-    if: if `expression` then `statement`* end ; 
-      : if `expression` then `statement`* else `statement`* end ;
+    if:   if `expression` then `statement`* end ; 
+      : | if `expression` then `statement`* else `statement`* end ;
 
 This is the form of a while statement.
 
@@ -159,9 +159,9 @@ Unary operators have the following forms.
 Binary operators have the following forms.
 
 .. productionlist:: Tiny
-    binaryop: + | - | * | / | %  
-    : | ==  | != | < | <= | > | >=  
-    : | and | or
+    binaryop:   +   | -  | * | /  | %  
+            : | ==  | != | < | <= | > | >=  
+            : | and | or
 
 
 All binary operators associate from left to right so x ⊕ y ⊕ z is equivalent to (x ⊕ y) ⊕ z. 
@@ -192,7 +192,6 @@ newline character. It is not part of the program, it is just a lexical element t
 A tiny example program follows
 
 .. code-block::
-    :lineno-start: 10
 
     var i : int;
     for i := 0 to 10 do     # this is a comment
@@ -213,7 +212,7 @@ those mappings, that we collectivelly will call the scope. A tiny program starts
 consisting of just a single empty mapping.
 
 A declaration introduces a new entry in the top mapping of the current scope. This entry maps an 
-identifier (called the variable name) to an undefined value of the  @grammar{type} of the declaration. 
+identifier (called the variable name) to an undefined value of the  :token:`~Tiny:type` of the declaration. 
 This value is called the value of the variable. There can be up to one entry that maps an identifier 
 to a value, so declaring twice the same identifier in the same scope is an error.
 
@@ -305,7 +304,7 @@ declaration in line 9 hides it) but y does.
 
 .. note::
 
-    This kind of scoping mechanism is called static or lexical scoping.
+    This kind of scoping mechanism is called `static or lexical scoping <https://en.wikipedia.org/wiki/Scope_%28computer_science%29#Lexical_scoping>`_.
 
 An :token:`if statement <Tiny:if>` can have two forms, but the first form is equivalent to 
 if expression then statement* else end, 
