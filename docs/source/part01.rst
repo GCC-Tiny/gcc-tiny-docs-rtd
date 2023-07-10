@@ -65,9 +65,9 @@ and underscores.
 
 .. productionlist:: Tiny
     identifier: ( `letter` | `underscore` ) ( `letter` | `digit` | `underscore` )*
-    letter: "a" .. "z" | "A" .. "Z" 
-    digit: "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
-    underscore: "_"  
+    letter: a..z | A..Z 
+    digit: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+    underscore: _
 
 
 Examples of identifiers are foo, foo123, foo_123, hello_world, _foo, foo12a. 
@@ -95,35 +95,35 @@ The following two are not (in fact they are syntactically invalid).
 This is the form of an assignment statement.
 
 .. productionlist:: Tiny
-    assignment: `identifier` ":=" `expression` ";"
+    assignment: `identifier` := `expression` ;
 
 This is the form of an if statement.
 
 .. productionlist:: Tiny
-    if: "if" `expression` "then" `statement`* "end" ";" 
-      : "if" `expression` "then" `statement`* "else" `statement`* "end" ";"
+    if: if `expression` then `statement`* end ; 
+      : if `expression` then `statement`* else `statement`* end ;
 
 This is the form of a while statement.
 
 .. productionlist:: Tiny
-    while: "while" `expression` "do" `statement`* "end" ";"
+    while: while `expression` do `statement`* end ;
 
 
 This is the form of a for statement.
 
 .. productionlist:: Tiny
-    for: "for"  `identifier` ":="  `expression` "to" `expression` 
-    : "do" `statement`* "end" ";"
+    for: for  `identifier` :=  `expression` to `expression` 
+       : do `statement`* end ;
 
 This is the form of a read statement.
 
 .. productionlist:: Tiny
-    read: "read" `identifier` ";"
+    read: read `identifier` ;
 
 This is the form of a write statement.
 
 .. productionlist:: Tiny
-    write: "write" `expression` ";"
+    write: write `expression` ;
 
 An expression is either a primary, a prefix unary operator and its operand 
 or a binary infix operator with a left hand side operand and a right hand 
@@ -147,21 +147,21 @@ preceding element one or more times.
            : | `floatliteral` 
            : | `stringliteral`
     integerliteral: `digit`+
-    floatliteral: `digit`+ "." `digit`* | "." `digit`+
-    stringliteral: "\"" any-character-except-newline-or-double-quote* "\""
+    floatliteral: `digit`+ . `digit`* | . `digit`+
+    stringliteral: " any-character-except-newline-or-double-quote* "
 
 
 Unary operators have the following forms.
 
 .. productionlist:: Tiny
-    unaryop: "+" | "-" | "not"
+    unaryop: + | - | not
 
 Binary operators have the following forms.
 
 .. productionlist:: Tiny
-    binaryop: "+"  |  "-" |  "*"  |  "/"  |  "%"  
-    : |  "=="  |  "!="  |  "<" |  "<="  |  ">" |  ">="  
-    : |  "and" |  "or"
+    binaryop: + | - | * | / | %  
+    : | ==  | != | < | <= | > | >=  
+    : | and | or
 
 
 All binary operators associate from left to right so x ⊕ y ⊕ z is equivalent to (x ⊕ y) ⊕ z. 
@@ -413,7 +413,7 @@ he remainder has the same sign as the first operand). The resulting value has ty
     This is deliberately the same modulus that the C language computes.
 
 Operators <, <=, >, >=, == and != compare the (possibly coerced) first operand with the 
-possibly coerced) second operand. The comparison checks if the first operand is, 
+(possibly coerced) second operand. The comparison checks if the first operand is, 
 respectively, less than, less or equal than, greater than, greater or equal than, 
 different (not equal) or equal than the second operand. The resulting value has 
 boolean type.
