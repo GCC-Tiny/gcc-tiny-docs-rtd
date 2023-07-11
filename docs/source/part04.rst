@@ -1,3 +1,5 @@
+.. _part04:
+
 ********************
 Syntactical Analysis
 ********************
@@ -40,11 +42,12 @@ Recognizer
 There is an extense and interesting bibliography about language recognition, 
 but this is a blog not a compilers crash course so we will have to cut down 
 the explanation: we will build a recursive descent recognizer based on the 
-syntax description of part 1. If you are interested in parsing techniques an 
-excellent (and a tad bit expensive too) reference is Parsing Techniques: 
-A Practical Guide by Grune and Jacobs. 
-
-.. http://dickgrune.com/Books/PTAPG_2nd_Edition/
+syntax description of 
+:ref:`part01`
+. If you are interested in parsing techniques an 
+excellent (and a tad bit expensive too) reference is
+`Parsing Techniques: A Practical Guide by Grune and Jacobs <https://dickgrune.com/Books/PTAPG_2nd_Edition/>`_
+. 
 
 The strategy is very intuitive. Recognizing a rule like 〈declaration〉 → var 
 〈identifier〉 : 〈type〉 ; requires recognizing the elements in the right hand 
@@ -294,8 +297,9 @@ the hope that a correct statement will start there. Note that error recovery is
 always a best effort. Until the compiler is able to read the mind of the programmer, 
 it can only guess where the real error happened. It is not unlikely that a cascade 
 of errors is generated because the parsing restarts in the wrong place. It is not 
-the case of tiny but some programming languages are noticeably hard when it comes 
-to diagnosing syntactic errors.
+the case of tiny but 
+`some programming languages are noticeably hard when it comes to diagnosing syntactic errors <https://tgceec.tumblr.com/>`_
+.
 
 Parsing statements
 ==================
@@ -306,7 +310,7 @@ parse each individual statement.
 A variable declaration statement has the following form.
 
 .. productionlist:: Tiny1
-    declaration: "var" `identifier` ":" `type` ";"
+    declaration: var `identifier` : `type` ;
 
 
 So a straightforward implementation of a parser of this statement is the one below.
@@ -346,7 +350,9 @@ token has that same id. If it has, it just skips it and returns true. Otherwise
 diagnoses an error and returns false. When skip_token fails (i.e. returns false) 
 we immediately go to panic mode and give up parsing the current statement. 
 As you can see this code quickly becomes tedious and repetitive. No wonder there 
-exist tools, like ANTLR by Terence Parr, that automate the code generation of 
+exist tools, like 
+`ANTLR <http://www.antlr.org/>`_ 
+by Terence Parr, that automate the code generation of 
 recursive descent recognizers.
 
 Function skip_token simply forwards to expect_token.
@@ -386,7 +392,7 @@ When parsing a variable declaration we invoke a parse_type function,
 that parses the rule 〈type〉.
 
 .. productionlist:: Tiny1
-    type: "int" | "float"
+    type: int | float
 
 
 Its associated parsing function is rather obvious too.
@@ -420,16 +426,17 @@ Another interesting statement is the if-statement. Let's recall its syntax
 definition.
 
 .. productionlist:: Tiny1
-    if: "if" `expression` "then" `statement`* "end" ";" 
-      : "if" `expression` "then" `statement`* "else" `statement`* "end" ";"
+    if: if `expression` then `statement`* end  
+      : if `expression` then `statement`* else `statement`* end
 
 As shown, deriving a parse function for the rule 〈if〉 is not obvious because 
 the two forms share a lot of elements. It may help to split the rule 〈if〉 in 
 two rules follows.
 
 .. productionlist:: Tiny2
-    if: `ifthen` "end" | `ifthen` "else" `statement`* "end"
-    ifthen: "if" `expression` "then" `statement`*
+    if:   `ifthen` end 
+      : | `ifthen` else `statement`* end
+    ifthen: if `expression` then `statement`*
 
 From this definition it is clear that we have to parse first an if, followed by 
 an expression, followed by a then and followed by a statement sequence. In this 
@@ -515,7 +522,8 @@ have an arity, which means the number of operands they operate, and a
 "fixity" which defines the position of the operator respect its operands 
 in the syntax. Arity of most operators is either unary, a single operand, 
 or binary, two operands (some languages have ternary operators like the 
-conditional operator though they may need to include extra operators). 
+`conditional operator <https://en.wikipedia.org/wiki/%3F:>`_ 
+though they may need to include extra operators). 
 When it comes to "fixity" operators can be prefix, the operands appear 
 after the operator, or postfix, the operands appear before the operator. 
 For binary operators an extra fixity is possible called infix: the operator 
@@ -525,7 +533,9 @@ Some programming languages have only prefix operators (in some form the
 LISP family works this way) This simplifies a lot the syntactic analysis 
 as all unary expressions are of the form 〈op〉 〈operand1〉 and all binary 
 expressions of the form 〈op〉 〈operand1〉 〈operand2〉. Some notations (like 
-the Reverse Polish notation) only use postfix operators, this has the 
+the 
+`Reverse Polish notation <https://en.wikipedia.org/wiki/Reverse_Polish_notation>`_
+) only use postfix operators, this has the 
 same advantages as using only prefix operators.
 
 While using prefix or postfix notation may be OK, most programming languages,
@@ -533,7 +543,9 @@ including tiny, choose to use a notation closer, though not exactly the same,
 to the mathematical notation of arithmetic where most operators are infix. 
 Infix notation introduces an additional problem though: it is ambiguous unless 
 we define some operator priority and associativity. Operator priority, following 
-he rules of basic arithmetic, is what tells us that a * b + c is equivalent 
+he rules of 
+`basic arithmetic <https://en.wikipedia.org/wiki/Order_of_operations>`_
+, is what tells us that a * b + c is equivalent 
 to (a*b) + c and not a * (b + c). Associativity is what tells us that 
 a + b + c is (a + b) + c and not a + (b + c). Associativity is most of the time 
 left-to-right, like in the case of a + b + c, but it can be right-to-left like 
@@ -545,7 +557,9 @@ of operands if needed.
 Let's recall first the definition of expressions in tiny.
 
 .. productionlist:: Tiny1
-    expression: `primary` | `unaryop` `expression` | `expression` `binaryop` `expression`
+    expression:   `primary` 
+              : | `unaryop` `expression`
+              : | `expression` `binaryop` `expression`
 
 This definition is not very useful because it does not define the priority of 
 the operators. We defined, though, the priority of the operators in a table.
@@ -627,8 +641,9 @@ Clearly we need another strategy: priority parsing.
 
 The notion of priority appears more or less naturally in the syntax of 
 expressions. Can we use it to get a more or less sensible algorithm? 
-The answer is yes, it is called a Pratt parser and it is suprisingly 
-simple yet powerful.
+The answer is yes, it is called a 
+`Pratt parser <https://en.wikipedia.org/wiki/Pratt_parser>`_
+and it is suprisingly simple yet powerful.
 
 Pratt parser for expressions
 ============================
