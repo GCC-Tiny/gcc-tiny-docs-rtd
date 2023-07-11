@@ -5,14 +5,14 @@ Semantical Analysis and Generics I
 .. note:: 
   Work in progress
 
-In part 5 we described the objects that we will need to semantically analyze 
+In :ref:`part05` we described the objects that we will need to semantically analyze 
 a tiny program. In current part we will extend the parser of part 4 to do 
 the semantic analysis and create the GENERIC trees.
   
 Semantic values
 ===============
 
-If you recheck part 4 you will see that several parse_xxx functions returned 
+If you recheck :ref:`part04` you will see that several parse_xxx functions returned 
 a false boolean value when there was a syntax error, true otherwise. If we 
 are just checking if the input is syntactically valid this will do. But we 
 want to compute something more interesting thus we need something a bit 
@@ -31,7 +31,7 @@ Variable declaration
 Let's recall the syntax of a variable declaration.
 
 .. productionlist:: Tiny6
-  declaration: "var" `identifier` ":" `type` ";"
+  declaration: var `identifier` : `type` ;
 
 Recall that a variable declaration statement adds a new mapping for the 
 :token:`~Tiny:identifier` in the topmost mapping of the scope. Let's see 
@@ -139,7 +139,7 @@ Types
 A variable declaration has a type.
 
 .. productionlist:: Tiny6
-    type: "int" | "float"
+    type: int | float
 
 In part 5 we classified nodes in three kinds: declarations, expressions 
 and types. In GENERIC, types are represented obviously as trees. Some 
@@ -186,7 +186,7 @@ Variable assignment
 Ok, now we can declare variables. Let's assign them some value.
 
 .. productionlist:: Tiny6
-    assignment: `identifier` ":=" `expression` ";"
+    assignment: `identifier` := `expression` ;
 
 .. code-block:: c
   :linenos:
@@ -264,7 +264,9 @@ to extend it so it creates GENERIC trees that represent the expressions
 of the program.
 
 .. productionlist:: Tiny6
-    expression: `primary` | `unaryop` `expression` | `expression` `binaryop` `expression`
+    expression:   `primary` 
+              : | `unaryop` `expression`
+              : | `expression` `binaryop` `expression`
 
 
 Null denotations
@@ -285,13 +287,17 @@ null denotations handle primaries and unary operands.
       {
 
 .. productionlist:: Tiny6
-    primary: "(" `expression` ")"  | `identifier` | `integerliteral` | `floatliteral` | `stringliteral`
+    primary: "(" `expression` ")"  
+           : | `identifier`
+           : | `integerliteral`
+           : | `floatliteral`
+           : | `stringliteral`
     integerliteral: `digit`+
-    floatliteral: `digit`+ "." `digit`* | "." `digit`+
-    stringliteral: "\"" any-character-except-newline-or-double-quote* "\""
+    floatliteral: `digit`+ . `digit`* | . `digit`+
+    stringliteral: " any-character-except-newline-or-double-quote* "
 
 When we encounter an identifier, we have to look it up in the scope 
-(this was defined in part 5). The expression is just its VAR_DECL 
+(this was defined in :ref:`part05`). The expression is just its VAR_DECL 
 that we stored in the Symbol when it was declared.
 
 .. code-block:: c
@@ -330,8 +336,9 @@ integers we can just use atoi.
         tok->get_locus ());
         break;
 
-Note: we still have to check that the value represented by the token 
-lies in the valid range of the integer type. Let's ignore this for now.
+.. note:: 
+   We still have to check that the value represented by the token 
+   lies in the valid range of the integer type. Let's ignore this for now.
 
 Real literals are similar.
 
@@ -557,6 +564,7 @@ call to null_denotation or left_denotation, possibly in a recursive way).
 
 Now come a bunch of expression handlers for binary operators. We will 
 focus on the most interesting ones. You can find the remaining ones in the 
+.. TODO: link https://github.com/rofirrim/gcc-tiny/blob/master/gcc/tiny/tiny-parser.cc
 tiny parser. Let's start with the addition.
 
 .. code-block:: c
@@ -745,7 +753,7 @@ Write statement
 ---------------
 
 .. productionlist:: Tiny6
-    write: "write" `expression` ";"
+    write: write `expression` ;
 
 A write statement is not particularly complicated at first.
 
@@ -861,7 +869,6 @@ to that of the integer but requires us to convert the float value into a double
 value, because this is how it works in C.
 
 .. code-block:: c
-  :linenos:
 
     else if (expr.get_type () == float_type_node)
       {
@@ -881,13 +888,14 @@ value, because this is how it works in C.
       }
 
 To convert the float into a double we invoke the GCC convert function that will 
-require an extra file with some generic boilerplate. That file is not interesting 
+require an extra file with some generic boilerplate. 
+.. TODO: link https://github.com/rofirrim/gcc-tiny/blob/master/gcc/tiny/tiny-convert.cc
+That file is not interesting 
 enough to put it here. Alternatively a CONVERT_EXPR tree could be used instead.
 
 Finally to print a string, we just call puts.
 
 .. code-block:: c
-  :linenos:
 
     else if (is_string_type (expr.get_type ()))
       {
@@ -906,7 +914,6 @@ In contrast to printf, puts is not a variable argument function, so its type
 is constructed slightly different. Everything else is the same.
 
 .. code-block:: c
-  :linenos:
 
   Tree
   Parser::get_puts_addr ()
@@ -934,7 +941,6 @@ is constructed slightly different. Everything else is the same.
 Having handled all valid types, this completes our write statement.
 
 .. code-block:: c
-  :linenos:
 
     else
       {
@@ -960,8 +966,7 @@ will happen: a) we will push a new symbol mapping b) parse the statements
 c) pop the scope.
 
 .. code-block:: c
-  :linenos:
-
+  
   enter_scope ();
   parse_statement_seq (done);
   leave_scope ();
@@ -1002,7 +1007,6 @@ TreeStmtList is just a tiny wrapper around STATEMENT_LIST. This is a tree
 used to represent lists of statements.
 
 .. code-block:: c
-  :linenos:
 
   struct TreeStmtList
   {
@@ -1035,7 +1039,6 @@ accessor has to be used for each. To reduce the differences both have been
 wrapped in two classes that inherit from a generic one.
 
 .. code-block:: c
-  :linenos:
 
   template <typename Append> struct TreeChainBase
   {
