@@ -11,14 +11,14 @@ to give it meaning.
 
 Semantics concerns to the meaning of the program. This means that our sequence 
 of tokens, once they follow some syntax, have meaning in the context of the 
-programming language. In part 1 we gave a more or less abstract semantics of tiny. 
+programming language. In :ref:`part01` we gave a more or less abstract semantics of tiny. 
 Now, as compiler writers, it is up to us to materialize such semantics in an 
 implementation that fulfills it.
 
 GENERIC
 =======
 
-If you recall part 2, the final goal of our front end is creating a GENERIC tree 
+If you recall :ref:`part02`, the final goal of our front end is creating a GENERIC tree 
 nd handing it to the rest of the compiler. Let's talk about bit more about 
 GENERIC trees.
 
