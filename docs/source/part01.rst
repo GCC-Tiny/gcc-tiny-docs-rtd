@@ -9,6 +9,7 @@ In this series we will see the process of adding a new front end for a
 very simple language in GCC. If you, like me, marvel at the magic of 
 compilers then these posts may be for you.
 
+.. _part01: 
 
 Tiny Imperative Language
 ========================
