@@ -1,6 +1,6 @@
-****************
-Lexical Analysis
-****************
+************
+Architecture
+************
 
 
 Now that the minimal infrastructure is already set, we can start with the 
@@ -124,7 +124,7 @@ Lexical analysis
 ================
 
 Back to tiny, the tokens of the language more or less correspond to the 
-elements in black bold face in the rules of part 1, this is, all what 
+elements in black bold face in the rules of :ref:`part01`, this is, all what 
 appears in the right hand side of a rule and is not like 〈this〉. The 
 following elements of the program will be analyzed by the lexer as 
 tokens.
@@ -167,8 +167,23 @@ track of the location of each token inside the input. So we will also
 associate a file, line and column (called a location or locus). The above 
 sequence of tokens would actually be more like
 
-id=VAR, file=sum.tiny, line=1, col=1 id=IDENTIFIER, file=sum.tiny, line=1, col=5, text=i id=COLON, file=sum.tiny, line=1, col=7 id=INT, file=sum.tiny, line=1, col=9 id=SEMICOLON, file=sum.tiny, line=1, col=12 id=VAR, file=sum.tiny, line=2, col=1 id=IDENTIFIER, file=sum.tiny, line=2, col=5, text=s id=COLON, file=sum.tiny, line=2, col=7 id=INT, file=sum.tiny, line=2, col=9 id=SEMICOLON, file=sum.tiny, line=2, col=12 id=IDENTIFIER, file=sum.tiny, line=3, col=1, text=s id=ASSIG, file=sum.tiny, line=3, col=3 id=INTEGER_LITERAL, file=sum.tiny, line=2, col=6, text=0 id=SEMICOLON, file=sum.tiny, line=3, col=7
+- id=VAR, file=sum.tiny, line=1, col=1 
+- id=IDENTIFIER, file=sum.tiny, line=1, col=5, text=i
+- id=COLON, file=sum.tiny, line=1, col=7 
+- id=INT, file=sum.tiny, line=1, col=9 
+- id=SEMICOLON, file=sum.tiny, line=1, col=12 
+- id=VAR, file=sum.tiny, line=2, col=1 
+- id=IDENTIFIER, file=sum.tiny, line=2, col=5, text=s 
+- id=COLON, file=sum.tiny, line=2, col=7 
+- id=INT, file=sum.tiny, line=2, col=9 
+- id=SEMICOLON, file=sum.tiny, line=2, col=12 
+- id=IDENTIFIER, file=sum.tiny, line=3, col=1, text=s 
+- id=ASSIG, file=sum.tiny, line=3, col=3 
+- id=INTEGER_LITERAL, file=sum.tiny, line=2, col=6, text=0 
+- id=SEMICOLON, file=sum.tiny, line=3, col=7
+
 Tokens
+------
 
 What is a token? It is conceptually a tuple of what a token can have: the 
 kind of the token, its location and a text (if any).
@@ -199,11 +214,14 @@ of tokens we have.
     };
 
 The enum would contain all the token kinds as enumerators. We can write them 
-manually but this quickly becomes tedious. Instead we will use X-Macros. This 
-way we can describe our tokens in one place and the data structures will be 
+manually but this quickly becomes tedious. Instead we will use 
+`X-Macros <https://en.wikipedia.org/wiki/X_Macro>`_
+. This way we can describe our tokens in one place and the data structures will be 
 updated automatically. We will use this technique several times in our front 
 end to ease maintaining. Of course other code-generating approaches (like 
-using small DSLs like GNU M4) can be used instead, this one is enough for 
+using small DSLs like 
+`GNU M4 <http://www.gnu.org/software/m4/>`_
+) can be used instead, this one is enough for 
 most of our needs.
 
 .. code-block:: c
@@ -405,6 +423,8 @@ Type const_TokenPtr will be used later in the lexer. We have to use C++03
 TR1 because gcc is written in C++03 not C++11 (in C++11 we would use the 
 standard memory header and std::shared_ptr template instead)
 
+.. TODO: Add references to GCC Tiny github for the files.
+
 The complete implementation of the class Token is in files 
 gcc-src/gcc/tiny/tiny-token.h and gcc-src/gcc/tiny/tiny-token.cc
 
@@ -453,6 +473,10 @@ token stream. This means that the token returned by peek(n+1) before
 skip, will be returned by peek(n) after the skip.
 
 .. Add picture lexer-input https://thinkingeek.com/wp-content/uploads/2016/01/lexer-input.png
+
+
+.. image:: part03_lexer-input.png
+
 
 Lexer interface
 ===============
@@ -534,6 +558,8 @@ the input, we will see later how we build the token.
 
 Data members input_queue and token_queue implement respectively the buffered 
 queues of the input file and the stream of tokens.
+
+.. TODO: add link to gcc tiny github
 
 The implementation of buffered_queue is a bit long to paste it here. It is in 
 gcc-src/gcc/tiny/tiny-buffered-queue.h. It is implemented using a std::vector 
@@ -735,6 +761,8 @@ let's ignore it from now.
       // Martians
       error_at (loc, "unexpected character '%x'", current_char);
       current_column++;
+
+.. TODO: Add link to gcc tiny's https://github.com/rofirrim/gcc-tiny/blob/master/gcc/tiny/tiny-lexer.cc#L121
 
 And so on. See the full listing here. It may seem tedious but it only 
 has to be written once and after that it is relatively easy to extend.

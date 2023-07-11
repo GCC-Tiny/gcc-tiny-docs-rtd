@@ -124,15 +124,18 @@ are supporting libraries for gcc itself or runtime libraries required to
 run programs created with gcc (for instance libgomp or libasan). We are not 
 going to use them, except, maybe libcpp. libcpp is mainly used to implement 
 the C/C++ preprocessor in gcc but also provides location tracking support 
-in gcc, more on this in another post. The GCC internals manual has the full 
-list.
+in gcc, more on this in another post. The 
+`GCC internals manual <https://gcc.gnu.org/onlinedocs/gccint/Top-Level.html>`_ 
+has the full list.
 
 There are a few more directories in gcc-src/gcc. Directory config contains 
 all the target-specific bits. In gcc target means «the environment for which w
 e are generating code». In config you will find one subdirectory for 
 architecture supported. If you are interested in this part of the compiler 
 you may want to check config/moxie, it is small enough for a newcomer. Do not 
-forget to check their great blog.
+forget to check their 
+`great blog <http://moxielogic.org/blog/>`_
+.
 
 There is also one directory per language supported in gcc-src/gcc:
 
@@ -151,12 +154,14 @@ They are front ends in the sense of inputs to the compiler: libgccjit uses as
 input the result of calling a JIT library, lto uses as input the streamed-to-disk 
 intermediate representation of GCC, etc. There is also a c-family directory 
 that contains common parts of C, C++, Objective-C and Objective-C++. 
-Like before, the full list can be found in the GCC internals manual.
+Like before, the 
+`full list <https://gcc.gnu.org/onlinedocs/gccint/Subdirectories.html>`_ 
+can be found in the GCC internals manual.
 
 Adding a new front end is just a matter of creating a new directory in gcc-src/gcc. 
 Do not worry if this stuff seems complex at first, there are plenty of other 
-front ends that can be read as an example. In particular the jit and go f
-ront ends are relatively simple to be used as examples. Let's get down to it.
+front ends that can be read as an example. In particular the jit and go 
+front ends are relatively simple to be used as examples. Let's get down to it.
 
 
 Initial boilerplate
@@ -194,7 +199,7 @@ compiler (more on this below). It also specifies which languages are required
 to compile this front end. In our case we will use C++, so the command 
 line option --enable-languages will require c++ if we want to build tiny.
 
-.. code-block:: shell-session
+.. code-block:: makefile
 
     # gcc-src/gcc/config/config-lang.in
     language="tiny"
@@ -222,8 +227,9 @@ Another file that we will need is lang-specs.h. This is a fragment of C header
 file. This file tells the gcc driver how and when to invoke the tiny1 compiler. 
 In our case we want that files ended with .tiny are compiled with tiny1. These 
 two lines will do. Just believe me here. If you want to understand what is going
-on, you can find more information in the file gcc-src/gcc/gcc.c and in GCC 
-manual about spec files.
+on, you can find more information in the file gcc-src/gcc/gcc.c and in 
+`GCC manual about spec files <https://gcc.gnu.org/onlinedocs/gcc/Spec-Files.html>`_
+.
 
 .. code-block:: c
 
@@ -640,8 +646,9 @@ and gtype-tiny.h that have the routines automatically generated for
 the GCC garbage collector. If you recall the variable gtfiles in 
 config-lang.in above, that variable mentions tiny1.cc. A tool called 
 gengtype scans the files in gtfiles and using those GTY marks generates 
-two headers with some functions that we have to include. The GCC internal 
-manual has more information about the memory management.
+two headers with some functions that we have to include. The 
+`GCC internal manual has more information about the memory management <https://gcc.gnu.org/onlinedocs/gccint/Type-Information.html>`_
+.
 
 Current layout
 ^^^^^^^^^^^^^^
