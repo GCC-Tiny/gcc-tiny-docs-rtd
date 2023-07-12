@@ -6,8 +6,8 @@ Semantical Analysis and Generics II
   Work in progress
 
 
-In this part we will complete the missing statements from part 6 and finish
- our front end.
+In this part we will complete the missing statements from :ref:`part06` and finish
+our front end.
 
 Semantic values (cont)
 ======================
@@ -19,7 +19,7 @@ A read statement is a bit like the dual of a write statement. We will
 implement it using a call to scanf.
 
 .. productionlist:: Tiny7
-  read: "read" `identifier` ";"
+  read: read `identifier` ;
 
 .. code-block:: c
   :lineno-start: 1
@@ -110,8 +110,8 @@ If statement
 ------------
 
 .. productionlist:: Tiny7
-    if: "if" `expression` "then" `statement`* "end" ";" 
-      : "if" `expression` "then" `statement`* "else" `statement`* "end" ";"
+    if:   if `expression` then `statement`* end 
+      : | if `expression` then `statement`* else `statement`* end
 
 Control statements are a bit more complicated than other statements so we 
 will split the parsing proper and the GENERIC tree construction. You will 
@@ -334,7 +334,7 @@ We will use the same strategy for the while statement: first parse its syntactic
 elements and then build a statement list to implement it.
 
 .. productionlist:: Tiny7
-    while: "while" `expression` "do" `statement`* "end" ";"
+    while: while `expression` do `statement`* end ;
 
 .. code-block:: c
   :lineno-start: 1
@@ -436,7 +436,8 @@ For-statement
 -------------
 
 .. productionlist:: Tiny7
-    for: "for"  `identifier` ":="  `expression` "to" `expression` "do" `statement`* "end" ";"
+    for: for `identifier` := `expression` to `expression` 
+       :   do `statement`* end ;
 
 
 If you recall part 1, we defined a for statement like the following
