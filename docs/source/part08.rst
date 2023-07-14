@@ -12,8 +12,10 @@ new features to it. Today we will add arrays.
 Array type and array values
 ===========================
 
-An important element of programming languages is their type system. Type 
-systems are crucial in the semantics of programming languages and are an 
+An important element of programming languages is their 
+`type system <https://en.wikipedia.org/wiki/Type_system>`_
+. 
+Type systems are crucial in the semantics of programming languages and are an 
 actively researched topic nowadays. tiny, so far, has a very simple type 
 system: there are only four types (int, float, boolean and string). We can 
 express lots of things already with those types but it may fall short in 
@@ -24,7 +26,10 @@ An element of the type system, i.e. a type, will be denoted by τ. As we
 said, tiny has four types.
 
 .. productionlist:: Tiny8
-      τ: "int" | "float" | "bool" | "string"
+      τ:   int
+       : | float
+       : | bool 
+       : | string
 
 
 A type is a set of values: int values are the 32 bit signed integers, 
@@ -37,7 +42,7 @@ type. The size is an integer expression of the language, that we will
 denote as ε that evaluates to a positive (nonzero) integer.
 
 .. productionlist:: Tiny8a
-  τ: "array" ε τ
+  τ: array ε τ
 
 This means that our typesystem has a type array constructed using an integer 
 expression ε (the size) and a type τ (the element type).
@@ -45,11 +50,11 @@ expression ε (the size) and a type τ (the element type).
 After this addition, our typesystem looks like this.
 
 .. productionlist:: Tiny8b
-  τ:   "int"
-   : | "float"
-   : | "bool"
-   : | "string"
-   : | "array" ε τ
+  τ:   int
+   : | float
+   : | bool
+   : | string
+   : | array ε τ
 
 What are, thus, the values of a type array ε τ? A value of array type is 
 a set of values of type τ called the elements of the array. There is an 
@@ -80,22 +85,22 @@ Syntax
 We will extend the rule of types of tiny to let us define a variable of array type.
 
 .. productionlist:: Tiny8
-    type:   "int" | "float" 
-        : | `type` "[" `expression` "]" 
-        : | `type` "[" `expression` ":" `expression` "]"
+    type:   int | float 
+        : | `type` [ `expression` ] 
+        : | `type` [ `expression` : `expression` ]
 
 
 We will also need to extend expressions so we can designate one of the 
 elements of the array.
 
 .. productionlist:: Tiny8
-  primary: "(" `expression` ")"
+  primary: ( `expression` )
          : | `identifier`
          : | `integerliteral`
          : | `floatliteral`
          : | `stringliteral`
          : | `arrayelement`
-  arrayelement: `primary` "[" `expression` "]"
+  arrayelement: `primary` [ `expression` ]
 
 Semantics
 ---------
@@ -129,10 +134,10 @@ Then the designated type will be array ε0 (array τ0 〈expression〉)
 The other syntax is similar.
 
 .. productionlist:: Tiny8d
-    type: `type` "[" `expression`\ 0 ":" `expression`\ 1 "]"
+    type: `type` [ `expression`0 : `expression`1 ]
 
 
-Now ε is :token:`~Tiny:expression`\ 1 - :token:`~Tiny:expression`\ 0 + 1 and the indexes of 
+Now ε is :token:`~Tiny:expression`1 - :token:`~Tiny:expression`0 + 1 and the indexes of 
 the array range from expression0 to expression1 (both ends included). expression1
 must be larger or equal than expression0, otherwise this is an error.
 
@@ -146,7 +151,7 @@ must be larger or equal than expression0, otherwise this is an error.
 A :token:`~Tiny8:primary` of the form
 
 .. productionlist:: Tiny8e
-  arrayelement: `primary` "[" `expression` "]"
+  arrayelement: `primary` [ `expression` ]
 
 designates a single element of primary. The type of primary must be array, 
 otherwise this is an error. The expression must be an expression of integer 
@@ -175,8 +180,8 @@ these expressions lvalues (or L-values) for historical reasons: an lvalue can
 appear in the left hand side of an assignment.
 
 .. productionlist:: Tiny8
-  assignment: `variable` ":=" `expression` ";"
-  read: "read" `variable` ";"
+  assignment: `variable` := `expression` ;
+  read: read `variable` ;
   variable:   `identifier`
           : | `arrayelement`
 
@@ -526,10 +531,11 @@ this auxiliar function.
     return type.get_tree_code () == ARRAY_TYPE;
   }
 
-Likewise with ε, we are not verifying that the expression of the array 
-element evaluates to an integer contained in the range of indexes of 
-the declared array. Recall that the semantics of tiny are not complete 
-enough regarding errors.
+.. note::
+  Likewise with ε, we are not verifying that the expression of the array 
+  element evaluates to an integer contained in the range of indexes of 
+  the declared array. Recall that the semantics of tiny are not complete 
+  enough regarding errors.
 
 Final touches
 -------------
