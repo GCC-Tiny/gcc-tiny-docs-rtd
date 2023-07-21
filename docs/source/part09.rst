@@ -17,9 +17,9 @@ let's extend the syntax of types. Some programming languages call this type
 logical, but we will call it bool.
 
 .. productionlist:: Tiny9
-    type:   "int" | "float" | "bool"
-        : | `type` "[" `expression` "]" 
-        : | `type` "[" `expression` ":" `expression` "]"
+    type:   int | float | bool
+        : | `type` [ `expression` ] 
+        : | `type` [ `expression` : `expression` ]
 
 Booleans only have two values: true and false. Technically speaking we 
 already can express these two values in many different ways. For instance 
@@ -32,14 +32,14 @@ that express a true boolean value and a false boolean value respectively.
 We will have to extend our primary syntax.
 
 .. productionlist:: Tiny9
-  primary: "(" `expression` ")"
+  primary: ( `expression` )
          : | `identifier`
          : | `integerliteral`
          : | `boolliteral`
          : | `floatliteral`
          : | `stringliteral`
          : | `arrayelement`
-  boolliteral: "true" | "false"
+  boolliteral: true | false
   
 Semantics
 ---------

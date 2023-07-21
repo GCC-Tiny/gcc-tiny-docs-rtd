@@ -34,7 +34,7 @@ A record type is made of a sequence of pairs of names and types that we
 will call fields. First let's see how to declare a field.
 
 .. productionlist:: Tiny11
-  fielddeclaration: `identifier` ":" `type` ";"
+  fielddeclaration: `identifier` : `type` ;
 
 A field declaration has the same syntax as a variable/type declaration but 
 without an initial var/type. A keyword is not needed because a field 
@@ -42,7 +42,7 @@ declaration will always appear inside a record type.
 Recall that * means the previous element of the language repeated zero or more times
 
 .. productionlist:: Tiny11
-  type: "record" `fielddeclaration`* "end"
+  type: record `fielddeclaration`* end
 
 For instance we can declare a variable with a record type made of two 
 floats x and y, like this.
@@ -70,7 +70,7 @@ We need a way to access the field of a record type inside an expression
 or in the left hand side of an assignment. We will add a new primary expression.
 
 .. productionlist:: Tiny11
-  primary: "(" `expression` ")"
+  primary: ( `expression` )
          : | `identifier`
          : | `integerliteral`
          : | `boolliteral`

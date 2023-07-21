@@ -15,7 +15,7 @@ Our current version of tiny has the concept of variable declaration, where a nam
 is introduced in the program to represent a variable value type.
 
 .. productionlist:: Tiny10a
-    declartion: "var" `identifier` ":" `type` ;
+    declartion: var `identifier` : `type` ;
 
 For example, in the code below:
 
@@ -44,8 +44,8 @@ First we will generalize a bit the :token:`~Tiny10b:declaration` rules to encomp
 Now we can define the syntax of type-declarations.
 
 .. productionlist:: Tiny10b
-   variabledeclaration: "var" `identifier` ":" `type` ";"
-   typedeclaration: "type" `identifier` ":" `type` ";""
+   variabledeclaration: var `identifier` : `type` ;
+   typedeclaration: type `identifier` : `type` ;
 
 
 Since we want to be able to use the type declaration where types are specified, 
@@ -53,10 +53,10 @@ we need to extend our syntax for :token:`~Tiny10b:type` (note the addition of
 :token:`~Tiny:identifier` after bool).
 
 .. productionlist:: Tiny10b
-    type:   "int" | "float" | "bool"
+    type:   int | float | bool
         : | `identifier`
-        : | `type` "[" `expression` "]" 
-        : | `type` "[" `expression` ":" `expression` "]"
+        : | `type` [ `expression` ] 
+        : | `type` [ `expression` : `expression` ]
 
 Semantics
 ---------
