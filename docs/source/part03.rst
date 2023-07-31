@@ -475,7 +475,7 @@ skip, will be returned by peek(n) after the skip.
 .. Add picture lexer-input https://thinkingeek.com/wp-content/uploads/2016/01/lexer-input.png
 
 
-.. image:: part03_lexer-input.png
+.. image:: part03_lexer-input.svg
 
 
 Lexer interface
