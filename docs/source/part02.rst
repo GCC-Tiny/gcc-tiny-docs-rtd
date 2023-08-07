@@ -122,11 +122,23 @@ Finally let's install it.
 
 .. code-block:: shell-session
 
-    $ make install
+    $ make -j install
 
 The compiler will be installed in a directory gcc-install, as a sibling of gcc 
 and gcc-build.
 
+Verify you the GCC compiler installed at the gcc-install folder.
+
+.. code-block:: shell-session
+
+    $ ../gcc-install/bin/gcc --version
+
+    gcc (GCC) 14.0.0 20230807 (experimental)
+    Copyright (C) 2023 Free Software Foundation, Inc.
+    This is free software; see the source for copying conditions.  There is NO
+    warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+Now let us continue with the steps to add Tiny compiler.
 
 Structure of GCC
 ----------------
