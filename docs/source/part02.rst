@@ -160,12 +160,12 @@ in gcc, more on this in another post. The
 has the full list.
 
 There are a few more directories in gcc-src/gcc. Directory config contains 
-all the target-specific bits. In gcc target means «the environment for which w
-e are generating code». In config you will find one subdirectory for 
+all the target-specific bits. In gcc target means «the environment for which 
+we are generating code». In config you will find one subdirectory for 
 architecture supported. If you are interested in this part of the compiler 
 you may want to check config/moxie, it is small enough for a newcomer. Do not 
 forget to check their 
-`great blog <http://moxielogic.org/blog/>`_
+`moxie logic blog <http://moxielogic.org/blog/>`_
 .
 
 There is also one directory per language supported in gcc-src/gcc:
