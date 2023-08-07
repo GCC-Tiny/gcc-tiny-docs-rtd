@@ -51,6 +51,23 @@ Run it from the top level directory of the source tree.
     $ ./contrib/download_prerequisites
     ... downloading stuff ...
 
+Output from the download could look like this, but the actual 
+version numbers might vary.
+
+.. code-block:: shell-session
+
+    $ ./contrib/download_prerequisites 
+    2023-08-07 07:59:02 URL:http://gcc.gnu.org/pub/gcc/infrastructure/gmp-6.2.1.tar.bz2 [2493916/2493916] -> "gmp-6.2.1.tar.bz2" [1]
+    2023-08-07 07:59:02 URL:http://gcc.gnu.org/pub/gcc/infrastructure/mpfr-4.1.0.tar.bz2 [1747243/1747243] -> "mpfr-4.1.0.tar.bz2" [1]
+    2023-08-07 07:59:03 URL:http://gcc.gnu.org/pub/gcc/infrastructure/mpc-1.2.1.tar.gz [838731/838731] -> "mpc-1.2.1.tar.gz" [1]
+    2023-08-07 07:59:04 URL:http://gcc.gnu.org/pub/gcc/infrastructure/isl-0.24.tar.bz2 [2261594/2261594] -> "isl-0.24.tar.bz2" [1]
+    gmp-6.2.1.tar.bz2: OK
+    mpfr-4.1.0.tar.bz2: OK
+    mpc-1.2.1.tar.gz: OK
+    isl-0.24.tar.bz2: OK
+    All prerequisites downloaded successfully.
+
+
 This will add many files that ideally you want git to ignore them. In my case I 
 added the following lines to the existing gcc-src/.gitignore.
 
@@ -58,17 +75,17 @@ added the following lines to the existing gcc-src/.gitignore.
 
     # .gitignore
     gmp
-    gmp-4.3.2
-    gmp-4.3.2.tar.bz2
+    gmp-6.2.1
+    gmp-6.2.1.tar.bz2
     isl
-    isl-0.15
-    isl-0.15.tar.bz2
+    isl-0.24
+    isl-0.24.tar.bz2
     mpc
-    mpc-0.8.1
-    mpc-0.8.1.tar.gz
+    mpc-1.2.1
+    mpc-1.2.1.tar.gz
     mpfr
-    mpfr-2.4.2
-    mpfr-2.4.2.tar.bz2
+    mpfr-4.1.0
+    mpfr-4.1.0.tar.bz2
 
 Let's create a branch and switch to it, where we will develop the tiny frontend.
 
