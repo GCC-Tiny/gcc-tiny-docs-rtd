@@ -51,6 +51,23 @@ Run it from the top level directory of the source tree.
     $ ./contrib/download_prerequisites
     ... downloading stuff ...
 
+Output from the download could look like this, but the actual 
+version numbers might vary.
+
+.. code-block:: shell-session
+
+    $ ./contrib/download_prerequisites 
+    2023-08-07 07:59:02 URL:http://gcc.gnu.org/pub/gcc/infrastructure/gmp-6.2.1.tar.bz2 [2493916/2493916] -> "gmp-6.2.1.tar.bz2" [1]
+    2023-08-07 07:59:02 URL:http://gcc.gnu.org/pub/gcc/infrastructure/mpfr-4.1.0.tar.bz2 [1747243/1747243] -> "mpfr-4.1.0.tar.bz2" [1]
+    2023-08-07 07:59:03 URL:http://gcc.gnu.org/pub/gcc/infrastructure/mpc-1.2.1.tar.gz [838731/838731] -> "mpc-1.2.1.tar.gz" [1]
+    2023-08-07 07:59:04 URL:http://gcc.gnu.org/pub/gcc/infrastructure/isl-0.24.tar.bz2 [2261594/2261594] -> "isl-0.24.tar.bz2" [1]
+    gmp-6.2.1.tar.bz2: OK
+    mpfr-4.1.0.tar.bz2: OK
+    mpc-1.2.1.tar.gz: OK
+    isl-0.24.tar.bz2: OK
+    All prerequisites downloaded successfully.
+
+
 This will add many files that ideally you want git to ignore them. In my case I 
 added the following lines to the existing gcc-src/.gitignore.
 
@@ -58,17 +75,17 @@ added the following lines to the existing gcc-src/.gitignore.
 
     # .gitignore
     gmp
-    gmp-4.3.2
-    gmp-4.3.2.tar.bz2
+    gmp-6.2.1
+    gmp-6.2.1.tar.bz2
     isl
-    isl-0.15
-    isl-0.15.tar.bz2
+    isl-0.24
+    isl-0.24.tar.bz2
     mpc
-    mpc-0.8.1
-    mpc-0.8.1.tar.gz
+    mpc-1.2.1
+    mpc-1.2.1.tar.gz
     mpfr
-    mpfr-2.4.2
-    mpfr-2.4.2.tar.bz2
+    mpfr-4.1.0
+    mpfr-4.1.0.tar.bz2
 
 Let's create a branch and switch to it, where we will develop the tiny frontend.
 
@@ -77,23 +94,23 @@ Let's create a branch and switch to it, where we will develop the tiny frontend.
     $ git checkout -b tiny
     Switched to a new branch 'tiny'
 
-Now create a directory sibling to that of gcc, we will use it to build gcc. 
-This directory is the build tree.
+Now create two directories next to that of gcc, we will use them to build and install gcc. 
+These directories are the build and install tree.
 
 .. code-block:: shell-session
 
     $ cd  ..           # leave source tree
-    $ mkdir gcc-build
+    $ mkdir gcc-build gcc-install
 
 Now let's configure a minimal gcc with just C and C++ (C++ is required for GCC itself).
 
 .. code-block:: shell-session
 
     $ cd gcc-build
-    $ ../gcc-src/configure --prefix=$(pwd)/../gcc-install --enable-languages=c,c++
+    $ ../gcc-src/configure --prefix=$PWD/../gcc-install --disable-multilib --enable-languages=c,c++
 
-And make an initial build of the whole GCC. This step may take several minutes 
-depending on your specific machine. The flag to -jN will use all the cpus of 
+And make an initial build of the whole GCC. This step may take a long time, maybe 1 hour, 
+depending on your specific machine. The flag to -j will use all the cpus of 
 your system.
 
 .. code-block:: shell-session
@@ -105,11 +122,23 @@ Finally let's install it.
 
 .. code-block:: shell-session
 
-    $ make install
+    $ make -j install
 
 The compiler will be installed in a directory gcc-install, as a sibling of gcc 
 and gcc-build.
 
+Verify you the GCC compiler installed at the gcc-install folder.
+
+.. code-block:: shell-session
+
+    $ ../gcc-install/bin/gcc --version
+
+    gcc (GCC) 14.0.0 20230807 (experimental)
+    Copyright (C) 2023 Free Software Foundation, Inc.
+    This is free software; see the source for copying conditions.  There is NO
+    warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+Now let us continue with the steps to add Tiny compiler.
 
 Structure of GCC
 ----------------
@@ -131,12 +160,12 @@ in gcc, more on this in another post. The
 has the full list.
 
 There are a few more directories in gcc-src/gcc. Directory config contains 
-all the target-specific bits. In gcc target means «the environment for which w
-e are generating code». In config you will find one subdirectory for 
+all the target-specific bits. In gcc target means «the environment for which 
+we are generating code». In config you will find one subdirectory for 
 architecture supported. If you are interested in this part of the compiler 
 you may want to check config/moxie, it is small enough for a newcomer. Do not 
 forget to check their 
-`great blog <http://moxielogic.org/blog/>`_
+`moxie logic blog <http://moxielogic.org/blog/>`_
 .
 
 There is also one directory per language supported in gcc-src/gcc:
@@ -184,7 +213,7 @@ with tiny support. This will fail. Do not worry, this is expected.
 .. code-block:: shell-session
 
     $ cd gcc-build
-    $ ../gcc-src/configure --prefix=$(pwd)/../gcc-install --enable-languages=c,c++,tiny
+    $ ../gcc-src/configure --prefix=$PWD/../gcc-install --disable-multilib --enable-languages=c,c++,tiny
     ...
     The following requested languages could not be built: tiny
     Supported languages are: c,c,c++,fortran,go,java,jit,lto,objc,obj-c++
@@ -203,7 +232,7 @@ line option --enable-languages will require c++ if we want to build tiny.
 
 .. code-block:: makefile
 
-    # gcc-src/gcc/config/config-lang.in
+    # gcc-src/gcc/tiny/config-lang.in
     language="tiny"
 
     compilers="tiny1\$(exeext)"
@@ -235,7 +264,7 @@ on, you can find more information in the file gcc-src/gcc/gcc.c and in
 
 .. code-block:: c
 
-    /* gcc-src/gcc/config/lang-specs.in */
+    /* gcc-src/gcc/tiny/lang-specs.h */
     {".tiny",  "@tiny", 0, 1, 0},
     {"@tiny",  "tiny1 %i %(cc1_options) %{!fsyntax-only:%(invoke_as)}", 0, 1, 0},
 
@@ -268,6 +297,7 @@ is shared among drivers.
 .. code-block:: makefile
     :linenos:
 
+    # gcc-src/gcc/tiny/Make-lang.in
     GCCTINY_INSTALL_NAME := $(shell echo gcctiny|sed '$(program_transform_name)')
     GCCTINY_TARGET_INSTALL_NAME := $(target_noncanonical)-$(shell echo gcctiny|sed '$(program_transform_name)')
 
@@ -343,6 +373,8 @@ is shared among drivers.
         -mv tiny/*$(objext) stageprofile/tiny
     tiny.stagefeedback: stagefeedback-start
         -mv tiny/*$(objext) stagefeedback/tiny
+
+    selftest-tiny:
 
 Lines 1 and 2 define two variables that take the string gcctiny and apply 
 some sed transformation that is kept in the Makefile and determined at 
@@ -685,18 +717,18 @@ the bootstrap, using --disable-bootstrap.
 .. code-block:: shell-session
 
     $ cd gcc-build
-    $ ../gcc-src/configure --prefix=$(pwd)/../gcc-install --disable-bootstrap --enable-languages=c,c++,tiny
+    $ ../gcc-src/configure --prefix=$PWD/../gcc-install --disable-bootstrap --disable-multilib --enable-languages=c,c++,tiny
     $ make -j$(getconf _NPROCESSORS_ONLN)
     ... tons of gibberish ...
-    $ make install
+    $ make -j install
 
 A gcctiny and its corresponding target should now be in gcc-install/bin.
 
 .. code-block:: shell-session
 
-    $ ls -1 gcc-install/bin/*tiny*
-    gcc-install/bin/gcctiny
-    gcc-install/bin/x86_64-pc-linux-gnu-gcctiny
+    $ ls -1 ../gcc-install/bin/*tiny*
+    ../gcc-install/bin/gcctiny
+    ../gcc-install/bin/x86_64-pc-linux-gnu-gcctiny
 
 Nice. Let's make a smoke test. First let's create an empty test.tiny. 
 We need this because the driver checks for the existence of the input 
@@ -705,7 +737,7 @@ file for us.
 .. code-block:: shell-session
 
     $ touch test.tiny
-    $ gcc-install/bin/gcctiny -c test.tiny
+    $ ../gcc-install/bin/gcctiny -c test.tiny
     Hello gcctiny!
 
 Yay! I have passed the flag -c to avoid linking otherwise we would get 
@@ -713,7 +745,7 @@ an undefined error since there is no main function yet.
 
 .. code-block:: shell-session
 
-    $ gcc-install/bin/gcctiny  test.tiny
+    $ ../gcc-install/bin/gcctiny  test.tiny
     Hello gcctiny!
     /usr/lib/x86_64-linux-gnu/crt1.o: In function `_start':
     (.text+0x20): undefined reference to `main'
@@ -724,7 +756,7 @@ If you want to see what is going on, just pass -v.
 .. code-block:: shell-session
     :linenos:
 
-    $ gcc-install/bin/gcctiny -c -v test.tiny
+    $ ../gcc-install/bin/gcctiny -c -v test.tiny
     Using built-in specs.
     COLLECT_GCC=gcc-install/bin/gcctiny
     Target: x86_64-pc-linux-gnu
