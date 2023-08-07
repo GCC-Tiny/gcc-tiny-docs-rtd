@@ -127,7 +127,7 @@ Finally let's install it.
 The compiler will be installed in a directory gcc-install, as a sibling of gcc 
 and gcc-build.
 
-Verify you the GCC compiler installed at the gcc-install folder.
+Verify you have the GCC compiler installed at the gcc-install folder.
 
 .. code-block:: shell-session
 
@@ -138,7 +138,7 @@ Verify you the GCC compiler installed at the gcc-install folder.
     This is free software; see the source for copying conditions.  There is NO
     warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-Now let us continue with the steps to add Tiny compiler.
+Now let us continue with the steps to add Tiny compiler. Buckle up.
 
 Structure of GCC
 ----------------
