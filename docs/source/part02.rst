@@ -94,20 +94,20 @@ Let's create a branch and switch to it, where we will develop the tiny frontend.
     $ git checkout -b tiny
     Switched to a new branch 'tiny'
 
-Now create a directory sibling to that of gcc, we will use it to build gcc. 
-This directory is the build tree.
+Now create two directories next to that of gcc, we will use them to build and install gcc. 
+These directories are the build and install tree.
 
 .. code-block:: shell-session
 
     $ cd  ..           # leave source tree
-    $ mkdir gcc-build
+    $ mkdir gcc-build gcc-install
 
 Now let's configure a minimal gcc with just C and C++ (C++ is required for GCC itself).
 
 .. code-block:: shell-session
 
     $ cd gcc-build
-    $ ../gcc-src/configure --prefix=$(pwd)/../gcc-install --enable-languages=c,c++
+    $ ../gcc-src/configure --prefix=$PWD/../gcc-install --disable-multilib --enable-languages=c,c++
 
 And make an initial build of the whole GCC. This step may take several minutes 
 depending on your specific machine. The flag to -jN will use all the cpus of 
