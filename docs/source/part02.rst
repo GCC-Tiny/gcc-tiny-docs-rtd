@@ -232,7 +232,7 @@ line option --enable-languages will require c++ if we want to build tiny.
 
 .. code-block:: makefile
 
-    # gcc-src/gcc/config/config-lang.in
+    # gcc-src/gcc/tiny/config-lang.in
     language="tiny"
 
     compilers="tiny1\$(exeext)"
@@ -264,7 +264,7 @@ on, you can find more information in the file gcc-src/gcc/gcc.c and in
 
 .. code-block:: c
 
-    /* gcc-src/gcc/config/lang-specs.in */
+    /* gcc-src/gcc/tiny/lang-specs.h */
     {".tiny",  "@tiny", 0, 1, 0},
     {"@tiny",  "tiny1 %i %(cc1_options) %{!fsyntax-only:%(invoke_as)}", 0, 1, 0},
 
@@ -297,6 +297,7 @@ is shared among drivers.
 .. code-block:: makefile
     :linenos:
 
+    # gcc-src/gcc/tiny/Make-lang.in
     GCCTINY_INSTALL_NAME := $(shell echo gcctiny|sed '$(program_transform_name)')
     GCCTINY_TARGET_INSTALL_NAME := $(target_noncanonical)-$(shell echo gcctiny|sed '$(program_transform_name)')
 
@@ -372,6 +373,8 @@ is shared among drivers.
         -mv tiny/*$(objext) stageprofile/tiny
     tiny.stagefeedback: stagefeedback-start
         -mv tiny/*$(objext) stagefeedback/tiny
+
+    selftest-tiny:
 
 Lines 1 and 2 define two variables that take the string gcctiny and apply 
 some sed transformation that is kept in the Makefile and determined at 
