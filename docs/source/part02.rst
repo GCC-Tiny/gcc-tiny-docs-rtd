@@ -213,7 +213,7 @@ with tiny support. This will fail. Do not worry, this is expected.
 .. code-block:: shell-session
 
     $ cd gcc-build
-    $ ../gcc-src/configure --prefix=$(pwd)/../gcc-install --enable-languages=c,c++,tiny
+    $ ../gcc-src/configure --prefix=$PWD/../gcc-install --disable-multilib --enable-languages=c,c++,tiny
     ...
     The following requested languages could not be built: tiny
     Supported languages are: c,c,c++,fortran,go,java,jit,lto,objc,obj-c++
@@ -717,18 +717,18 @@ the bootstrap, using --disable-bootstrap.
 .. code-block:: shell-session
 
     $ cd gcc-build
-    $ ../gcc-src/configure --prefix=$(pwd)/../gcc-install --disable-bootstrap --enable-languages=c,c++,tiny
+    $ ../gcc-src/configure --prefix=$PWD/../gcc-install --disable-bootstrap --disable-multilib --enable-languages=c,c++,tiny
     $ make -j$(getconf _NPROCESSORS_ONLN)
     ... tons of gibberish ...
-    $ make install
+    $ make -j install
 
 A gcctiny and its corresponding target should now be in gcc-install/bin.
 
 .. code-block:: shell-session
 
-    $ ls -1 gcc-install/bin/*tiny*
-    gcc-install/bin/gcctiny
-    gcc-install/bin/x86_64-pc-linux-gnu-gcctiny
+    $ ls -1 ../gcc-install/bin/*tiny*
+    ../gcc-install/bin/gcctiny
+    ../gcc-install/bin/x86_64-pc-linux-gnu-gcctiny
 
 Nice. Let's make a smoke test. First let's create an empty test.tiny. 
 We need this because the driver checks for the existence of the input 
@@ -737,7 +737,7 @@ file for us.
 .. code-block:: shell-session
 
     $ touch test.tiny
-    $ gcc-install/bin/gcctiny -c test.tiny
+    $ ../gcc-install/bin/gcctiny -c test.tiny
     Hello gcctiny!
 
 Yay! I have passed the flag -c to avoid linking otherwise we would get 
@@ -745,7 +745,7 @@ an undefined error since there is no main function yet.
 
 .. code-block:: shell-session
 
-    $ gcc-install/bin/gcctiny  test.tiny
+    $ ../gcc-install/bin/gcctiny  test.tiny
     Hello gcctiny!
     /usr/lib/x86_64-linux-gnu/crt1.o: In function `_start':
     (.text+0x20): undefined reference to `main'
@@ -756,7 +756,7 @@ If you want to see what is going on, just pass -v.
 .. code-block:: shell-session
     :linenos:
 
-    $ gcc-install/bin/gcctiny -c -v test.tiny
+    $ ../gcc-install/bin/gcctiny -c -v test.tiny
     Using built-in specs.
     COLLECT_GCC=gcc-install/bin/gcctiny
     Target: x86_64-pc-linux-gnu
