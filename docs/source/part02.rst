@@ -756,33 +756,32 @@ If you want to see what is going on, just pass -v.
 .. code-block:: shell-session
     :linenos:
 
-    $ ../gcc-install/bin/gcctiny -c -v test.tiny
+    $ ../gcc-install/bin/gcctiny -c -v test.tiny 
     Using built-in specs.
-    COLLECT_GCC=gcc-install/bin/gcctiny
+    COLLECT_GCC=../gcc-install/bin/gcctiny
     Target: x86_64-pc-linux-gnu
-    Configured with: ../gcc-src/configure --prefix=/home/roger/soft/gcc/gcc-blog/gcc-build/../gcc-install --disable-bootstrap --enable-languages=c,c++,tiny
+    Configured with: ../gcc/configure --prefix=/home/chatai/github/gcc-build/../gcc-install --disable-bootstrap --disable-multilib --enable-languages=c,c++,tiny
     Thread model: posix
-    gcc version 6.0.0 20160105 (experimental) (GCC) 
+    Supported LTO compression algorithms: zlib
+    gcc version 14.0.0 20230807 (experimental) (GCC) 
     COLLECT_GCC_OPTIONS='-c' '-v' '-mtune=generic' '-march=x86-64'
-    /home/roger/soft/gcc/gcc-blog/gcc-install/bin/../libexec/gcc/x86_64-pc-linux-gnu/6.0.0/tiny1 test.tiny -quiet -dumpbase test.tiny -mtune=generic -march=x86-64 -auxbase test -version -o /tmp/ccsptWhB.s
-    Tiny (GCC) version 6.0.0 20160105 (experimental) (x86_64-pc-linux-gnu)
-        compiled by GNU C version 5.3.1 20151219, GMP version 4.3.2, MPFR version 2.4.2, MPC version 0.8.1, isl version 0.15
-    GGC heuristics: --param ggc-min-expand=30 --param ggc-min-heapsize=4096
-    Tiny (GCC) version 6.0.0 20160105 (experimental) (x86_64-pc-linux-gnu)
-        compiled by GNU C version 5.3.1 20151219, GMP version 4.3.2, MPFR version 2.4.2, MPC version 0.8.1, isl version 0.15
+    /home/chatai/github/gcc-install/bin/../libexec/gcc/x86_64-pc-linux-gnu/14.0.0/tiny1 test.tiny -quiet -dumpbase test.tiny -dumpbase-ext .tiny -mtune=generic -march=x86-64 -version -o /tmp/ccf5BmOY.s
+    Tiny (GCC) version 14.0.0 20230807 (experimental) (x86_64-pc-linux-gnu)
+            compiled by GNU C version 11.4.0, GMP version 6.2.1, MPFR version 4.1.0, MPC version 1.2.1, isl version isl-0.24-GMP
+
     GGC heuristics: --param ggc-min-expand=30 --param ggc-min-heapsize=4096
     Hello gcctiny!
     COLLECT_GCC_OPTIONS='-c' '-v' '-mtune=generic' '-march=x86-64'
-    as -v --64 -o test.o /tmp/ccsptWhB.s
-    GNU assembler version 2.25.90 (x86_64-linux-gnu) using BFD version (GNU Binutils for Debian) 2.25.90.20151209
-    COMPILER_PATH=/home/roger/soft/gcc/gcc-blog/gcc-install/bin/../libexec/gcc/x86_64-pc-linux-gnu/6.0.0/:/home/roger/soft/gcc/gcc-blog/gcc-install/bin/../libexec/gcc/
-    LIBRARY_PATH=/home/roger/soft/gcc/gcc-blog/gcc-install/bin/../lib/gcc/x86_64-pc-linux-gnu/6.0.0/:/home/roger/soft/gcc/gcc-blog/gcc-install/bin/../lib/gcc/:/home/roger/soft/gcc/gcc-blog/gcc-install/bin/../lib/gcc/x86_64-pc-linux-gnu/6.0.0/../../../../lib64/:/lib/x86_64-linux-gnu/:/lib/../lib64/:/usr/lib/x86_64-linux-gnu/:/home/roger/soft/gcc/gcc-blog/gcc-install/bin/../lib/gcc/x86_64-pc-linux-gnu/6.0.0/../../../:/lib/:/usr/lib/
+    as -v --64 -o test.o /tmp/ccf5BmOY.s
+    GNU assembler version 2.38 (x86_64-linux-gnu) using BFD version (GNU Binutils for Ubuntu) 2.38
+    COMPILER_PATH=/home/chatai/github/gcc-install/bin/../libexec/gcc/x86_64-pc-linux-gnu/14.0.0/:/home/chatai/github/gcc-install/bin/../libexec/gcc/
+    LIBRARY_PATH=/home/chatai/github/gcc-install/bin/../lib/gcc/x86_64-pc-linux-gnu/14.0.0/:/home/chatai/github/gcc-install/bin/../lib/gcc/:/home/chatai/github/gcc-install/bin/../lib/gcc/x86_64-pc-linux-gnu/14.0.0/../../../../lib64/:/lib/x86_64-linux-gnu/:/lib/../lib64/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib64/:/home/chatai/github/gcc-install/bin/../lib/gcc/x86_64-pc-linux-gnu/14.0.0/../../../:/lib/:/usr/lib/
     COLLECT_GCC_OPTIONS='-c' '-v' '-mtune=generic' '-march=x86-64'
 
-In line 9 tiny1 is being called. You can see some extra flags that are added 
-because of cc1_options used in the lang-specs.h. In line 18 the assembler is 
+In line 10 tiny1 is being called. You can see some extra flags that are added 
+because of cc1_options used in the lang-specs.h. In line 17 the assembler is 
 invoked to generate the .o file. Since our frontend did nothing but print a 
-message (line 16), the net effect is the same as compiling an empty file.
+message (line 15), the net effect is the same as compiling an empty file.
 
 Wrap-up
 -------
