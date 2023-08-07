@@ -376,43 +376,43 @@ is shared among drivers.
 
     selftest-tiny:
 
-Lines 1 and 2 define two variables that take the string gcctiny and apply 
+Lines 2 and 3 define two variables that take the string gcctiny and apply 
 some sed transformation that is kept in the Makefile and determined at 
 configure time. This is used only for cross compilers so it is of little 
 importance now. This will be used during install. In addition of installing 
 gcctiny, a target-gcctiny will be installed as well. If you have x86-64 
 machine it will probably be something like x86_64-pc-linux-gnu-gcctiny.
 
-Line 4 is a Makefile rule that says that the tiny goal requires building 
+Line 5 is a Makefile rule that says that the tiny goal requires building 
 tiny1$(exeext). exeext is a Makefile variable that the configure sets as 
 empty in Linux but it is set to .exe in Windows, you will see it used 
 everywhere a binary is mentioned.
 
-Lines 8 to 19 are related to our gcctiny driver. Lines 10 to 13 we specify 
+Lines 9 to 20 are related to our gcctiny driver. Lines 11 to 14 we specify 
 all the .o files required to build gcctiny. We list them in a variable 
 called GCCTINY_OBJS. GCC_OBJS is a variable from gcc-src/gcc/Makefile 
 that contains all the .o files required by gcc. This set is not complete 
 to get a driver. So we add a tinyspec.o extra with a few definitions 
-inside. More on this later. Lines 15 to 18 are the link command to build 
+inside. More on this later. Lines 16 to 19 are the link command to build 
 our gcctiny driver. No need to mess with that one, it works fine and most 
 front ends use a similar command.
 
-Lines 20 to 29 are related to tiny1. The real compiler. We follow a similar 
+Lines 21 to 30 are related to tiny1. The real compiler. We follow a similar 
 structure here. tiny_OBJS is a list of .o files of our compiler. Due to the 
 way the makefile in gcc-src/gcc works, this variable has to be called 
-lang_OBJS (in our case lang is tiny). Lines 26 to 28 are the link command 
+lang_OBJS (in our case lang is tiny). Lines 27 to 29 are the link command 
 to link tiny1. Again another command line taken from existing front ends 
 that seems to work fine. No need to mess with that one either.
 
 Now come a bunch of rules some of them do nothing, some of them do something. 
-In line 35, this rule installs the gcctiny driver and makes a (hard) link to 
+In line 36, this rule installs the gcctiny driver and makes a (hard) link to 
 target-gcctiny in bindir. In this rule, variable INSTALL_PROGRAM is the install 
 program (used obviously to install files), variable bindir is gcc-install/bin. 
 The variable $(DESTDIR) is used only during make install to, temporarily, 
 install files into another location before moving them to the final location 
 (this is mostly useful for sysadmins and system packagers). Most of the time 
-DESTDIR will be empty. Lines 59 to 61 implement the uninstall rule, that is 
-invoked if during make uninstall. Finally lines 63 to 75 implement some logic 
+DESTDIR will be empty. Lines 60 to 62 implement the uninstall rule, that is 
+invoked if during make uninstall. Finally lines 64 to 76 implement some logic 
 required for the gcc bootstraping.
 
 Great, we are half way. Now we need some code. Our current Make-lang.in 
