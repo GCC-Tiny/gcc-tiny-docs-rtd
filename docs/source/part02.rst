@@ -109,8 +109,8 @@ Now let's configure a minimal gcc with just C and C++ (C++ is required for GCC i
     $ cd gcc-build
     $ ../gcc-src/configure --prefix=$PWD/../gcc-install --disable-multilib --enable-languages=c,c++
 
-And make an initial build of the whole GCC. This step may take several minutes 
-depending on your specific machine. The flag to -jN will use all the cpus of 
+And make an initial build of the whole GCC. This step may take a long time, maybe 1 hour, 
+depending on your specific machine. The flag to -j will use all the cpus of 
 your system.
 
 .. code-block:: shell-session
