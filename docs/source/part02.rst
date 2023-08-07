@@ -127,7 +127,7 @@ Finally let's install it.
 The compiler will be installed in a directory gcc-install, as a sibling of gcc 
 and gcc-build.
 
-Verify you the GCC compiler installed at the gcc-install folder.
+Verify you have the GCC compiler installed at the gcc-install folder.
 
 .. code-block:: shell-session
 
@@ -138,7 +138,7 @@ Verify you the GCC compiler installed at the gcc-install folder.
     This is free software; see the source for copying conditions.  There is NO
     warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-Now let us continue with the steps to add Tiny compiler.
+Now let us continue with the steps to add Tiny compiler. Buckle up.
 
 Structure of GCC
 ----------------
@@ -376,43 +376,43 @@ is shared among drivers.
 
     selftest-tiny:
 
-Lines 1 and 2 define two variables that take the string gcctiny and apply 
+Lines 2 and 3 define two variables that take the string gcctiny and apply 
 some sed transformation that is kept in the Makefile and determined at 
 configure time. This is used only for cross compilers so it is of little 
 importance now. This will be used during install. In addition of installing 
 gcctiny, a target-gcctiny will be installed as well. If you have x86-64 
 machine it will probably be something like x86_64-pc-linux-gnu-gcctiny.
 
-Line 4 is a Makefile rule that says that the tiny goal requires building 
+Line 5 is a Makefile rule that says that the tiny goal requires building 
 tiny1$(exeext). exeext is a Makefile variable that the configure sets as 
 empty in Linux but it is set to .exe in Windows, you will see it used 
 everywhere a binary is mentioned.
 
-Lines 8 to 19 are related to our gcctiny driver. Lines 10 to 13 we specify 
+Lines 9 to 20 are related to our gcctiny driver. Lines 11 to 14 we specify 
 all the .o files required to build gcctiny. We list them in a variable 
 called GCCTINY_OBJS. GCC_OBJS is a variable from gcc-src/gcc/Makefile 
 that contains all the .o files required by gcc. This set is not complete 
 to get a driver. So we add a tinyspec.o extra with a few definitions 
-inside. More on this later. Lines 15 to 18 are the link command to build 
+inside. More on this later. Lines 16 to 19 are the link command to build 
 our gcctiny driver. No need to mess with that one, it works fine and most 
 front ends use a similar command.
 
-Lines 20 to 29 are related to tiny1. The real compiler. We follow a similar 
+Lines 21 to 30 are related to tiny1. The real compiler. We follow a similar 
 structure here. tiny_OBJS is a list of .o files of our compiler. Due to the 
 way the makefile in gcc-src/gcc works, this variable has to be called 
-lang_OBJS (in our case lang is tiny). Lines 26 to 28 are the link command 
+lang_OBJS (in our case lang is tiny). Lines 27 to 29 are the link command 
 to link tiny1. Again another command line taken from existing front ends 
 that seems to work fine. No need to mess with that one either.
 
 Now come a bunch of rules some of them do nothing, some of them do something. 
-In line 35, this rule installs the gcctiny driver and makes a (hard) link to 
+In line 36, this rule installs the gcctiny driver and makes a (hard) link to 
 target-gcctiny in bindir. In this rule, variable INSTALL_PROGRAM is the install 
 program (used obviously to install files), variable bindir is gcc-install/bin. 
 The variable $(DESTDIR) is used only during make install to, temporarily, 
 install files into another location before moving them to the final location 
 (this is mostly useful for sysadmins and system packagers). Most of the time 
-DESTDIR will be empty. Lines 59 to 61 implement the uninstall rule, that is 
-invoked if during make uninstall. Finally lines 63 to 75 implement some logic 
+DESTDIR will be empty. Lines 60 to 62 implement the uninstall rule, that is 
+invoked if during make uninstall. Finally lines 64 to 76 implement some logic 
 required for the gcc bootstraping.
 
 Great, we are half way. Now we need some code. Our current Make-lang.in 
@@ -756,33 +756,32 @@ If you want to see what is going on, just pass -v.
 .. code-block:: shell-session
     :linenos:
 
-    $ ../gcc-install/bin/gcctiny -c -v test.tiny
+    $ ../gcc-install/bin/gcctiny -c -v test.tiny 
     Using built-in specs.
-    COLLECT_GCC=gcc-install/bin/gcctiny
+    COLLECT_GCC=../gcc-install/bin/gcctiny
     Target: x86_64-pc-linux-gnu
-    Configured with: ../gcc-src/configure --prefix=/home/roger/soft/gcc/gcc-blog/gcc-build/../gcc-install --disable-bootstrap --enable-languages=c,c++,tiny
+    Configured with: ../gcc/configure --prefix=/home/chatai/github/gcc-build/../gcc-install --disable-bootstrap --disable-multilib --enable-languages=c,c++,tiny
     Thread model: posix
-    gcc version 6.0.0 20160105 (experimental) (GCC) 
+    Supported LTO compression algorithms: zlib
+    gcc version 14.0.0 20230807 (experimental) (GCC) 
     COLLECT_GCC_OPTIONS='-c' '-v' '-mtune=generic' '-march=x86-64'
-    /home/roger/soft/gcc/gcc-blog/gcc-install/bin/../libexec/gcc/x86_64-pc-linux-gnu/6.0.0/tiny1 test.tiny -quiet -dumpbase test.tiny -mtune=generic -march=x86-64 -auxbase test -version -o /tmp/ccsptWhB.s
-    Tiny (GCC) version 6.0.0 20160105 (experimental) (x86_64-pc-linux-gnu)
-        compiled by GNU C version 5.3.1 20151219, GMP version 4.3.2, MPFR version 2.4.2, MPC version 0.8.1, isl version 0.15
-    GGC heuristics: --param ggc-min-expand=30 --param ggc-min-heapsize=4096
-    Tiny (GCC) version 6.0.0 20160105 (experimental) (x86_64-pc-linux-gnu)
-        compiled by GNU C version 5.3.1 20151219, GMP version 4.3.2, MPFR version 2.4.2, MPC version 0.8.1, isl version 0.15
+    /home/chatai/github/gcc-install/bin/../libexec/gcc/x86_64-pc-linux-gnu/14.0.0/tiny1 test.tiny -quiet -dumpbase test.tiny -dumpbase-ext .tiny -mtune=generic -march=x86-64 -version -o /tmp/ccf5BmOY.s
+    Tiny (GCC) version 14.0.0 20230807 (experimental) (x86_64-pc-linux-gnu)
+            compiled by GNU C version 11.4.0, GMP version 6.2.1, MPFR version 4.1.0, MPC version 1.2.1, isl version isl-0.24-GMP
+
     GGC heuristics: --param ggc-min-expand=30 --param ggc-min-heapsize=4096
     Hello gcctiny!
     COLLECT_GCC_OPTIONS='-c' '-v' '-mtune=generic' '-march=x86-64'
-    as -v --64 -o test.o /tmp/ccsptWhB.s
-    GNU assembler version 2.25.90 (x86_64-linux-gnu) using BFD version (GNU Binutils for Debian) 2.25.90.20151209
-    COMPILER_PATH=/home/roger/soft/gcc/gcc-blog/gcc-install/bin/../libexec/gcc/x86_64-pc-linux-gnu/6.0.0/:/home/roger/soft/gcc/gcc-blog/gcc-install/bin/../libexec/gcc/
-    LIBRARY_PATH=/home/roger/soft/gcc/gcc-blog/gcc-install/bin/../lib/gcc/x86_64-pc-linux-gnu/6.0.0/:/home/roger/soft/gcc/gcc-blog/gcc-install/bin/../lib/gcc/:/home/roger/soft/gcc/gcc-blog/gcc-install/bin/../lib/gcc/x86_64-pc-linux-gnu/6.0.0/../../../../lib64/:/lib/x86_64-linux-gnu/:/lib/../lib64/:/usr/lib/x86_64-linux-gnu/:/home/roger/soft/gcc/gcc-blog/gcc-install/bin/../lib/gcc/x86_64-pc-linux-gnu/6.0.0/../../../:/lib/:/usr/lib/
+    as -v --64 -o test.o /tmp/ccf5BmOY.s
+    GNU assembler version 2.38 (x86_64-linux-gnu) using BFD version (GNU Binutils for Ubuntu) 2.38
+    COMPILER_PATH=/home/chatai/github/gcc-install/bin/../libexec/gcc/x86_64-pc-linux-gnu/14.0.0/:/home/chatai/github/gcc-install/bin/../libexec/gcc/
+    LIBRARY_PATH=/home/chatai/github/gcc-install/bin/../lib/gcc/x86_64-pc-linux-gnu/14.0.0/:/home/chatai/github/gcc-install/bin/../lib/gcc/:/home/chatai/github/gcc-install/bin/../lib/gcc/x86_64-pc-linux-gnu/14.0.0/../../../../lib64/:/lib/x86_64-linux-gnu/:/lib/../lib64/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib64/:/home/chatai/github/gcc-install/bin/../lib/gcc/x86_64-pc-linux-gnu/14.0.0/../../../:/lib/:/usr/lib/
     COLLECT_GCC_OPTIONS='-c' '-v' '-mtune=generic' '-march=x86-64'
 
-In line 9 tiny1 is being called. You can see some extra flags that are added 
-because of cc1_options used in the lang-specs.h. In line 18 the assembler is 
+In line 10 tiny1 is being called. You can see some extra flags that are added 
+because of cc1_options used in the lang-specs.h. In line 17 the assembler is 
 invoked to generate the .o file. Since our frontend did nothing but print a 
-message (line 16), the net effect is the same as compiling an empty file.
+message (line 15), the net effect is the same as compiling an empty file.
 
 Wrap-up
 -------
