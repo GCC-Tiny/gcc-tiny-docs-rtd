@@ -3,7 +3,7 @@
 # -- Project information
 
 project = 'GCC Tiny'
-copyright = '2016 Roger Ferrer Ibáñez, 2023, GCC Tiny Project'
+copyright = '2016 Roger Ferrer Ibáñez, 2023 GCC Tiny Project'
 author = 'GCC Tiny'
 license = 'CC-BY-SA 4.0'
 

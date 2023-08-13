@@ -642,12 +642,14 @@ The square root computed using 100 steps of the Newton method.
   1.414214
 
 Github
-======
+------
 
-I have uploaded all the code in my github. The code is in gcc/tiny.
+All the code is uploaded to the GCC Tiny project. The code is in 
+`src-gcc-tiny branch <https://github.com/GCC-Tiny/gcc/tree/src-gcc-tiny>`
+.
 
-What next
----------
+What is next
+------------
 
 While this post marks the end of this series there are still a few things 
 possible to do for tiny.
