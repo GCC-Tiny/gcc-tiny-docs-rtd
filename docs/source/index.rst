@@ -1,13 +1,15 @@
 Welcome to GCC Tiny documentation!
 ==================================
 
-**GCC Tiny** is a sample programming language showcasing how to add a front end to GCC.
+**GCC Tiny** is a sample programming language showcasing how to add
+a frontend to GCC. This guide starts with a fresh clone of GCC and
+build everything that is needed for a fully functioning compiler.
 
-It is converted from `Roger Ferrer Ibáñez' blog series <https://thinkingeek.com/gcc-tiny/>`_
+If you want to join the fun, or have any comments or ideas, 
+please don`t hesitate join us at 
+`GCC Tiny Project <https://github.com/GCC-Tiny>`_
+.
 
-.. note::
-
-   This project is under active development.
 
 Contents
 --------
