@@ -645,7 +645,7 @@ Github
 ------
 
 All the code is uploaded to the GCC Tiny project. The code is in 
-`src-gcc-tiny branch <https://github.com/GCC-Tiny/gcc/tree/src-gcc-tiny>`
+`src-gcc-tiny branch <https://github.com/GCC-Tiny/gcc/tree/src-gcc-tiny>`_
 .
 
 What is next
