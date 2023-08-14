@@ -415,7 +415,7 @@ just parses the expression e and returns its tree.
     Tree expr = parse_expression ();
     tok = lexer.peek_token ();
     if (tok->get_id () != Tiny::RIGHT_PAREN)
-      error_at (tok->get_locus (), "expecting ')' but %s found\n",
+      error_at (tok->get_locus (), "expecting ')' but %s found",
           tok->get_token_description ());
     else
       lexer.skip_token ();
@@ -740,7 +740,7 @@ simply verifies that both operands are logical.
       {
         error_at (
     tok->get_locus (),
-    "operands of operator %s must be boolean but they are %s and %s\n",
+    "operands of operator %s must be boolean but they are %s and %s",
     tok->get_token_description (), print_type (left.get_type ()),
     print_type (right.get_type ()));
         return false;
