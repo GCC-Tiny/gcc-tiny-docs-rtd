@@ -78,7 +78,7 @@ how we have to change parse_variable_declaration to do this.
     if (scope.get_current_mapping ().get (identifier->get_str ()))
       {
         error_at (identifier->get_locus (),
-      "variable '%s' already declared in this scope",
+      "variable %qs already declared in this scope",
       identifier->get_str ().c_str ());
         return Tree::error ();
       }
@@ -232,9 +232,9 @@ Ok, now we can declare variables. Let's assign them some value.
     if (var_decl.get_type () != expr.get_type ())
       {
         error_at (first_of_expr->get_locus (),
-      "cannot assign value of type %s to variable '%s' of type %s",
-      print_type (expr.get_type ()), sym->get_name ().c_str (),
-      print_type (var_decl.get_type ()));
+          "cannot assign value of type %qs to variable %qs of type %qs",
+          print_type (expr.get_type ()), sym->get_name ().c_str (),
+          print_type (var_decl.get_type ()));
         return Tree::error ();
       }
 
@@ -311,7 +311,7 @@ that we stored in the Symbol when it was declared.
     if (s == NULL)
       {
         error_at (tok->get_locus (),
-            "variable '%s' not declared in the current scope",
+            "variable %qs not declared in the current scope",
             tok->get_str ().c_str ());
         return Tree::error ();
       }
@@ -415,7 +415,7 @@ just parses the expression e and returns its tree.
     Tree expr = parse_expression ();
     tok = lexer.peek_token ();
     if (tok->get_id () != Tiny::RIGHT_PAREN)
-      error_at (tok->get_locus (), "expecting ')' but %s found\n",
+      error_at (tok->get_locus (), "expecting %qs but %qs found\n",")",
           tok->get_token_description ());
     else
       lexer.skip_token ();
@@ -437,7 +437,7 @@ applied to integer and float expressions.
         || expr.get_type () != float_type_node)
       {
         error_at (tok->get_locus (),
-            "operand of unary plus must be int or float but it is %s",
+            "operand of unary plus must be %<int%> or %<float%> but it is %qs",
             print_type (expr.get_type ()));
         return Tree::error ();
       }
@@ -487,7 +487,7 @@ Unary minus operator is similar to the plus operator but it negates its operand.
       {
         error_at (
           tok->get_locus (),
-          "operand of unary minus must be int or float but it is %s",
+          "operand of unary minus must be %<int%> or %<float%> but it is %qs",
           print_type (expr.get_type ()));
         return Tree::error ();
       }
@@ -513,7 +513,7 @@ Unary not operator computes the logical negation of its boolean argument.
     if (expr.get_type () != boolean_type_node)
       {
         error_at (tok->get_locus (),
-            "operand of logical not must be a boolean but it is %s",
+            "operand of logical not must be a %<boolean%> but it is %qs",
             print_type (expr.get_type ()));
         return Tree::error ();
       }
@@ -636,7 +636,7 @@ code FLOAT_EXPR is used to convert from integer to float.
 
     // i.e. int + boolean
     error_at (tok->get_locus (),
-        "invalid operands of type %s and %s for operator %s",
+        "invalid operands of type %qs and %qs for operator %qs",
         print_type (left_type), print_type (right_type),
         tok->get_token_description ());
     return Tree::error ();
@@ -740,7 +740,7 @@ simply verifies that both operands are logical.
       {
         error_at (
     tok->get_locus (),
-    "operands of operator %s must be boolean but they are %s and %s\n",
+    "operands of operator %qs must be boolean but they are %qs and %qs\n",
     tok->get_token_description (), print_type (left.get_type ()),
     print_type (right.get_type ()));
         return false;
@@ -901,7 +901,7 @@ Finally to print a string, we just call puts.
 
     else if (is_string_type (expr.get_type ()))
       {
-        // Alternatively we could use printf('%s\n', expr) instead of puts(expr)
+        // Alternatively we could use printf('%s', expr) instead of puts(expr)
         tree args[] = {expr.get_tree ()};
 
         Tree puts_fn = get_puts_addr ();
@@ -947,7 +947,7 @@ Having handled all valid types, this completes our write statement.
     else
       {
         error_at (first_of_expr->get_locus (),
-      "value of type %s is not a valid write operand",
+      "value of type %qs is not a valid write operand",
       print_type (expr.get_type ()));
         return Tree::error ();
       }
