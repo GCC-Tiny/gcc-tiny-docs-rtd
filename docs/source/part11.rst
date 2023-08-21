@@ -425,7 +425,7 @@ left tree (that we checked it is of record type) and the appropiate FIELD_DECL.
   +  if (field_decl.is_null ())
   +    {
   +      error_at (left.get_locus (),
-  +		"record type does not have a field named '%s'",
+  +		"record type does not have a field named %qs",
   +		identifier->get_str ().c_str ());
   +      return Tree::error ();
   +    }

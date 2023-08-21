@@ -556,7 +556,7 @@ first create a couple of functions that expression r that check this for us.
     if (expr.get_tree_code () != VAR_DECL && expr.get_tree_code () != ARRAY_REF)
       {
         error_at (expr.get_locus (),
-      "does not designate a variable or array element");
+        "does not designate a variable or array element");
         return Tree::error ();
       }
     return expr;
@@ -609,10 +609,10 @@ parse_assignment.
   +  if (variable.get_type () != expr.get_type ())
       {
         error_at (first_of_expr->get_locus (),
-  -		"cannot assign value of type %s to variable '%s' of type %s",
+  -		"cannot assign value of type %qs to variable %qs of type %qs",
   -		print_type (expr.get_type ()), sym->get_name ().c_str (),
   -		print_type (var_decl.get_type ()));
-  +		"cannot assign value of type %s to a variable of type %s",
+  +		"cannot assign value of type %qs to a variable of type %qs",
   +		print_type (expr.get_type ()),
   +		print_type (variable.get_type ()));
         return Tree::error ();

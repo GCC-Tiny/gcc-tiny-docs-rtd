@@ -229,20 +229,20 @@ to be updated.
       if (scope.get_current_mapping ().get (identifier->get_str ()))
       {
          error_at (identifier->get_locus (),
-   -		"variable '%s' already declared in this scope",
-   +		"name '%s' already declared in this scope",
+   -		"variable %qs already declared in this scope",
+   +		"name %qs already declared in this scope",
          identifier->get_str ().c_str ());
       }
    -  SymbolPtr sym (new Symbol (identifier->get_str ()));
    +  SymbolPtr sym (new Symbol (Tiny::VARIABLE, identifier->get_str ()));
       scope.get_current_mapping ().insert (sym);
    @@ -635,6 +728,11 @@ Parser::query_variable (const std::string &name, location_t loc)
-         error_at (loc, "variable '%s' not declared in the current scope",
+         error_at (loc, "variable %qs not declared in the current scope",
          name.c_str ());
       }
    +  else if (sym->get_kind () != Tiny::VARIABLE)
    +    {
-   +      error_at (loc, "name '%s' is not a variable", name.c_str ());
+   +      error_at (loc, "name %qs is not a variable", name.c_str ());
    +      sym = SymbolPtr();
    +    }
       return sym;
@@ -257,7 +257,7 @@ we left halfways above.
    +  if (scope.get_current_mapping ().get (identifier->get_str ()))
    +    {
    +      error_at (identifier->get_locus (),
-   +		"name '%s' already declared in this scope",
+   +		"name %qs already declared in this scope",
    +		identifier->get_str ().c_str ());
    +    }
    +  SymbolPtr sym (new Symbol (Tiny::TYPENAME, identifier->get_str ()));
@@ -344,12 +344,12 @@ does the same query in the lookup but checks the name is a type name.
    +  SymbolPtr sym = scope.lookup (name);
    +  if (sym == NULL)
    +    {
-   +      error_at (loc, "type '%s' not declared in the current scope",
+   +      error_at (loc, "type %qs not declared in the current scope",
    +		name.c_str ());
    +    }
    +  else if (sym->get_kind () != Tiny::TYPENAME)
    +    {
-   +      error_at (loc, "name '%s' is not a type", name.c_str ());
+   +      error_at (loc, "name %qs is not a type", name.c_str ());
    +      sym = SymbolPtr();
    +    }
    +  return sym;
