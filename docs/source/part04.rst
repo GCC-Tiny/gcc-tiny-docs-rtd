@@ -241,7 +241,7 @@ We do some minimal error recovery by skiping all tokens until a semicolon is fou
     void
     Parser::unexpected_token (const_TokenPtr t)
     {
-    error_at (t->get_locus (), "unexpected %s", t->get_token_description ());
+    error_at (t->get_locus (), "unexpected %qs\n", t->get_token_description ());
     }
 
     void
@@ -382,7 +382,7 @@ returns an empty pointer (i.e. a null pointer).
         }
     else
         {
-        error_at (t->get_locus (), "expecting %s but %s found",
+        error_at (t->get_locus (), "expecting %qs but %qs found\n",
             get_token_description (token_id), t->get_token_description ());
         return const_TokenPtr ();
         }
