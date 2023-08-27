@@ -64,8 +64,8 @@ long time, so do not get discouraged by all the content you will encounter. It u
 in various ways by the GCC toolchain. For now, just accept this and add the changes
 needed for enabling the Tiny testsuites.
 
-  1. First you need to let GCC know that your frontend can be included into the test automation framework by changing gcc-src/Makefile.def.
-  2. Second you need to add include the Tiny testsuites into the gcc-src/testsuite/tiny folder.
+  1. First you need to let GCC know that your frontend can be included into the test automation framework by changing gcc-src/Makefile.def and gcc/tiny/Make-lang.in
+  2. Second you need to create the GNU Tiny testsuites into the gcc-src/gcc/testsuite/tiny folder
 
 
 Makefile.def
@@ -115,14 +115,15 @@ The autogen tool will generate the Makefile.in file based on the content of Make
     $ autogen Makefile.def
 
 
-The tool will not provide any prompt, so once autogen completes, it is recommended to check if you changes made it to the gcc-src/Makefile.in
+The tool will not provide any prompt, so once autogen completes, it is recommended to 
+check if your changes made it to the gcc-src/Makefile.in
 
 Makefile.in
 -----------
 
 .. code-block:: shell
     
-    git diff HEAD@{1} Makefile.in
+    $ git diff HEAD@{1} Makefile.in
 
 
 .. code-block:: diff
@@ -156,17 +157,58 @@ Makefile.in
     # The gcc part of install-no-fixedincludes, which relies on an intimate
     # knowledge of how a number of gcc internal targets (inter)operate.  Delegate.
 
-Looks like there are two new targets: check-gcc-tiny and check-tiny.
+Looks like there are two new phony targets: check-gcc-tiny and check-tiny. 
+We will disect this later once we execute the make check-tiny command.
+
+Let's check everything is still working as expected
+
+.. code-block:: shell
+
+    $ cd gcc-build
+    $ rm -rf *
+    $ ../gcc/configure --prefix=$PWD/../gcc-install --disable-multilib --disable-bootstrap --enable-languages=c,c++,tiny
+    $ make -j
+    $ make -j install
+
+If everything goes well you should see something like
+
+.. code-block:: shell-session
+
+    make[1]: Leaving directory '/home/chatai/github/gcc-build'
+
+Now a good time to try the new target for the tine test suite.
+
+.. code-block:: shell
+
+    $ make check-tiny
+
+The output will be very verbose. In a later section we will dive into the 
+meaning of the output. For now the ... denote the shortened output.
+
+.. code-block:: shell-session
+
+    r=`${PWDCMD-pwd}`; export r; \
+    s=`cd ../gcc; ${PWDCMD-pwd}`; export s;
+    ...
+    FLEX="flex"; export FLEX; LEX="flex"; ...
+    ...
+    (cd gcc && make ... check-tiny);
+    make[1]: Entering directory '/home/chatai/github/gcc-build/gcc'
+    make[1]: *** No rule to make target 'check-tiny'.  Stop.
+    make[1]: Leaving directory '/home/chatai/github/gcc-build/gcc'
+    make: *** [Makefile:19673: check-gcc-tiny] Error 2
 
 
-.. TODO: check make check-tiny at this point with out the changes totiny/Make-lang.in 
+The error indicates that make could not find the expected target check-tiny. 
+Still some more work to complete this part of the integration.
 
-Just a few more steps to be completed.
 
 gcc/tiny/Make-lang.in
 ---------------------
 
-In the gcc/tiny/Make-lang.in file we need to let the generic test suite framework know that the Tiny language will use the standard testsuites features:
+In the gcc/tiny/Make-lang.in file we need to let the generic test suite 
+framework know that the Tiny language will use the standard testsuites 
+features:
 
 .. code-block:: shell
     
@@ -190,11 +232,74 @@ In the gcc/tiny/Make-lang.in file we need to let the generic test suite framewor
     +# For description see the check_$lang_parallelize comment in gcc/Makefile.in.
     +check_tiny_parallelize = 10000
 
+To activate the changes to the Make-lang.in filem you need to run make again.
+
+.. code-block:: shell
+
+    $ make -j
+    $ make -j install
+    $ make check-tiny
 
 
-.. TODO: check make check-tiny at this point with out the adding the gcc-src/gcc/testsuites/tiny
+.. code-block:: shell-session
+
+    $ make check-tiny
+
+    r=`${PWDCMD-pwd}`; export r; \
+    s=`cd ../gcc; ${PWDCMD-pwd}`; export s; \
+    FLEX="flex"; export FLEX; ...
+    (cd gcc && make ... check-tiny);
+    make[1]: Entering directory '/home/chatai/github/gcc-build/gcc'
+    Making a new config file...
+    echo "set tmpdir /home/chatai/github/gcc-build/gcc/testsuite" >> ./site.tmp
+    rm -rf testsuite/tiny-parallel
+    make[2]: Entering directory '/home/chatai/github/gcc-build/gcc'
+    (rootme=`${PWDCMD-pwd}`; export rootme; \
+    srcdir=`cd ../../gcc/gcc; ${PWDCMD-pwd}` ; export srcdir ; \
+    if [ -n "" ] \
+    && [ -n "$GCC_RUNTEST_PARALLELIZE_DIR" ] \
+    && [ -f testsuite/tiny-parallel/finished ]; then \
+    rm -rf testsuite/tiny; \
+    else \
+    cd testsuite/tiny; \
+    rm -f tmp-site.exp; \
+    sed '/set tmpdir/ s|testsuite$|testsuite/tiny|' \
+            < ../../site.exp > tmp-site.exp; \
+    /bin/bash ${srcdir}/../move-if-change tmp-site.exp site.exp; \
+    EXPECT=`if [ -f ${rootme}/../expect/expect ] ; then echo ${rootme}/../expect/expect ; else echo expect ; fi` ; export EXPECT ; \
+    if [ -f ${rootme}/../expect/expect ] ; then  \
+        TCL_LIBRARY=`cd .. ; cd ${srcdir}/../tcl/library ; ${PWDCMD-pwd}` ; \
+        export TCL_LIBRARY ; \
+    fi ; \
+    `if [ -f ${srcdir}/../dejagnu/runtest ] ; then echo ${srcdir}/../dejagnu/runtest ; else echo runtest; fi` --tool tiny ; \
+    if [ -n "$GCC_RUNTEST_PARALLELIZE_DIR" ] ; then \
+        touch ${rootme}/testsuite/tiny-parallel/finished; \
+    fi ; \
+    fi )
+    WARNING: Couldn't find tool init file
+    Test run by chatai on Sun Aug 27 10:01:24 2023
+    Native configuration is x86_64-pc-linux-gnu
+
+                    === tiny tests ===
+
+    Schedule of variations:
+        unix
+
+    Running target unix
+    Using /usr/share/dejagnu/baseboards/unix.exp as board description file for target.
+    Using /usr/share/dejagnu/config/unix.exp as generic interface file for target.
+    Using /home/chatai/github/gcc/gcc/testsuite/config/default.exp as tool-and-target-specific interface file.
+
+                    === tiny Summary ===
+
+    make[2]: Leaving directory '/home/chatai/github/gcc-build/gcc'
+    make[1]: Leaving directory '/home/chatai/github/gcc-build/gcc'
 
 
+The line === tiny summary === indicates the runtest command was invoked. 
+As expected there is a warning that a tool init file cannot be found. 
+This is from the runtest command. Let get started on added the needed 
+setup for the execution of the runtest commands.
 
 gcc-src/testsuites
 ------------------
