@@ -50,8 +50,33 @@ Check installed versions of DejaGnu and required softare Expect and Tcl.
 DejaGnu Introduction
 ====================
 
+.. https://www.embecosm.com/appnotes/ean8/ean8-howto-dejagnu-1.0.html
+.. https://www.gnu.org/software/dejagnu/dejagnu.pdf
+.. https://wiki.tcl-lang.org/page/Expect
+.. https://en.wikipedia.org/wiki/Expect
+.. Exploring Expect https://learning.oreilly.com/library/view/exploring-expect/9781565920903/
+
+DejaGNU is using the tcl extension Expect to control interactions with 
+the GCC compilers, linux utilities and the produced output.
+
+
+Expect
+------
+
+Expect is a program to control interactive applications. These applications 
+interactively prompt and expect a user to enter keystrokes in response. 
+By using Expect, you can write simple scripts to automate these 
+interactions. And using automated interactive programs, you will be 
+able to solve problems that you never would have even considered before.
+
+
 DejaGnu Testcases
 -----------------
+
+
+.. graphvit:: part12_expect.dot
+
+
 
 
 GCC Integration of TestSuites
@@ -132,15 +157,6 @@ Makefile.in
     index 144bccd2603..5769cee1bbc 100644
     --- a/Makefile.in
     +++ b/Makefile.in
-    @@ -444,7 +444,7 @@ LIBCFLAGS = $(CFLAGS)
-    CXXFLAGS = @CXXFLAGS@
-    LIBCXXFLAGS = $(CXXFLAGS) -fno-implicit-templates
-    GOCFLAGS = $(CFLAGS)
-    -GDCFLAGS = @GDCFLAGS@
-    +GDCFLAGS = $(CFLAGS)
-    GM2FLAGS = $(CFLAGS)
-    
-    # Pass additional PGO and LTO compiler options to the PGO build.
     @@ -61790,6 +61790,14 @@ check-gcc-rust:
             (cd gcc && $(MAKE) $(GCC_FLAGS_TO_PASS) check-rust);
     check-rust: check-gcc-rust

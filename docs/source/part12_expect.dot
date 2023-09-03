@@ -1,0 +1,79 @@
+  digraph foo {
+    "make check-tiny" -> "runtest --tool tiny" -> "config/default.exp";
+    "runtest --tool tiny" -> "go.dg/dg.exp" -> "lib/go-dg.exp" -> "lib/gcc-dg.exp";
+   
+   //shape=box: proc definitions
+   "proc ${tool}_compile" [shape=box];
+   "proc ${tool}_load" [shape=box];
+
+   "config/default.exp" -> "share/dejagnu/standard.exp"
+   "share/dejagnu/standard.exp" -> "proc ${tool}_load";
+   "share/dejagnu/standard.exp" -> "proc ${tool}_compile";
+
+   //shape=parallelogram: commands
+   "dg-init" [shape=parallelogram];
+   "go-dg-runtest" [shape=parallelogram];
+   "dg-finish" [shape=parallelogram];
+
+   "go.dg/dg.exp" -> "dg-init"
+   "go.dg/dg.exp" -> "go-dg-runtest"
+   "go.dg/dg.exp" -> "dg-finish"
+
+   "proc dg-test" [shape=box];
+   "proc gcc-dg-prune" [shape=box];
+   "lib/gcc-dg.exp" -> "proc gcc-dg-prune"
+   "lib/gcc-dg.exp" -> "share/dejagnu/dg.exp"
+   "share/dejagnu/dg.exp" -> "proc dg-test"
+
+   "dg-get-options" [shape=parallelogram];
+   "${tool}-dg-test" [shape=parallelogram];
+   "${tool}-dg-prune" [shape=parallelogram];
+   "${tool}_load" [shape=parallelogram];
+   "proc dg-test" -> "dg-get-options"
+   "proc dg-test" -> "${tool}-dg-test"
+   "proc dg-test" -> "${tool}-dg-prune"
+   "proc dg-test" -> "${tool}_load" 
+
+   "proc go-dg-test" [shape=box];
+   "proc go-dg-runtest" [shape=box];
+   "proc go-dg-prune" [shape=box];
+
+   "lib/go-dg.exp" -> "proc go-dg-test"
+   "lib/go-dg.exp" -> "proc go-dg-runtest"
+   "lib/go-dg.exp" -> "proc go-dg-prune"
+
+   "go_target_compile" [shape=parallelogram];
+   "proc go-dg-test" -> "go_target_compile"
+
+   "dg-test" [shape=parallelogram];
+   "proc go-dg-runtest" -> "dg-test"
+
+   "gcc-dg-prune"  [shape=parallelogram];
+   "proc go-dg-prune" -> "gcc-dg-prune"
+    /*
+subgraph "gcc-dg.exp" { color=blue;
+
+  "lib/gcc-dg.exp" -> "lib/dg.exp";
+  "lib/gcc-dg.exp" -> "lib/file-format.exp";
+  "lib/gcc-dg.exp" -> "lib/target-supports.exp";
+  "lib/gcc-dg.exp" -> "lib/target-supports-dg.exp";
+  "lib/gcc-dg.exp" -> "lib/scanasm.exp";
+  "lib/gcc-dg.exp" -> "lib/scanrtl.exp";
+  "lib/gcc-dg.exp" -> "lib/scantree.exp";
+  "lib/gcc-dg.exp" -> "lib/scanltranstree.exp";
+  "lib/gcc-dg.exp" -> "lib/scanipa.exp";
+  "lib/gcc-dg.exp" -> "lib/scanwpaipa.exp";
+  "lib/gcc-dg.exp" -> "lib/scanlang.exp";
+  "lib/gcc-dg.exp" -> "lib/scansarif.exp";
+  "lib/gcc-dg.exp" -> "lib/timeout.exp";
+  "lib/gcc-dg.exp" -> "lib/timeout-dg.exp";
+  "lib/gcc-dg.exp" -> "lib/prune.exp";
+  "lib/gcc-dg.exp" -> "lib/libgloss.exp";
+  "lib/gcc-dg.exp" -> "lib/target-libpath.exp";
+  "lib/gcc-dg.exp" -> "lib/torture-options.exp";
+  "lib/gcc-dg.exp" -> "lib/fortran-modules.exp";
+  "lib/gcc-dg.exp" -> "lib/multiline.exp";
+}
+*/
+
+   }
