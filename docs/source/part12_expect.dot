@@ -19,11 +19,16 @@
    "go.dg/dg.exp" -> "go-dg-runtest"
    "go.dg/dg.exp" -> "dg-finish"
 
+   "proc dg-init" [shape=box];
    "proc dg-test" [shape=box];
+   "proc dg-finish" [shape=box];
    "proc gcc-dg-prune" [shape=box];
+   "${tool}_finish" [shape=parallelogram];
    "lib/gcc-dg.exp" -> "proc gcc-dg-prune"
    "lib/gcc-dg.exp" -> "share/dejagnu/dg.exp"
+   "share/dejagnu/dg.exp" -> "proc dg-init"
    "share/dejagnu/dg.exp" -> "proc dg-test"
+   "share/dejagnu/dg.exp" -> "proc dg-finish" -> "${tool}_finish"
 
    "dg-get-options" [shape=parallelogram];
    "${tool}-dg-test" [shape=parallelogram];
