@@ -327,8 +327,10 @@ GNU Tiny TestSuites
 Setup
 -----
 
-create gcc/testsuites/tiny
-create dg.exp
+create gcc/testsuites
+create tiny/dg.exp
+create lib/tiny-dg.exp
+
 
 
 Lexical testing
