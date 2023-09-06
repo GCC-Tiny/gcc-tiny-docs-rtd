@@ -10,10 +10,14 @@ You now have a full functioning compiler. Great job getting to this point.
 
 Next step is to ensure the current code does not regress as GCC upstream 
 is updated, or new features is added to the GNU Tiny programming language.
-GCC comes with an elaborate testing facility based on DejaGNU (TODO: LINK)
+GCC comes with an elaborate testing facility based on 
+`DejaGnu <https://www.gnu.org/software/dejagnu>`_
+and
+`Expect <https://wiki.tcl-lang.org/page/Expect>`_
+.
 
-In this blog we will add basic tests and validations of some of the sematic 
-and lexical rules for the GNU Tiny language.
+This blog will briefly introduce DejaGnu and Expect and add basic tests and 
+validations of some of the sematic and lexical rules for the GNU Tiny language.
 
 Prerequisites
 =============
@@ -74,9 +78,97 @@ DejaGnu Testcases
 -----------------
 
 
-.. graphvit:: part12_expect.dot
+.. graphvit  :  : part12_expect.dot
+
+The instructions on how to integrate DejaGnu is fairly straight forward: 
 
 
+1. Driver program in testsuite/${tool}/dg.exp
+2. Callback definitions in testsuite/lib/${tool}-dg.exp
+3. Library support functions in testsuite/lib/${tool}.exp
+
+Create testsuite/$tool/dg.exp
+
+.. code-block:: shell
+
+    # testsuite/$tool/dg.exp
+    load_lib ${tool}-dg.exp
+    dg-init
+    ${tool}-dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/foo*]] ...
+    dg-finish
+
+This also means create testsuite/lib/${tool}-dg.exp
+
+.. code-block:: shell
+
+    # Callbacks
+    #
+    # ${tool}-dg-test testfile do-what-keyword extra-flags
+    #
+    #	Run the test, be it compiler, assembler, or whatever.
+    #
+    # ${tool}-dg-prune target_triplet text
+    #
+    #	Optional callback to delete output from the tool that can occur
+    #	even in successful ("pass") situations and interfere with output
+    #	pattern matching.  This also gives the tool an opportunity to review
+    #	the output and check for any conditions which indicate an "untested"
+    #	or "unresolved" state.
+    proc ${tool}-dg-test {
+
+    }
+
+    proc ${tool}-dg-prune {
+
+    }
+
+    proc ${tool}-dg-runtest {
+
+    }
+
+Further create lib/${tool}.exp
+
+.. code-block:: shell
+
+    #
+    # go_version -- extract and print the version number of the compiler
+    #
+
+    proc go_version { } {
+
+    }
+
+    #
+    # go_include_flags -- include flags for the gcc tree structure
+    #
+
+    proc go_include_flags { } {
+
+    }
+
+    #
+    # go_link_flags -- linker flags for the gcc tree structure
+    #
+
+    proc go_link_flags {
+
+    }
+
+    #
+    # go_init -- called at the start of each subdir of tests
+    #
+
+    proc go_init { 
+
+    }
+
+    #
+    # go_target_compile -- compile a source file
+    #
+
+    proc go_target_compile {
+
+    }
 
 
 GCC Integration of TestSuites
@@ -327,10 +419,10 @@ GNU Tiny TestSuites
 Setup
 -----
 
-create gcc/testsuites
+create gcc/testsuites/tiny
 create tiny/dg.exp
 create lib/tiny-dg.exp
-
+create lib/tiny.exp
 
 
 Lexical testing
