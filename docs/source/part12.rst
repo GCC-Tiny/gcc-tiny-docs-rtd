@@ -1,7 +1,7 @@
 
-*******************
-Adding A Test Suite
-*******************
+******************
+Regression Testing
+******************
 
 .. note:: 
   Work in progress
@@ -9,7 +9,7 @@ Adding A Test Suite
 You now have a full functioning compiler. Great job getting to this point.
 
 Next step is to ensure the current code does not regress as GCC upstream 
-is updated, or new features is added to the GNU Tiny programming language.
+is updated, or new features are added to the GNU Tiny programming language.
 GCC comes with an elaborate testing facility based on 
 `DejaGnu <https://www.gnu.org/software/dejagnu>`_
 and
@@ -39,6 +39,7 @@ If you have all the prerequistites in place you will, after some time, see
 you can skip to the next section (TODO: link)
 
 Use the package manager that comes with you distribution to install
+
 - autogen
 - DejaGnu
 
@@ -73,7 +74,7 @@ DejaGnu Introduction
 .. https://en.wikipedia.org/wiki/Expect
 .. Exploring Expect https://learning.oreilly.com/library/view/exploring-expect/9781565920903/
 
-DejaGNU is using the tcl extension Expect to control interactions with 
+DejaGnu is using the tcl extension Expect to control interactions with 
 the GCC compilers, linux utilities and the produced output.
 
 
@@ -112,101 +113,205 @@ stages of the compiler. For example
 Here the directive is checking for an expected syntax error message 
 from the compiler. In the example there an unexpected semicolon.
 
+DejaGnu Directives
+------------------
 
-.. link to dajagnu directives 
+To see the full list of supported DejaGnu directives look in the /usr/share/dejagnu/dg.exp
+
+For the purpose of this blog just a few are used
+
+- dg-do do-what-keyword
+	'do-what-keyword' is tool specific and is passed unchanged to
+	${tool}-dg-test.  An example is gcc where 'keyword' can be any of:
+	preprocess | compile | assemble | link | run
+	and will do one of: produce a .i, produce a .s, produce a .o,
+	produce an a.out, or produce an a.out and run it (the default is
+	'compile').
+
+- dg-error regexp comment
+	indicate an error message <regexp> is expected on this line
+	(the test fails if it doesn't occur)
+
+- dg-output regexp
+	indicate the expected output of the program is <regexp>
+	(there may be multiple occurrences of this, they are concatenated)
+
+
 
 .. graphviz  :  : part12_expect.dot
 
+DejaGnu Setup
+-------------
+
 The instructions on how to integrate DejaGnu is fairly straight forward: 
 
+1. Driver program in gcc-src/gcc/testsuite/tiny.dg/dg.exp
+2. Callback definitions in gcc-src/gcc/testsuite/lib/tiny-dg.exp
 
-1. Driver program in testsuite/${tool}.dg/dg.exp
-2. Callback definitions in testsuite/lib/${tool}-dg.exp
-3. Library support functions in testsuite/lib/${tool}.exp
+tiny.dg/dg.exp
+~~~~~~~~~~~~~~
 
-Create testsuite/$tool.dg/dg.exp
+Create testsuite/tiny.dg/dg.exp
 
 .. code-block:: shell
+    :linenos:
+
+    #   Copyright (C) 2009-2023 Free Software Foundation, Inc.
+
+    # This program is free software; you can redistribute it and/or modify
+    # it under the terms of the GNU General Public License as published by
+    # the Free Software Foundation; either version 3 of the License, or
+    # (at your option) any later version.
+    # 
+    # This program is distributed in the hope that it will be useful,
+    # but WITHOUT ANY WARRANTY; without even the implied warranty of
+    # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    # GNU General Public License for more details.
+    # 
+    # You should have received a copy of the GNU General Public License
+    # along with GCC; see the file COPYING3.  If not see
+    # <http://www.gnu.org/licenses/>.
 
     # testsuite/tiny.dg/dg.exp
+    # Load support procs.
     load_lib tiny-dg.exp
+
+    # If a testcase doesn't have special options, use these.
+    global DEFAULT_TINYCFLAGS
+    if ![info exists DEFAULT_TINYCFLAGS] then {
+        set DEFAULT_TINYCFLAGS ""
+    }
+
+    # Initialize 'dg'.
     dg-init
-    dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/*.tiny]] ...
+
+    # Main loop.
+    dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/*.tiny ] ] "" $DEFAULT_TINYCFLAGS
+
+    # All done.
     dg-finish
 
-This also means create testsuite/lib/${tool}-dg.exp
+
+lib/tiny-dg.exp
+~~~~~~~~~~~~~~~
+
+This also means create testsuite/lib/tiny-dg.exp
 
 .. code-block:: shell
+    :linenos:
 
-    # Callbacks
-    #
-    # ${tool}-dg-test testfile do-what-keyword extra-flags
-    #
-    #	Run the test, be it compiler, assembler, or whatever.
-    #
-    # ${tool}-dg-prune target_triplet text
-    #
-    #	Optional callback to delete output from the tool that can occur
-    #	even in successful ("pass") situations and interfere with output
-    #	pattern matching.  This also gives the tool an opportunity to review
-    #	the output and check for any conditions which indicate an "untested"
-    #	or "unresolved" state.
-    proc ${tool}-dg-test {
+    #   Copyright (C) 2009-2023 Free Software Foundation, Inc.
 
+    # This program is free software; you can redistribute it and/or modify
+    # it under the terms of the GNU General Public License as published by
+    # the Free Software Foundation; either version 3 of the License, or
+    # (at your option) any later version.
+    # 
+    # This program is distributed in the hope that it will be useful,
+    # but WITHOUT ANY WARRANTY; without even the implied warranty of
+    # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    # GNU General Public License for more details.
+    # 
+    # You should have received a copy of the GNU General Public License
+    # along with GCC; see the file COPYING3.  If not see
+    # <http://www.gnu.org/licenses/>.
+
+
+    #
+    # DejaGnu Setup for the Tiny language
+    #   For details to the Dejagnu directives and more 
+    #   see: https://gcc.gnu.org/onlinedocs/gccint/Directives.html
+    #
+
+    puts "+lib/tiny-dg.exp ..."
+    #
+    # Define tiny callbacks for dg.exp.
+    # Loading /usr/share/dejagnu/dg.exp
+    #
+    load_lib dg.exp
+
+    #
+    # tiny-dg-test
+    #    This is called from share/dejagnu/dg.exp
+    # 
+    proc tiny-dg-test { prog do_what extra_tool_flags } {
+    puts "+lib/tiny-dg.exp: tiny-dg-test [file rootname [file tail $prog]]"
+
+        # Set up options, based on what we're going to do.
+    #    - Setting of the compiler type is handled in the dejagnu file /usr/share/dejagnu/target.exp
+    #      Use the c++ compiler as Tiny is integrated into the gcc compiler.
+    #    - Suppress advanced diagnostic messages from gcc: additional_flags=-fdiagnostics-plain-output
+        set options [list "c++" "additional_flags=-fdiagnostics-plain-output"]
+
+        set compile_type [compile-type $do_what]
+        set output_file  [compile-outfile $do_what $prog]
+
+        verbose "tiny_compile $prog $output_file $compile_type $options" 4
+        set comp_output [tiny_compile "$prog" "$output_file" "$compile_type" $options]
+
+        return [list $comp_output $output_file]
     }
 
-    proc ${tool}-dg-prune {
 
+    # 
+    # compile-type 
+    # -- based on gcc-dg.exp, proc gcc-dg-test-1
+    #    translate dg-do directive to compile type: preprocess, assembly, object, executable
+    #
+    proc compile-type { do_what } {
+        switch $do_what {
+    "preprocess" {
+        set compile_type "preprocess"
+    }
+    "compile" {
+        set compile_type "assembly"
+    }
+    "assemble" {
+        set compile_type "object"
+    }
+    "link" {
+        set compile_type "executable"
+    }
+    "run" {
+        set compile_type "executable"
+    }
+    default {
+        perror "$do_what: not a valid dg-do keyword"
+        set compile_type ""
+    }
+        }
+    return $compile_type 
     }
 
-    proc ${tool}-dg-runtest {
-
+    # 
+    # compile-outfile 
+    # -- based on gcc-dg.exp, proc gcc-dg-test-1
+    #    translate dg-do directive to compile outfile type: .i, .s, .o, -exe
+    #
+    proc compile-outfile { do_what prog } {
+        switch $do_what {
+    "preprocess" {
+        set output_file "[file rootname [file tail $prog]].i"
     }
-
-Further create lib/${tool}.exp
-
-.. code-block:: shell
-
-    #
-    # go_version -- extract and print the version number of the compiler
-    #
-
-    proc go_version { } {
-
+    "compile" {
+        set output_file "[file rootname [file tail $prog]].s"
     }
-
-    #
-    # go_include_flags -- include flags for the gcc tree structure
-    #
-
-    proc go_include_flags { } {
-
+    "assemble" {
+        set output_file "[file rootname [file tail $prog]].o"
     }
-
-    #
-    # go_link_flags -- linker flags for the gcc tree structure
-    #
-
-    proc go_link_flags {
-
+    "link" {
+        set output_file "[file rootname [file tail $prog]]-exe"
     }
-
-    #
-    # go_init -- called at the start of each subdir of tests
-    #
-
-    proc go_init { 
-
+    "run" {
+        set output_file "./[file rootname [file tail $prog]]-exe"
     }
-
-    #
-    # go_target_compile -- compile a source file
-    #
-
-    proc go_target_compile {
-
+    default {
+        perror "$do_what: not a valid dg-do keyword"
+        set output_file ""
     }
-
+        }
+    return $output_file
+    }
 
 GCC Integration of TestSuites
 =============================
