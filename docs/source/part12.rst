@@ -36,7 +36,7 @@ If you have all the prerequistites in place you will, after some time, see
 
     ..... success ....
 
-you can skip to the next session (TODO: link)
+you can skip to the next section (TODO: link)
 
 Use the package manager that comes with you distribution to install
 - autogen
@@ -46,10 +46,23 @@ Check installed versions of DejaGnu and required softare Expect and Tcl.
 
 .. code-block:: shell-session
 
+    $ which runtest
+    /usr/bin/runtest
+
+To check the version of the runtest program change to the gcc-src folder. This 
+is needed because the runtest program need various information regarding 
+the configured complilation targets. 
+
+.. code-block:: shell-session
+
+    $ cd gcc-src
     $ runtest --version
     DejaGnu version 1.6.2
     Expect version  5.45.4
     Tcl version     8.6
+
+With the basic installation done you can continue with understanding DejaGnu
+and creation of testsuites for the Tiny programming language.
 
 DejaGnu Introduction
 ====================
@@ -77,24 +90,48 @@ able to solve problems that you never would have even considered before.
 DejaGnu Testcases
 -----------------
 
+DejaGnu uses special formatted comments, also known as dejagnu directives, 
+in the source code for testing purposes. For example
 
-.. graphvit  :  : part12_expect.dot
+.. code-block:: shell
+
+    write "GCC ROCKS" ; # { dg-output "GCC ROCKS" }
+
+The comment contains the directive dg-output, which instructs DejaGnu to 
+check the output from the compiled program and compare the output with the
+text "GCC ROCKS". In this case the source will be compiled, linked and the
+resulting progam will be executed. 
+Other directives is used to check for specific messages from the various 
+stages of the compiler. For example
+
+.. code-block:: shell
+
+    var i : bool;
+    i := ; # { dg-error "unexpected ‘;’" }
+
+Here the directive is checking for an expected syntax error message 
+from the compiler. In the example there an unexpected semicolon.
+
+
+.. link to dajagnu directives 
+
+.. graphviz  :  : part12_expect.dot
 
 The instructions on how to integrate DejaGnu is fairly straight forward: 
 
 
-1. Driver program in testsuite/${tool}/dg.exp
+1. Driver program in testsuite/${tool}.dg/dg.exp
 2. Callback definitions in testsuite/lib/${tool}-dg.exp
 3. Library support functions in testsuite/lib/${tool}.exp
 
-Create testsuite/$tool/dg.exp
+Create testsuite/$tool.dg/dg.exp
 
 .. code-block:: shell
 
-    # testsuite/$tool/dg.exp
-    load_lib ${tool}-dg.exp
+    # testsuite/tiny.dg/dg.exp
+    load_lib tiny-dg.exp
     dg-init
-    ${tool}-dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/foo*]] ...
+    dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/*.tiny]] ...
     dg-finish
 
 This also means create testsuite/lib/${tool}-dg.exp
@@ -340,7 +377,7 @@ features:
     +# For description see the check_$lang_parallelize comment in gcc/Makefile.in.
     +check_tiny_parallelize = 10000
 
-To activate the changes to the Make-lang.in filem you need to run make again.
+To activate the changes to the Make-lang.in file you need to run make again.
 
 .. code-block:: shell
 
