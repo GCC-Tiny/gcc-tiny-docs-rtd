@@ -52,7 +52,7 @@ Check installed versions of DejaGnu and required softare Expect and Tcl.
 
 To check the version of the runtest program change to the gcc-src folder. This 
 is needed because the runtest program need various information regarding 
-the configured complilation targets. 
+the configured compilation targets. 
 
 .. code-block:: shell-session
 
@@ -334,6 +334,10 @@ Create testsuite/lib/tiny-dg.exp
         }
     return $output_file
     }
+
+
+With the files in place the next step is to add the integration into the Makefile, 
+and to start to populate the Tiny testsuites with meaningful tests.
 
 GCC Integration of TestSuites
 =============================
