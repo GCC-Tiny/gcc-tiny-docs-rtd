@@ -123,18 +123,18 @@ For the purpose of this blog just a few are used
 - dg-do do-what-keyword
 	'do-what-keyword' is tool specific and is passed unchanged to
 	${tool}-dg-test.  An example is gcc where 'keyword' can be any of:
-	preprocess | compile | assemble | link | run
+	preprocess, compile, assemble, link or run
 	and will do one of: produce a .i, produce a .s, produce a .o,
-	produce an a.out, or produce an a.out and run it (the default is
-	'compile').
+	produce an a.out, or produce an a.out and run it. The default is
+	'compile'.
 
 - dg-error regexp comment
-	indicate an error message <regexp> is expected on this line
-	(the test fails if it doesn't occur)
+	Indicate an error message <regexp> is expected on this line.
+	The test fails if it doesn't occur.
 
 - dg-output regexp
-	indicate the expected output of the program is <regexp>
-	(there may be multiple occurrences of this, they are concatenated)
+	Indicate the expected output of the program is <regexp>.
+	There may be multiple occurrences of this, they are concatenated.
 
 
 
@@ -148,8 +148,18 @@ The instructions on how to integrate DejaGnu is fairly straight forward:
 1. Driver program in gcc-src/gcc/testsuite/tiny.dg/dg.exp
 2. Callback definitions in gcc-src/gcc/testsuite/lib/tiny-dg.exp
 
+Larger compilers also use a library for various functions. Placed in 
+testsuite/lib/${tool}.dg. 
+For Tiny there is currently no need for this utility function, but if the 
+testsuite expands into more features, maybe it will be added.
+
 tiny.dg/dg.exp
 ~~~~~~~~~~~~~~
+
+This is the first file the runtest program loads relevant to the testsuite 
+for the tool. It first includes the tiny-dg.exp file containing the callback 
+definitions for the source compilation and then invokes the main 
+functions: dg-init, dg-runtest and dg-finish.
 
 Create testsuite/tiny.dg/dg.exp
 
@@ -195,7 +205,20 @@ Create testsuite/tiny.dg/dg.exp
 lib/tiny-dg.exp
 ~~~~~~~~~~~~~~~
 
-This also means create testsuite/lib/tiny-dg.exp
+The DejaGnu testsuite is a maze of callbacks and source based 
+overwrites for local and global functions. It is daunting to fully
+analyze how it really works. For now we will chose to do an implementation
+that just do enough to showcase the possibilities for the GCC Testsuites. 
+Later we might dive into what is really happening behind the scenes when the
+runtest commands executes.
+
+The next file we need to create defines the function tiny-dg-test, 
+aka ${tool}-dg-test. This function will setup the needed parameters
+for the compilation of the Tiny test source code. The file further defines
+two helper functions that we could have placed in a lib/tiny.exp file, but
+we will leave the refactoring for a later blog.
+
+Create testsuite/lib/tiny-dg.exp
 
 .. code-block:: shell
     :linenos:
@@ -223,7 +246,6 @@ This also means create testsuite/lib/tiny-dg.exp
     #   see: https://gcc.gnu.org/onlinedocs/gccint/Directives.html
     #
 
-    puts "+lib/tiny-dg.exp ..."
     #
     # Define tiny callbacks for dg.exp.
     # Loading /usr/share/dejagnu/dg.exp
