@@ -16,27 +16,35 @@ and
 `Expect <https://wiki.tcl-lang.org/page/Expect>`_
 .
 
+Just as an example of how important it is to keep validating that everything 
+is still working after changes to the sourse code we just have to look at the
+Tiny compiler itself. For the square root test program we wanted to ensure the
+result remain consistent, so adding a simple test should not be a problem.
+
+.. code-block::
+    :linenos:
+
+    var s : float;
+    s := 2.0;
+    var i : int;
+    var x : float;
+    x := 1.0;
+    for i := 1 to 100 do
+    x := 0.5 * (x + s / x);
+    end
+    write x; # { dg-output "1.414214" }
+ 
+But lo and behold, the Tiny lexer had a bug when reading a comment on the very
+last line of the program. See all the details in
+`GCC Tiny Bug #46 <https://github.com/GCC-Tiny/gcc-tiny-docs-rtd/issues/46>`_
+.
+
+
 This blog will briefly introduce DejaGnu and Expect and add basic tests and 
 validations of some of the sematic and lexical rules for the GNU Tiny language.
 
 Prerequisites
 =============
-
-Try
-
-.. code-block:: shell-session
-
-    $ cd gcc-build
-    $ make check
-
-
-If you have all the prerequistites in place you will, after some time, see
-
-.. code-block:: shell-session
-
-    ..... success ....
-
-you can skip to the next section (TODO: link)
 
 Use the package manager that comes with you distribution to install
 
@@ -68,11 +76,13 @@ and creation of testsuites for the Tiny programming language.
 DejaGnu Introduction
 ====================
 
-.. https://www.embecosm.com/appnotes/ean8/ean8-howto-dejagnu-1.0.html
-.. https://www.gnu.org/software/dejagnu/dejagnu.pdf
-.. https://wiki.tcl-lang.org/page/Expect
-.. https://en.wikipedia.org/wiki/Expect
-.. Exploring Expect https://learning.oreilly.com/library/view/exploring-expect/9781565920903/
+There are a number of good references on how to implement DejaGnu:
+
+- `How to guide <https://www.embecosm.com/appnotes/ean8/ean8-howto-dejagnu-1.0.html>`_
+- `DejaGnu documentation <https://www.gnu.org/software/dejagnu/dejagnu.pdf>`_
+- `Expect programming <https://wiki.tcl-lang.org/page/Expect>`_
+- `Expect Wiki <https://en.wikipedia.org/wiki/Expect>`_
+- `Book Exploring Expect <https://learning.oreilly.com/library/view/exploring-expect/9781565920903/>`_
 
 DejaGnu is using the tcl extension Expect to control interactions with 
 the GCC compilers, linux utilities and the produced output.
@@ -221,6 +231,7 @@ we will leave the refactoring for a later blog.
 Create testsuite/lib/tiny-dg.exp
 
 .. code-block:: shell
+    :emphasize-lines: 47
     :linenos:
 
     #   Copyright (C) 2009-2023 Free Software Foundation, Inc.
@@ -335,6 +346,7 @@ Create testsuite/lib/tiny-dg.exp
     return $output_file
     }
 
+The compiler is invoked on line 47 via the function tiny_compile.
 
 With the files in place the next step is to add the integration into the Makefile, 
 and to start to populate the Tiny testsuites with meaningful tests.
@@ -452,7 +464,7 @@ If everything goes well you should see something like
 
     make[1]: Leaving directory '/home/chatai/github/gcc-build'
 
-Now a good time to try the new target for the tine test suite.
+Now would be a good time to try the new target for the Tiny test suite.
 
 .. code-block:: shell
 
@@ -504,9 +516,6 @@ features:
     +# List of targets that can use the generic check- rule and its // variant.
     +# Invoke with make check-tiny
     +lang_checks += check-tiny
-    +lang_checks_parallelized += check-tiny
-    +# For description see the check_$lang_parallelize comment in gcc/Makefile.in.
-    +check_tiny_parallelize = 10000
 
 To activate the changes to the Make-lang.in file you need to run make again.
 
@@ -596,22 +605,38 @@ create lib/tiny.exp
 Lexical testing
 ---------------
 
-Does the language scanner follow all the rules of the input characters, and will proper error messages get emitted if there are illegal constructs.
+Does the language scanner follow all the rules of the input characters, 
+and will proper error messages get emitted if there are illegal constructs.
 
 Syntactical testing
 -------------------
 
-Does the language parser follow all the rules of the syntax and will the compiler generate meaningful, even helpful, hints on how to fix the syntax error.
+Does the language parser follow all the rules of the syntax and will the 
+compiler generate meaningful, even helpful, hints on how to fix the 
+syntax error.
 
 
 Semantically testing
 --------------------
 
-Will the compiled code produce the expected results, including error handling like zero divide, over/underflows etc.
+Will the compiled code produce the expected results, including error handling 
+like zero divide, over/underflows etc.
 
-Will datatypes be enforced, and proper diagnostic messages created to there are unsupported assignments or calculations, For example: a=10*true is not a valid expression and assignment.
+Will datatypes be enforced, and proper diagnostic messages created to there 
+are unsupported assignments or calculations, For example: a=10*true is not 
+a valid expression and assignment.
 
 Try it out
 ==========
 
 make check-tiny
+
+
+Next Steps
+==========
+
+- Add parallel testsuite execution
+- Refactor Tiny utilities into separate file
+- Explain all the DejaGnu directives
+- Deep dive into runtest script
+- ...
