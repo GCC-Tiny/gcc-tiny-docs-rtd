@@ -587,46 +587,39 @@ To activate the changes to the Make-lang.in file you need to run make again.
     make[1]: Leaving directory '/home/chatai/github/gcc-build/gcc'
 
 
-The line === tiny Summary === indicates the runtest command was invoked. 
-As expected there is a warning that a tool init file cannot be found. 
-This is from the runtest command. Let get started on added the needed 
-setup for the execution of the runtest commands.
+The line === tiny Summary === indicates the runtest command invoked the 
+check-tiny target. As expected there is a warning that a tool init file 
+cannot be found. This is from the runtest command. 
+
+With these changes we now ready to add the test cases to the Tiny testsuites.
 
 GNU Tiny TestSuites
 ===================
 
-Setup
------
+So far we installed the autogen and DejaGnu tools, added the Expect files 
+supporting the Tiny compiler, and added the check-tiny targets to the gcc 
+Makefile. 
 
-create gcc/testsuites/tiny
-create tiny/dg.exp
-create lib/tiny-dg.exp
-create lib/tiny.exp
+All that is missing now is adding the testcases to the gcc/testsuites/tiny.dg/
+directory.
 
+Testcases falls into different categories:
 
-Lexical testing
----------------
+- Lexical testing
+    Does the language scanner follow all the rules of the input characters, and will proper error messages get emitted if there are illegal constructs.
 
-Does the language scanner follow all the rules of the input characters, 
-and will proper error messages get emitted if there are illegal constructs.
+- Syntactical testing
+    Does the language parser follow all the rules of the syntax and will the 
+    compiler generate meaningful, even helpful, hints on how to fix the 
+    syntax error.
 
-Syntactical testing
--------------------
-
-Does the language parser follow all the rules of the syntax and will the 
-compiler generate meaningful, even helpful, hints on how to fix the 
-syntax error.
-
-
-Semantically testing
---------------------
-
-Will the compiled code produce the expected results, including error handling 
-like zero divide, over/underflows etc.
-
-Will datatypes be enforced, and proper diagnostic messages created to there 
-are unsupported assignments or calculations, For example: a=10*true is not 
-a valid expression and assignment.
+- Semantically testing
+    Will the compiled code produce the expected results, including error handling 
+    like zero divide, over/underflows etc.
+    
+    Will datatypes be enforced, and proper diagnostic messages created to there 
+    are unsupported assignments or calculations, For example: a=10*true is not 
+    a valid expression and assignment.
 
 Try it out
 ==========
