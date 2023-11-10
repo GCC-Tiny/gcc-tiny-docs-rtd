@@ -17,9 +17,10 @@ and
 .
 
 Just as an example of how important it is to keep validating that everything 
-is still working after changes to the sourse code we just have to look at the
+is still working after changes to the source code we just have to look at the
 Tiny compiler itself. For the square root test program we wanted to ensure the
-result remain consistent, so adding a simple test should not be a problem.
+result remain consistent, so adding a simple test `# { dg-output "1.414214" }`
+should not be a problem.
 
 .. code-block::
     :linenos:
@@ -346,7 +347,12 @@ Create testsuite/lib/tiny-dg.exp
     return $output_file
     }
 
-The compiler is invoked on line 47 via the function tiny_compile.
+The compiler is invoked on line 47 via the function tiny_compile. 
+The short version of how the actual compiler will get invokded:
+
+1. In share/dejagnu/standard.exp, the function $tool_compile will invoke taget_compile
+2. In share/dejagnu/target.exp, the function target_compile will invokde default_target_compile 
+3. Which in turn will invoke the gcc compiler
 
 With the files in place the next step is to add the integration into the Makefile, 
 and to start to populate the Tiny testsuites with meaningful tests.
@@ -581,14 +587,10 @@ To activate the changes to the Make-lang.in file you need to run make again.
     make[1]: Leaving directory '/home/chatai/github/gcc-build/gcc'
 
 
-The line === tiny summary === indicates the runtest command was invoked. 
+The line === tiny Summary === indicates the runtest command was invoked. 
 As expected there is a warning that a tool init file cannot be found. 
 This is from the runtest command. Let get started on added the needed 
 setup for the execution of the runtest commands.
-
-gcc-src/testsuites
-------------------
-
 
 GNU Tiny TestSuites
 ===================
