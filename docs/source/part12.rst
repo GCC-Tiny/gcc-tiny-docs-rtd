@@ -148,9 +148,6 @@ For the purpose of this blog just a few are used
 	There may be multiple occurrences of this, they are concatenated.
 
 
-
-.. graphviz  :  : part12_expect.dot
-
 DejaGnu Setup
 -------------
 
@@ -468,7 +465,7 @@ If everything goes well you should see something like
 
 .. code-block:: shell-session
 
-    make[1]: Leaving directory '/home/chatai/github/gcc-build'
+    make[1]: Leaving directory 'gcc-build'
 
 Now would be a good time to try the new target for the Tiny test suite.
 
@@ -487,9 +484,9 @@ meaning of the output. For now the ... denote the shortened output.
     FLEX="flex"; export FLEX; LEX="flex"; ...
     ...
     (cd gcc && make ... check-tiny);
-    make[1]: Entering directory '/home/chatai/github/gcc-build/gcc'
+    make[1]: Entering directory 'gcc-build/gcc'
     make[1]: *** No rule to make target 'check-tiny'.  Stop.
-    make[1]: Leaving directory '/home/chatai/github/gcc-build/gcc'
+    make[1]: Leaving directory 'gcc-build/gcc'
     make: *** [Makefile:19673: check-gcc-tiny] Error 2
 
 
@@ -540,11 +537,11 @@ To activate the changes to the Make-lang.in file you need to run make again.
     s=`cd ../gcc; ${PWDCMD-pwd}`; export s; \
     FLEX="flex"; export FLEX; ...
     (cd gcc && make ... check-tiny);
-    make[1]: Entering directory '/home/chatai/github/gcc-build/gcc'
+    make[1]: Entering directory 'gcc-build/gcc'
     Making a new config file...
-    echo "set tmpdir /home/chatai/github/gcc-build/gcc/testsuite" >> ./site.tmp
+    echo "set tmpdir gcc-build/gcc/testsuite" >> ./site.tmp
     rm -rf testsuite/tiny-parallel
-    make[2]: Entering directory '/home/chatai/github/gcc-build/gcc'
+    make[2]: Entering directory 'gcc-build/gcc'
     (rootme=`${PWDCMD-pwd}`; export rootme; \
     srcdir=`cd ../../gcc/gcc; ${PWDCMD-pwd}` ; export srcdir ; \
     if [ -n "" ] \
@@ -579,12 +576,12 @@ To activate the changes to the Make-lang.in file you need to run make again.
     Running target unix
     Using /usr/share/dejagnu/baseboards/unix.exp as board description file for target.
     Using /usr/share/dejagnu/config/unix.exp as generic interface file for target.
-    Using /home/chatai/github/gcc/gcc/testsuite/config/default.exp as tool-and-target-specific interface file.
+    Using gcc/gcc/testsuite/config/default.exp as tool-and-target-specific interface file.
 
                     === tiny Summary ===
 
-    make[2]: Leaving directory '/home/chatai/github/gcc-build/gcc'
-    make[1]: Leaving directory '/home/chatai/github/gcc-build/gcc'
+    make[2]: Leaving directory 'gcc-build/gcc'
+    make[1]: Leaving directory 'gcc-build/gcc'
 
 
 The line === tiny Summary === indicates the runtest command invoked the 
@@ -606,7 +603,8 @@ directory.
 Testcases falls into different categories:
 
 - Lexical testing
-    Does the language scanner follow all the rules of the input characters, and will proper error messages get emitted if there are illegal constructs.
+    Does the language scanner follow all the rules of the input characters, 
+    and will proper error messages get emitted if there are illegal constructs.
 
 - Syntactical testing
     Does the language parser follow all the rules of the syntax and will the 
@@ -616,15 +614,123 @@ Testcases falls into different categories:
 - Semantically testing
     Will the compiled code produce the expected results, including error handling 
     like zero divide, over/underflows etc.
-    
+
     Will datatypes be enforced, and proper diagnostic messages created to there 
     are unsupported assignments or calculations, For example: a=10*true is not 
     a valid expression and assignment.
 
+
+GNU Tiny testsuite
+------------------
+
+To showcase just a few of the capabilities of DejaGnu study the following
+examples. 
+
+Test syntax error
+~~~~~~~~~~~~~~~~~
+
+This example shows a case of dg-error directive. 
+
+
+.. code-block:: 
+
+    var i : bool;
+    i := ; # { dg-error "unexpected ‘;’" }
+
+
+Test error in expression
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+This example shows another case of dg-error directive. 
+Also shows the dg-do directive. Note the option compile is the default.
+
+.. code-block::
+
+    # { dg-do compile }
+    var i : bool;
+    i := -1; # { dg-error "cannot assign value of type ‘int’ to a variable of type ‘boolean’" }
+
+
+Test output from program
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+This example shows a case of dg-do and dg-output directives. 
+The dg-do run will compile, link and execute the generated program. 
+
+.. code-block::
+
+    # { dg-do run }
+    # sqrt.tiny
+    var s : float;
+    s := 2.0;
+
+    var i : int;
+
+    var x : float;
+    x := 1.0;
+    for i := 1 to 100 do
+    x := 0.5 * (x + s / x);
+    end
+
+    write x; # { dg-output "1.414214" }
+
+
+Test multiple errors at same line
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This example shows case of using multiple dg-error directives for cases where
+multiple messages are emitted from the compiler. This example also provides a
+litte glimpse into the full potential of DejaGnu.
+
+.. code-block::
+
+    # { dg-do compile }
+    # { dg-error "unended string literal" "unended string literal" { target *-*-* } 4 }
+    # { dg-error "expecting ‘;’ but ‘end of file’ found" "expecting ‘;’" { target *-*-* } 4 }
+    write "... oops no closing of string on the very last line
+
+The syntax for the dg-error directive is provided for reference only. We might 
+be explaining this in more details in a subsequent blog.
+
+dg-error regexp comment [{ target/xfail selector } [{.|0|linenum}]]
+indicate an error message <regexp> is expected on this line. The test fails if it doesn't occur.
+linenum=0 for general tool messages, eg: -V arg missing.
+"." means the current line.
+
+"{ target selector }" is a list of expressions that determine whether the
+test succeeds or fails for a particular target, or in some cases whether the
+option applies for a particular target.  If the case of 'dg-do' it specifies
+whether the testcase is even attempted on the specified target.
+
+The target selector is always optional.  The format is one of:
+
+{ xfail *-*-* ... } - the test is expected to fail for the given targets
+
+{ target *-*-* ... } - the option only applies to the given targets
+
+At least one target must be specified, use *-*-* for "all targets".
+At present it is not possible to specify both 'xfail' and 'target'.
+"native" may be used in place of "*-*-*".
+
+All this is good to know, but for now this will wrap up the Regressions 
+Testing blog.
+
 Try it out
 ==========
 
-make check-tiny
+.. code-block:: shell-session
+
+    $ cd gcc-build
+    $ make check-tiny
+
+Once completed you should see some like:
+
+.. code-block:: shell-session
+
+    === tiny Summary ===
+
+    # of expected passes            10
+    make[1]: Leaving directory 'gcc-build/gcc'
 
 
 Next Steps
