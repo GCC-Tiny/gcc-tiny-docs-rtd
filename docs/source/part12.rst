@@ -693,14 +693,14 @@ The syntax for the dg-error directive is provided for reference only. We might
 be explaining this in more details in a subsequent blog.
 
 dg-error regexp comment [{ target/xfail selector } [{.|0|linenum}]]
-indicate an error message <regexp> is expected on this line. The test fails if it doesn't occur.
+
+Indicate an error message <regexp> is expected on this line. The test fails if it doesn't occur.
 linenum=0 for general tool messages, eg: -V arg missing.
 "." means the current line.
 
 "{ target selector }" is a list of expressions that determine whether the
 test succeeds or fails for a particular target, or in some cases whether the
-option applies for a particular target.  If the case of 'dg-do' it specifies
-whether the testcase is even attempted on the specified target.
+option applies for a particular target.
 
 The target selector is always optional.  The format is one of:
 
