@@ -1,0 +1,84 @@
+  digraph foo {
+    edge [labelfloat=true]
+    node [color=green,penwidth=2.0,shape=note]
+
+    "make check-go" [color=black,shape=box]
+    "runtest --tool go" [color=black,shape=box]
+    "make check-go" -> "runtest --tool go" [label=invoke,color=black]
+    "runtest --tool go" -> "config/default.exp" [label=include,color=green];
+    "runtest --tool go" -> "go.dg/dg.exp" -> "lib/go-dg.exp" -> "lib/gcc-dg.exp" [label=include,color=green];
+    "runtest --tool go" -> "lib/go.exp" [label=include,color=green]
+    
+    "lib/go.exp" -> "proc go_version" [label=define,color=purple]
+    "lib/go.exp" -> "proc go_include_flags" [label=define,color=purple]
+    "lib/go.exp" -> "proc go_link_flags" [label=define,color=purple]
+    "lib/go.exp" -> "proc go_init" [label=define,color=purple]
+    "lib/go.exp" -> "proc go_target_compile" [label=define,color=purple]
+
+   //shape=box: proc definitions
+   "proc ${tool}_compile" [shape=box,color=purple];
+   "proc ${tool}_load" [shape=box,color=purple];
+   "proc go_version" [shape=box,color=purple]
+   "proc go_include_flags" [shape=box,color=purple]
+   "proc go_link_flags" [shape=box,color=purple]
+   "proc go_init" [shape=box,color=purple]
+   "proc go_target_compile" [shape=box,color=purple]
+
+   
+
+   "config/default.exp" -> "share/dejagnu/standard.exp" [label=include,color=green]
+   "share/dejagnu/standard.exp" -> "proc ${tool}_load" [label=define,color=purple];
+   "share/dejagnu/standard.exp" -> "proc ${tool}_compile" [label=define,color=purple];
+
+   //shape=octagon: commands
+   "dg-init" [shape=octagon,color=red];
+   "go-dg-runtest" [shape=octagon,color=red];
+   "dg-finish" [shape=octagon,color=red];
+
+   "go.dg/dg.exp" -> "dg-init" [label=call,color=red]
+   "go.dg/dg.exp" -> "go-dg-runtest" [label=call,color=red]
+   "go.dg/dg.exp" -> "dg-finish" [label=call,color=red]
+
+   "proc dg-init" [shape=box,color=purple];
+   "proc dg-test" [shape=box,color=purple];
+   "proc dg-finish" [shape=box,color=purple];
+   "proc gcc-dg-prune" [shape=box,color=purple];
+   "proc gcc-dg-test-1" [shape=box,color=purple];
+   "go-target-compile" [shape=octagon,color=red] 
+   "${tool}_finish" [shape=octagon,color=red];
+   "lib/gcc-dg.exp" -> "proc gcc-dg-prune" [label=define,color=purple]
+   "lib/gcc-dg.exp" -> "proc gcc-dg-test-1" [label=define,color=purple]
+   "proc gcc-dg-test-1" -> "go-target-compile" [label=call,color=red]
+   "lib/gcc-dg.exp" -> "share/dejagnu/dg.exp" [label=include,color=green]
+   "share/dejagnu/dg.exp" -> "proc dg-init" [label=define,color=purple]
+   "share/dejagnu/dg.exp" -> "proc dg-test" [label=define,color=purple]
+   "share/dejagnu/dg.exp" -> "proc dg-finish" [label=define,color=purple]
+   "proc dg-finish" -> "${tool}_finish" [label=call,color=red]
+
+   "dg-get-options" [shape=octagon,color=red];
+   "${tool}-dg-test" [shape=octagon,color=red];
+   "${tool}-dg-prune" [shape=octagon,color=red];
+   "${tool}_load" [shape=octagon,color=red];
+   "proc dg-test" -> "dg-get-options" [label=call,color=red]
+   "proc dg-test" -> "${tool}-dg-test" [label=call,color=red]
+   "proc dg-test" -> "${tool}-dg-prune" [label=call,color=red]
+   "proc dg-test" -> "${tool}_load" [label=call,color=red]
+
+   "proc go-dg-test" [shape=box,color=purple];
+   "proc go-dg-runtest" [shape=box,color=purple];
+   "proc go-dg-prune" [shape=box,color=purple];
+
+   "lib/go-dg.exp" -> "proc go-dg-test" [label=define,color=purple]
+   "lib/go-dg.exp" -> "proc go-dg-runtest" [label=define,color=purple]
+   "lib/go-dg.exp" -> "proc go-dg-prune" [label=define,color=purple]
+
+   "gcc-dg-test-1" [shape=octagon,color=red];
+   "proc go-dg-test" -> "gcc-dg-test-1" [label=call,color=red]
+
+   "dg-test" [shape=octagon,color=red];
+   "proc go-dg-runtest" -> "dg-test" [label=call,color=red]
+
+   "gcc-dg-prune"  [shape=octagon,color=red];
+   "proc go-dg-prune" -> "gcc-dg-prune" [label=call,color=red]
+
+   }
