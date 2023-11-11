@@ -345,7 +345,7 @@ Create testsuite/lib/tiny-dg.exp
     }
 
 The compiler is invoked on line 47 via the function tiny_compile. 
-The short version of how the actual compiler will get invokded:
+The short version of how the actual compiler will get invoked:
 
 1. In share/dejagnu/standard.exp, the function $tool_compile will invoke taget_compile
 2. In share/dejagnu/target.exp, the function target_compile will invokde default_target_compile 
